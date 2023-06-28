@@ -4,6 +4,7 @@ import copy
 
 
 class MAX2SAT:
+    """Max 2-SAT problem generator."""
     def __init__(self, num_var, num_clauses):
         self.num_var = num_var
         self.num_clauses = num_clauses
@@ -18,6 +19,7 @@ class MAX2SAT:
         self.matrix_start = copy.deepcopy(self.matrix)
 
     def generate_formula(self):
+        """This generates a random MAX-2-SAT formula."""
         variables = [i for i in range(1, self.num_var + 1)]
         self.cnf = []
 
@@ -50,17 +52,20 @@ class MAX2SAT:
         self.remain_var_list = copy.deepcopy(self.var_list)
 
     def add_off_element(self, i, j, const):
+        """Adds an off-diagonal element to the Hamiltonian matrix."""
         if np.abs(i) >= np.abs(j):
             self.matrix[np.abs(i), np.abs(j)] += np.sign(i) * np.sign(j) * const
         else:
             self.matrix[np.abs(j), np.abs(i)] += np.sign(i) * np.sign(j) * const
 
     def add_diag_element(self, i, const):
+        """Adds a diagonal element to the Hamiltonian matrix."""
         self.matrix[np.abs(i), np.abs(i)] += -np.sign(i) * const
 
     def SAT_to_Hamiltonian(self):
-        self.single_dict = {}
-        self.coupling_dict = {}
+        """Converts the MAX-2-SAT formula to a Hamiltonian matrix."""
+        self.single_dict = {} # do we ever use this?
+        self.coupling_dict = {} # or this?
 
         self.position_translater = {0}
         for clause in self.cnf:
@@ -111,10 +116,76 @@ class MAX2SAT:
         return E
 
 
+class MIS:
+    """Maximum Independent Set problem generator."""
+    def __init__(self, graph, alpha=1.1):
+        """Init takes in a networkx graph object, and a penalty factor alpha."""
+        self.graph = copy.deepcopy(graph)
+        self.alpha = alpha
+        self.matrix = None
+        self.position_translater = None
+        self.var_list = None
+
+        # compute the matrix (i.e., Hamiltonian) from the graph. Also sets the varlist!
+        self.graph_to_matrix()
+        self.remain_var_list = copy.deepcopy(self.var_list)
+
+    def add_off_element(self, i, j, coeff):
+        if np.abs(i) >= np.abs(j):
+            self.matrix[np.abs(i), np.abs(j)] += coeff
+        else:
+            self.matrix[np.abs(j), np.abs(i)] += coeff
+
+    def add_diag_element(self, i, coeff):
+        self.matrix[np.abs(i), np.abs(i)] += coeff
+
+    
+    def graph_to_matrix(self):
+        
+        # matrix is one dimension larger due to the 0-th row and column, which are set to 0 by convention.
+        self.matrix = np.zeros((self.graph.number_of_nodes() + 1, self.graph.number_of_nodes() + 1))
 
 
-    ##### RUDI HERE YOU CAN ADD THE MIS PROBLEM GENERATOR
-    ##### RUDI HERE YOU CAN ADD THE MIS PROBLEM GENERATOR
-    ##### RUDI HERE YOU CAN ADD THE MIS PROBLEM GENERATOR
+        # Transform graph nodes in ordered list of variables. These run from 1 -> n (instead of 0 -> n-1)
+        variable_set = set()
+        for node_shifted in self.graph.nodes:
+            node = node_shifted + 1
+            variable_set.add(node)
+        variables = list(variable_set)
+        variables.sort()
+        self.var_list = copy.deepcopy(variables)
 
+        # Filling the matrix (here the type of optimization problem is encoded, MIS in this case)
+        # we skip the zeroth index, which is set to 0 by convention
+        for variable in variables:
+            idx = variables.index(variable) + 1
+            self.add_diag_element(idx, -1/2)
 
+        for correlation in self.graph.edges:
+            # the first correlation + 1 comes from the fact that graph nodes run from 0...n-1
+            # the fact that we add another +1 to the index is because the variables list runs 1....n 
+            # and the indices in the matrix run 0...n
+            idx1, idx2 = variables.index(correlation[0] + 1) + 1, variables.index(correlation[1] + 1) + 1
+            self.add_off_element(idx1, idx2, self.alpha/4)
+            self.add_diag_element(idx1, self.alpha/4)
+            self.add_diag_element(idx2, self.alpha/4)
+
+        # we define the appropriate position translater
+        self.position_translater = [0] + variables
+
+    def evaluate_solution(self, solution):
+        """Returns the number of violations and the size of the set found."""
+        number_of_violations = 0
+        size_of_set = len(*np.where(np.array(solution) > 0.))
+        print(solution)
+        for n1, n2 in self.graph.edges:
+            if solution[n1] > 0. and solution[n2] > 0.:
+                number_of_violations += 1
+        
+        return number_of_violations, size_of_set
+
+    def calc_energy(self, assignment, single_energy_vector, correl_energy_matrix):
+        E_calc = np.sign(assignment).T @ correl_energy_matrix @ np.sign(assignment) + single_energy_vector.T @ np.sign(assignment)
+        return E_calc
+    
+        

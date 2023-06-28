@@ -60,7 +60,9 @@ class RQAOA(Expectation_Values.ExpectationValues):
 
     def execute(self):
         """Solves the given problem via RQAOA and returns the solution and solution quality"""
-        for i in range(self.nq):
+        for step in range(self.nq):
+            print(f"RQAOA Step: {step + 1}")
+
             #self.num_elimination_step.append(i)
             exp_value_coeff, exp_value_sign, max_exp_value = self.optimize()
 
@@ -78,17 +80,9 @@ class RQAOA(Expectation_Values.ExpectationValues):
         if self.type_of_problem == "MAX_2_SAT":
             E = self.problem.calc_violated_clauses(self.solution)
 
-
-
-
-        ###### RRRRRUUUUDDDDDIIIII THIS IS FOR YOU TO ADAPT
-        ###### RRRRRUUUUDDDDDIIIII THIS IS FOR YOU TO ADAPT
-        ###### RRRRRUUUUDDDDDIIIII THIS IS FOR YOU TO ADAPT
         elif self.type_of_problem == "MIS":
             # Calculate here size of independent set or whatever measure of quality you want to return
-            pass
-
-
+            E = self.problem.evaluate_solution(self.solution)
 
 
         return E, self.solution
