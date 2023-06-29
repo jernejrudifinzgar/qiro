@@ -50,3 +50,7 @@ Contains the RQAOA algorithm for any quadratic problem (among others, MIS and MA
 #### aws_quera.py
 
 Contains the code for running the QIRO algorithm to solve MIS on QuEra Aquila (AWS Braket).
+
+#### greedy_mis.py
+
+Contains the code for the greedy algorithm for MIS.
