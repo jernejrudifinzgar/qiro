@@ -12,7 +12,7 @@ from braket.jobs.metrics import log_metric
 from braket.jobs import save_job_checkpoint
 
 from itertools import combinations, chain
-import sys
+# import sys
 
 from scipy.spatial import distance_matrix
 from scipy.signal import butter, lfilter
@@ -47,7 +47,6 @@ def run_job(hyperparams=None):
     t_total = np.round(float(hyperparams['t_total']) if "t_total" in hyperparams.keys() else 4e-6, 9)
     nodes_to_remove = int(hyperparams["nodes_to_remove"]) if "nodes_to_remove" in hyperparams.keys() else 0
     remaining_nodes = int(hyperparams["remaining_nodes"]) if "remaining_nodes" in hyperparams.keys() else 19
-    # vanilla = bool(int(hyperparams["vanilla"])) if "vanilla" in hyperparams.keys() else False
 
     parameters = {"omega_max": 1.58e7, "tau": 0.1, "delta_initial": 3e7, "delta_final": 6e7}
 
@@ -312,34 +311,12 @@ def prepare_register_hard_graph(fpath, scale=1):
     return reg, vertices_to_graph(vs, 1.7 * scale * 4.5e-6)
 
 
-def add_save_optimizer_data(res_dict, params, target_value, filepath, is_local):
-    """Adds optimizer data to the dictionary saving the results. Also writes it to filepath."""
-    pos = len(res_dict)
-    new_entry = {'params': params, 'target': target_value}
-    res_dict[pos] = new_entry
-    # print out for progress tracking!
-    print(f"Iteration {pos + 1} completed!")
-    if not is_local:
-        with open(filepath, 'w') as f_resdict:
-            f_resdict.write(json.dumps(res_dict))
-        # for logging
-        log_metric(metric_name="Target", value=target_value, iteration_number=pos + 1)
-        # for checkpointing
-        save_job_checkpoint(checkpoint_data=res_dict,
-                            checkpoint_file_suffix="checkpoint")
-
-    return res_dict
-
 
 def log_iteration(iteration_number):
     print(f"Iteration {iteration_number} completed.")
     iteration_number += 1
     return iteration_number
 
-
-def suggest_random_params(pbounds):
-    """Suggests random params."""
-    return {k: np.random.uniform(*v) for k, v in pbounds.items()}
 
 
 def get_mis_cost(graph, solution, alpha=5):
@@ -393,70 +370,6 @@ def generate_initial_params(omega_max, delta_initial, delta_final, tau, ndp, kin
 
     return params
 
-
-def prepare_test_register(n_cells=1, parallel=False, a=4.5e-6, add_middle=True):
-    """In the real case this will be replaced by a function preparing the graph arrangement."""
-    # a = 4.5e-6
-    register = AtomArrangement()
-    if not parallel:
-        n_reps = 1
-    else:
-        n_reps = int(np.floor((7.5e-5 / (2 * a) + 1) / (n_cells + 1)))
-
-    for offset in product(range(n_reps), range(n_reps)):
-        x_o, y_o = [o * 2 * a * (n_cells + 1) for o in offset]
-        # grid
-        for i in range(0, 2 * n_cells + 1, 2):
-            for j in range(0, 2 * n_cells + 1, 2):
-                register.add(np.array((i * a + x_o, j * a + y_o)).round(7))
-        # add middle
-        if add_middle:
-            for i in range(1, 2 * n_cells + 1, 2):
-                for j in range(1, 2 * n_cells + 1, 2):
-                    register.add(np.array((i * a + x_o, j * a + y_o)).round(7))
-
-    return register, vertices_to_graph(np.transpose([register.coordinate_list(0), register.coordinate_list(1)]),
-                                       a * 1.5)
-
-
-def prepare_grid_register(which=0, parallel=False, a=4.5e-6):
-    # number of grid points in the x, y dimension
-    mx = 4
-    my = 3
-
-    def _get_reps_and_shift(m, d=7.5e-5):
-        reps = int((d + 2 * a) / (a * (m + 2)))
-        # print(reps)
-        shift = (d - reps * a * m) / ((reps - 1) * a)
-        return reps, shift
-
-    if not parallel:
-        x_reps = y_reps = 1
-        x_shift = y_shift = 0
-    else:
-        x_reps, x_shift = _get_reps_and_shift(mx - 1, d=7.5e-5)
-        y_reps, y_shift = _get_reps_and_shift(my - 1, d=7.6e-5)
-
-    _, poss = get_grid_graph_combs(9, 10, (mx, my), scale=a)
-    if which >= len(poss):
-        print("Warning; which is longer than the number of graphs generated.")
-        which %= len(poss)
-        print(f"Graph {which} generated.")
-    pos = poss[which]
-
-    pos_container = []
-
-    for xrep in range(x_reps):
-        for yrep in range(y_reps):
-            pos_container.append(pos + np.array([xrep * (mx + x_shift - 1) * a, yrep * (my + y_shift - 1) * a]))
-
-    total_pos = np.vstack(pos_container)
-
-    register = AtomArrangement()
-    for coord in total_pos:
-        register.add(coord.round(7))
-
-    return register, vertices_to_graph(total_pos, 1.5 * a)
 
 
 def prepare_drive(total_time, params, kind='real'):
@@ -694,8 +607,3 @@ def get_mis_size(graph, solution):
         return np.count_nonzero([int(i > 0) for i in solution.values()])
     else:
         return len(solution)
-
-
-
-
-
