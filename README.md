@@ -1,5 +1,7 @@
 # qiro
-Quantum-Informed Recursive Optimization Algorithms
+Quantum-Informed Recursive Optimization Algorithms. 
+
+Contains most of the code; stuff to be added: parallel tempering, simulated annealing. 
 
 ### Installation
 
