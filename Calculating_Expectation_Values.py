@@ -20,6 +20,7 @@ class ExpectationValues():
         self.gamma = 0
         self.beta = 0
         self.fixed_correl = []
+        self.max_exp_dict = {}
 
     """the single_cos und coupling_cos functions are sub-functions which are called in the calculation of the
     expectation values"""
@@ -101,7 +102,9 @@ class ExpectationValues():
 
         b_part_term = (1/2) * np.sin(2 * gamma * self.problem.matrix[index_large, index_small]) * \
                     (
-                            np.cos(2 * gamma * self.problem.matrix[index_large, index_large]) * self.coupling_cos_0(index_large, index_small, gamma) + np.cos(2 * gamma * self.problem.matrix[index_small, index_small]) * self.coupling_cos_0(index_small, index_large, gamma)
+                            np.cos(2 * gamma * self.problem.matrix[index_large, index_large]) * self.coupling_cos_0(index_large, index_small, gamma)
+                                + \
+                            np.cos(2 * gamma * self.problem.matrix[index_small, index_small]) * self.coupling_cos_0(index_small, index_large, gamma)
                     )
         c_0 = 1/2
         c_1 = np.cos(2 * gamma * (self.problem.matrix[index_large, index_large] + self.problem.matrix[index_small, index_small])) * self.coupling_cos_plus(index_large, index_small, gamma)
@@ -140,8 +143,8 @@ class ExpectationValues():
         self.c = c
 
     def calc_max_exp_value(self):
-        """Calculate all one- and two-point correlation expectation values and return the one with highest absolute value"""
-
+        """Calculate all one- and two-point correlation expectation values and return the one with highest absolute value."""
+        self.max_exp_dict = {}
         Z = np.sin(2 * self.beta) * self.calc_single_terms(gamma=self.gamma, index=1)
         if np.abs(Z) > 0:
             rounding_list = [[[self.problem.position_translater[1]], np.sign(Z), np.abs(Z)]]
@@ -149,9 +152,12 @@ class ExpectationValues():
         else:
             rounding_list = [[[self.problem.position_translater[1]], 1, 0]]
             max_exp_value = 0
+        
+        self.max_exp_dict[frozenset({1})] = Z
 
         for index in range(2, len(self.problem.matrix)):
             Z = np.sin(2 * self.beta) * self.calc_single_terms(gamma=self.gamma, index=index)
+            self.max_exp_dict[frozenset({index})] = Z
             if np.abs(Z) > max_exp_value:
                 rounding_list = [[[self.problem.position_translater[index]], np.sign(Z), np.abs(Z)]]
                 max_exp_value = np.abs(Z)
@@ -163,17 +169,19 @@ class ExpectationValues():
                 if self.problem.matrix[index_large, index_small] != 0:
                     b_part_term, c_part_term = self.calc_coupling_terms(gamma=self.gamma, index_large=index_large, index_small=index_small)
                     ZZ = np.sin(4 * self.beta) * b_part_term - ((np.sin(2 * self.beta)) ** 2) * c_part_term
+                    self.max_exp_dict[frozenset({index_large, index_small})] = ZZ
                     if np.abs(ZZ) > max_exp_value:
                         rounding_list = [[[self.problem.position_translater[index_large], self.problem.position_translater[index_small]], np.sign(ZZ), np.abs(ZZ)]]
                         max_exp_value = np.abs(ZZ)
                     elif np.abs(ZZ) == max_exp_value:
                         rounding_list.append([[self.problem.position_translater[index_large], self.problem.position_translater[index_small]], np.sign(ZZ), np.abs(ZZ)])
 
+        # random tie-breaking:
         random_index = np.random.randint(len(rounding_list))
-        roundling_element = rounding_list[random_index]
-        exp_value_coeff = roundling_element[0]
-        exp_value_sign = roundling_element[1]
-        max_exp_value = roundling_element[2]
+        rounding_element = rounding_list[random_index]
+        exp_value_coeff = rounding_element[0]
+        exp_value_sign = rounding_element[1]
+        max_exp_value = rounding_element[2]
         return exp_value_coeff, exp_value_sign, max_exp_value
 
     def calc_beta_energy(self, gamma):
@@ -266,3 +274,5 @@ class ExpectationValues():
                 brute_forced_solution = copy.deepcopy(x_in_dict)
                 E_best = copy.deepcopy(E_current)
         return brute_forced_solution
+    
+    # TODO: in the future, maybe add QAOA with suboptimal parameters.

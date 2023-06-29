@@ -5,7 +5,7 @@ import copy
 
 class MAX2SAT:
     """Max 2-SAT problem generator."""
-    def __init__(self, num_var, num_clauses):
+    def __init__(self, num_var, num_clauses, seed=42):
         self.num_var = num_var
         self.num_clauses = num_clauses
         self.num_per_clause = 2
@@ -14,6 +14,7 @@ class MAX2SAT:
         self.cnf_start = None
         self.matrix = None
         self.position_translater = None
+        self.random_seed = seed
         self.generate_formula()
         self.SAT_to_Hamiltonian()
         self.matrix_start = copy.deepcopy(self.matrix)
@@ -23,9 +24,11 @@ class MAX2SAT:
         variables = [i for i in range(1, self.num_var + 1)]
         self.cnf = []
 
+        rg = np.random.default_rng(self.random_seed)
+
         for j in range(int(self.num_clauses)):
-            var_in_clause = np.random.choice(variables, self.num_per_clause, replace=True)
-            neg_pos_in_clause = np.random.choice([1, -1], self.num_per_clause, replace=True)
+            var_in_clause = rg.choice(variables, self.num_per_clause, replace=True)
+            neg_pos_in_clause = rg.choice([1, -1], self.num_per_clause, replace=True)
             for var in var_in_clause:
                 if var not in self.var_list:
                     self.var_list.append(var)
@@ -177,7 +180,6 @@ class MIS:
         """Returns the number of violations and the size of the set found."""
         number_of_violations = 0
         size_of_set = len(*np.where(np.array(solution) > 0.))
-        print(solution)
         for n1, n2 in self.graph.edges:
             if solution[n1] > 0. and solution[n2] > 0.:
                 number_of_violations += 1
