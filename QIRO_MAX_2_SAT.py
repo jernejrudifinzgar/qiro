@@ -7,7 +7,7 @@ class QIRO(Expectation_Values.ExpectationValues):
     """
     :param problem_input: The problem object that shall be solved
     :param nc: size of remaining problem that is solved by brute force
-    This class is responsible for the whole RQAOA procedure; the output represents the optimized bitstring solution in the form
+    This class is responsible for the whole QIRO procedure; the output represents the optimized bitstring solution in the form
     of a dictionary as well as a list of optimal parameters from each elimination step
     """
     def __init__(self, problem_input, nc):
