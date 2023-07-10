@@ -35,26 +35,29 @@ def Execute(problem_matrix, variables, num_cycles, num_per_sweep, num_swaps, num
     correl_energy_matrix = copy.deepcopy(problem_matrix)
     np.fill_diagonal(correl_energy_matrix, 0)
 
-    best_state_list = []
-    best_E_list = []
     curr_state_list = []
     curr_E_list = []
     T_list = []
-
+    # The acceptance vector keeps track of the number of successful replica exchanges at each temperature
+    acceptance_vector = np.zeros(0, dtype=int)
 
     T_diff = (T_max - T_min) / (num_replicas - 1)
     for num in range(num_replicas):
         T_list.append(T_min + num*T_diff)
-        best_state_list.append(assignment_list[num])
-        best_E_list.append(calc_energy(best_state_list[num], single_energy_vector=single_energy_vector, correl_energy_matrix=correl_energy_matrix))
-        curr_state_list.append(copy.deepcopy(best_state_list[num]))
-        curr_E_list.append(copy.deepcopy(best_E_list[num]))
+        curr_state_list.append(assignment_list[num])
+        curr_E_list.append(calc_energy(curr_state_list[num], single_energy_vector=single_energy_vector, correl_energy_matrix=correl_energy_matrix))
+        if num != num_replicas - 1:
+            acceptance_vector = np.append(acceptance_vector, 0)
+        if num == 0:
+            best_E = curr_E_list[num]
+            best_state = curr_state_list[num]
+        elif curr_E_list[num] < best_E:
+            best_E = curr_E_list[num]
+            best_state = curr_state_list[num]
 
     for cycle in range(num_cycles):
         for replica_num in range(num_replicas):
             curr_state = curr_state_list[replica_num]
-            best_state = best_state_list[replica_num]
-            best_E = best_E_list[replica_num]
             curr_E = curr_E_list[replica_num]
             curr_temp = T_list[replica_num]
             for i in range(num_per_sweep):
@@ -63,42 +66,30 @@ def Execute(problem_matrix, variables, num_cycles, num_per_sweep, num_swaps, num
                 cand_E = calc_energy(cand_state, single_energy_vector=single_energy_vector, correl_energy_matrix=correl_energy_matrix)
                 # update our best_energy in case we reduced it
                 if cand_E < best_E:
-                    best_state = cand_state
-                    best_E = cand_E
+                    best_E = copy.deepcopy(cand_E)
+                    best_state = copy.deepcopy(cand_state)
 
-                # calculate the energy difference:
                 diff = cand_E - curr_E
-
-                # calculate energy exp term
                 crit = np.exp(-diff / curr_temp)
                 p = np.random.uniform(low=0.0, high=1.0)
-                # check if we should keep the new state & energy and update them
+                # check if we should update state & energy
                 if diff < 0 or p < crit:
                     curr_state = copy.deepcopy(cand_state)
                     curr_E = calc_energy(curr_state, single_energy_vector=single_energy_vector, correl_energy_matrix=correl_energy_matrix)
 
-            best_state_list[replica_num] = best_state
             curr_state_list[replica_num] = curr_state
-            best_E_list[replica_num] = best_E
             curr_E_list[replica_num] = curr_E
 
-        for swap in range(num_swaps):
-            swap_index = np.random.randint(len(T_list) - 1)
+        for swap_index in range(num_swaps):
             diff = (curr_E_list[swap_index] - curr_E_list[swap_index + 1]) * (1/T_list[swap_index] - 1/T_list[swap_index + 1])
-            # calculate energy exp term
             crit = np.exp(diff)
             p = np.random.uniform(low=0.0, high=1.0)
             # check if we should keep the new state & energy and update them
             if p < crit:
-                T_list[swap_index], T_list[swap_index + 1] = T_list[swap_index + 1], T_list[swap_index]
-
-        E_best = best_E_list[0]
-        best_state = best_state_list[0]
-        for num, E in enumerate(best_E_list):
-            if E < E_best:
-                E_best = E
-                best_state = best_state_list[num]
+                curr_state_list[swap_index], curr_state_list[swap_index + 1] = curr_state_list[swap_index + 1], curr_state_list[swap_index]
+                curr_E_list[swap_index], curr_E_list[swap_index + 1] = curr_E_list[swap_index + 1], curr_E_list[swap_index]
+                acceptance_vector[swap_index] += 1
 
     # Transform solution
-    solution = best_state * np.append(np.array([0]), variables, axis=0)
-    return E_best, solution
+    best_solution = best_state * np.append(np.array([0]), variables, axis=0)
+    return best_E, best_solution, acceptance_vector/num_cycles
