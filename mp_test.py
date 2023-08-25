@@ -30,7 +30,7 @@ if __name__ == "__main__":
 
     print(f"Final result is {result}.")
 
-    np.save("test_result.npy", np.array(result))
+    np.save("test_result_new.npy", np.array(result))
     # save as a dictionary, including the parameters
     # output_dict = {par: res for par, res in zip(domain, result)}
     # and then store this with e.g., json
