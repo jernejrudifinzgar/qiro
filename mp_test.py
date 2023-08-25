@@ -9,6 +9,7 @@ def fn(x, y, z):
         for i, j, k in product(range(x), range(y), range(z)):
             total += i * i + j * j + k * k
         totals.append(total)
+        print('hallo')
     return totals
 
 if __name__ == "__main__":
