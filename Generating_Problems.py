@@ -237,8 +237,8 @@ class MAXCUT:
             # the fact that we add another +1 to the index is because the variables list runs 1....n 
             # and the indices in the matrix run 0...n
             idx1, idx2 = variables.index(correlation[0] + 1) + 1, variables.index(correlation[1] + 1) + 1
-            self.add_off_element(idx1, idx2, 1)
-
+            self.add_off_element(idx1, idx2, 5)
+            
         # we define the appropriate position translater
         self.position_translater = [0] + variables
 
