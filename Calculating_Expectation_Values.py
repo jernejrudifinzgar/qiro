@@ -3,24 +3,31 @@ import numpy as np
 import itertools as it
 import copy
 from scipy.optimize import fsolve
-import Generating_Problems as Generator
+import qtensor
+import torch
 
 class ExpectationValues():
+    """General expectation value calculator"""
+    def __init__(self, problem):
+        self.problem = problem
+        self.energy = None
+        self.best_energy = None
+        self.fixed_correl = []
+        self.expect_val_dict = {}
+
+class SingleLayerQAOAExpectationValues(ExpectationValues):
     """
     :param problem: input problem
     this class is responsible for the whole RQAOA procedure
     """
-    def __init__(self, problem):
-        self.problem = problem
+    def __init__(self, problem, gamma=[0], beta=[0]):
+        ExpectationValues.__init__(self, problem)
         self.a = None
         self.b = None
         self.c = None
-        self.energy = None
-        self.best_energy = None
-        self.gamma = 0
-        self.beta = 0
-        self.fixed_correl = []
-        self.max_exp_dict = {}
+        self.gamma = gamma[0]*np.pi
+        self.beta = beta[0]*np.pi
+        self.type = 'SingleLayerQAOAExpectationValue'
 
     """the single_cos und coupling_cos functions are sub-functions which are called in the calculation of the
     expectation values"""
@@ -142,26 +149,26 @@ class ExpectationValues():
         self.b = b
         self.c = c
 
-    def calc_max_exp_value(self):
+    def calc_expect_val(self):
         """Calculate all one- and two-point correlation expectation values and return the one with highest absolute value."""
-        self.max_exp_dict = {}
+        self.expect_val_dict = {}
         Z = np.sin(2 * self.beta) * self.calc_single_terms(gamma=self.gamma, index=1)
         if np.abs(Z) > 0:
             rounding_list = [[[self.problem.position_translater[1]], np.sign(Z), np.abs(Z)]]
-            max_exp_value = np.abs(Z)
+            max_expect_val = np.abs(Z)
         else:
             rounding_list = [[[self.problem.position_translater[1]], 1, 0]]
-            max_exp_value = 0
+            max_expect_val = 0
         
-        self.max_exp_dict[frozenset({1})] = Z
+        self.expect_val_dict[frozenset({1})] = Z
 
         for index in range(2, len(self.problem.matrix)):
             Z = np.sin(2 * self.beta) * self.calc_single_terms(gamma=self.gamma, index=index)
-            self.max_exp_dict[frozenset({index})] = Z
-            if np.abs(Z) > max_exp_value:
+            self.expect_val_dict[frozenset({index})] = Z
+            if np.abs(Z) > max_expect_val:
                 rounding_list = [[[self.problem.position_translater[index]], np.sign(Z), np.abs(Z)]]
-                max_exp_value = np.abs(Z)
-            elif np.abs(Z) == max_exp_value:
+                max_expect_val = np.abs(Z)
+            elif np.abs(Z) == max_expect_val:
                 rounding_list.append([[self.problem.position_translater[index]], np.sign(Z), np.abs(Z)])
 
         for index_large in range(1, len(self.problem.matrix)):
@@ -169,20 +176,20 @@ class ExpectationValues():
                 if self.problem.matrix[index_large, index_small] != 0:
                     b_part_term, c_part_term = self.calc_coupling_terms(gamma=self.gamma, index_large=index_large, index_small=index_small)
                     ZZ = np.sin(4 * self.beta) * b_part_term - ((np.sin(2 * self.beta)) ** 2) * c_part_term
-                    self.max_exp_dict[frozenset({index_large, index_small})] = ZZ
-                    if np.abs(ZZ) > max_exp_value:
+                    self.expect_val_dict[frozenset({index_large, index_small})] = ZZ
+                    if np.abs(ZZ) > max_expect_val:
                         rounding_list = [[[self.problem.position_translater[index_large], self.problem.position_translater[index_small]], np.sign(ZZ), np.abs(ZZ)]]
-                        max_exp_value = np.abs(ZZ)
-                    elif np.abs(ZZ) == max_exp_value:
+                        max_expect_val = np.abs(ZZ)
+                    elif np.abs(ZZ) == max_expect_val:
                         rounding_list.append([[self.problem.position_translater[index_large], self.problem.position_translater[index_small]], np.sign(ZZ), np.abs(ZZ)])
 
         # random tie-breaking:
         random_index = np.random.randint(len(rounding_list))
         rounding_element = rounding_list[random_index]
-        exp_value_coeff = rounding_element[0]
-        exp_value_sign = rounding_element[1]
-        max_exp_value = rounding_element[2]
-        return exp_value_coeff, exp_value_sign, max_exp_value
+        max_expect_val_location = rounding_element[0]
+        max_expect_val_sign = rounding_element[1]
+        max_expect_val = rounding_element[2]
+        return max_expect_val_location, max_expect_val_sign, max_expect_val
 
     def calc_beta_energy(self, gamma):
         """Calculate the optimal value of beta regarding the energy, dependent on the input gamma"""
@@ -243,11 +250,10 @@ class ExpectationValues():
         ub = self.gamma + (np.pi / (steps - 1))
         self.calc_best_gamma(lb=lb, ub=ub, steps=steps)
 
-        exp_value_coeff, exp_value_sign, max_exp_value = self.calc_max_exp_value()
-        self.fixed_correl.append([exp_value_coeff, exp_value_sign, max_exp_value])
+        max_expect_val_location, max_expect_val_sign, max_expect_val = self.calc_expect_val()
+        self.fixed_correl.append([max_expect_val_location, max_expect_val_sign, max_expect_val])
 
-        return exp_value_coeff, exp_value_sign, max_exp_value
-
+        return max_expect_val_location, max_expect_val_sign, max_expect_val
 
     def brute_force(self):
         """calculate optimal solution of the remaining variables (according to the remaining
@@ -258,7 +264,7 @@ class ExpectationValues():
         single_energy_vector = copy.deepcopy(self.problem.matrix.diagonal())
         correl_energy_matrix = copy.deepcopy(self.problem.matrix)
         np.fill_diagonal(correl_energy_matrix, 0)
-
+        
         for iter_var_list in it.product([-1, 1], repeat=(len(self.problem.position_translater)-1)):
             vec = np.array([0])
             vec = np.append(vec, iter_var_list)
@@ -275,4 +281,214 @@ class ExpectationValues():
                 E_best = copy.deepcopy(E_current)
         return brute_forced_solution
     
-    # TODO: in the future, maybe add QAOA with suboptimal parameters.
+
+# TODO Generalise to arbitrary QUBO by introducing matrix 
+class QtensorQAOAExpectationValuesMIS(ExpectationValues):
+    """Calculation of expectation values via tensor network contraction using Qtensor"""
+
+    def __init__(self, problem, p, gamma=None, beta=None, backend=qtensor.contraction_backends.TorchBackend(), ordering_algo='greedy'):
+        super().__init__(problem)
+
+        if gamma == None:
+            gamma=[0.1] * p
+        if beta == None:
+            beta=[0.3] * p
+
+        self.p = p
+        self.backend = backend
+        self.alpha = self.problem.alpha
+        self.graph = self.problem.graph
+        self.type = 'QtensorQAOAExpectationValuesMIS'
+        #if self.backend == qtensor.contraction_backends.TorchBackend():
+    
+        self.alpha = torch.tensor(self.alpha, requires_grad=False)
+        self.gamma, self.beta = torch.tensor(gamma, requires_grad=True), torch.tensor(beta, requires_grad=True)
+        #else:
+        #    self.gamma = gamma
+        #    self.beta = beta
+        self.p = len(self.gamma)
+        self.loss = None
+        self.ordering_algo = ordering_algo
+        self.peos = self.energy_peo()
+        self.E_nodes = None
+        self.E_edges = None
+
+    def energy_loss(self):
+        sim = qtensor.QtreeSimulator(backend=self.backend)
+        composer = qtensor.TorchQAOAComposer_MIS(self.graph, alpha=self.alpha, gamma=self.gamma, beta = self.beta)
+        self.loss = torch.tensor([0.])
+        self.E_nodes = {}
+        self.E_edges ={}
+
+        #if peos is None:
+        #    peos = [None] *(self.graph.number_of_edges()+self.graph.number_of_nodes())
+
+        #peos_nodes = self.peos[:self.graph.number_of_nodes()]
+        #peos_edges = self.peos[self.graph.number_of_nodes():]
+
+        for node in self.graph.nodes():
+            peo = self.peos[node]
+            #print(node)
+            composer.energy_expectation_lightcone_node(node)
+            E = torch.real(sim.simulate_batch(composer.circuit, peo=peo))
+            composer.builder.reset()
+            self.loss -= 0.5 * E
+            self.E_nodes[node]=E 
+            #self.E_nodes.append(E)
+
+        for edge in self.graph.edges():
+            #print(edge)
+            peo = self.peos[edge]
+            composer.energy_expectation_lightcone(edge)
+            E = torch.real(sim.simulate_batch(composer.circuit, peo=peo))
+            composer.builder.reset()
+            self.E_edges[edge]= E
+            self.loss += self.alpha * 0.25 * (E + self.E_nodes[edge[0]] + self.E_nodes[edge[1]])
+
+    #@lru_cache
+    def energy_peo(self):
+        opt = qtensor.toolbox.get_ordering_algo(self.ordering_algo)
+        peos = {}
+        for node in self.graph.nodes():
+            composer = qtensor.TorchQAOAComposer_MIS(self.graph, alpha = self.alpha, gamma = self.gamma, beta = self.beta)
+            composer.energy_expectation_lightcone_node(node)
+            tn = qtensor.optimisation.TensorNet.QtreeTensorNet.from_qtree_gates(composer.circuit)
+            peo, _ = opt.optimize(tn)
+            peos[node] = peo 
+
+        for edge in self.graph.edges():
+            composer = qtensor.TorchQAOAComposer_MIS(self.graph, alpha = self.alpha, gamma = self.gamma, beta = self.beta)
+            composer.energy_expectation_lightcone(edge)
+            tn = qtensor.optimisation.TensorNet.QtreeTensorNet.from_qtree_gates(composer.circuit)
+            peo, _ = opt.optimize(tn)
+            peos[edge] = peo
+
+        return peos
+    
+    def calc_expect_val(self):
+        self.energy_loss()
+        max_expect_val = 0
+
+        for node in self.graph.nodes():
+            #+1 introduced to be comparable with SingleLayerQAOAExpectationValues:
+            self.expect_val_dict[frozenset({self.problem.position_translater.index(node+1)})]=float(self.E_nodes[node])
+            #self.expect_val_dict[frozenset({node+1})]=float(self.E_nodes[node])
+            if abs(float(self.E_nodes[node])) > max_expect_val:
+                max_expect_val = abs(float(self.E_nodes[node]))
+                max_expect_val_sign = np.sign(float(self.E_nodes[node]))
+                max_expect_val_location = node
+                
+        for edge in self.graph.edges():
+            self.expect_val_dict[frozenset({self.problem.position_translater.index(max(edge)+1), self.problem.position_translater.index(min(edge)+1)})]=float(self.E_edges[edge])
+            #self.expect_val_dict[frozenset({edge[0]+1, edge[1]+1})]=float(self.E_edges[edge])
+            if abs(float(self.E_edges[edge])) > max_expect_val:
+                max_expect_val = abs(float(self.E_edges[edge]))
+                max_expect_val_location = edge 
+
+        return max_expect_val_location, max_expect_val_sign, max_expect_val
+    
+    def optimize(self, steps=50, pbar=True, Opt = torch.optim.RMSprop, opt_kwargs=dict(), **kwargs):
+        opt = Opt(params=(self.gamma, self.beta) , **opt_kwargs)
+        self.peos = self.energy_peo()
+        print(self.graph)
+        self.expect_val_dict = {}
+        max_expect_val_location = None
+        max_expect_val_sign = None
+        max_expect_val = None
+        self.losses = []
+        self.steps = steps
+        self.param_history = []
+        #ExpectationValues.__init__(self, self.problem)
+
+        self.param_history.append([x.detach().numpy().copy() for x in (self.gamma, self.beta)])
+        
+        if pbar:
+            from tqdm.auto import tqdm
+            _pbar = tqdm(total=self.steps)
+        else:
+            _pbar = None
+
+        for i in range(self.steps):
+            self.energy_loss()
+
+            opt.zero_grad()
+            self.loss.backward()
+            opt.step()
+
+            self.losses.append(self.loss.detach().numpy().data)
+            self.param_history.append([x.detach().numpy().copy() for x in (self.gamma, self.beta)])
+            if pbar:
+                _pbar.update(1)
+        
+        max_expect_val = 0
+
+        for node in self.graph.nodes():
+            #+1 introduced to be comparable with SingleLayerQAOAExpectationValues:
+            self.expect_val_dict[frozenset({self.problem.position_translater.index(node+1)})]=float(self.E_nodes[node])
+            #self.expect_val_dict[frozenset({node+1})]=float(self.E_nodes[node])
+            if abs(float(self.E_nodes[node])) > max_expect_val:
+                max_expect_val = abs(float(self.E_nodes[node]))
+                max_expect_val_sign = np.sign(float(self.E_nodes[node]))
+                max_expect_val_location = node
+                
+        for edge in self.graph.edges():
+            self.expect_val_dict[frozenset({self.problem.position_translater.index(max(edge)+1), self.problem.position_translater.index(min(edge)+1)})]=float(self.E_edges[edge])
+            #self.expect_val_dict[frozenset({edge[0]+1, edge[1]+1})]=float(self.E_edges[edge])
+            if abs(float(self.E_edges[edge])) > max_expect_val:
+                max_expect_val = abs(float(self.E_edges[edge]))
+                max_expect_val_location = edge 
+
+        #does the same thing as above but more complicated
+        """ for i in self.E_nodes.values():
+            if abs(float(i)) > max_expect_val:
+                max_expect_val=abs(float(i))
+                max_expect_val_sign=np.sign(float(i))
+                for key, value in self.expect_val_dict.items():
+                    if value == float(i):
+                        max_expect_val_location = key
+                    
+        for i in self.E_edges:
+            if abs(float(i)) > max_expect_val:
+                max_expect_val=abs(float(i))
+                max_expect_val_sign=np.sign(float(i))
+                for key, value in self.expect_val_dict.items():
+                    if value == float(i):
+                        max_expect_val_location = key """
+
+        return max_expect_val_location, max_expect_val_sign, max_expect_val
+    
+
+class QtensorFixedAnglesQAOAExpectationValuesMIS(ExpectationValues):
+    """Calculation of expectation values via tensor network contraction using Qtensor"""
+
+    def __init__(self, problem):
+        super().__init__(problem)
+        self.type = 'QtensorFixedAnglesQAOAExpectationValuesMIS'
+
+class ExampleClass(ExpectationValues):
+
+    def __init__(self, problem):
+        super().__init__(problem)
+        self.type = 'ExampleClass'
+        self.graph = self.problem.graph
+        self.expect_val_dict = {}
+
+
+    def optimize(self, *params):
+
+        #Optimization process:
+            #fill self.expect_val_dict in the following way for all correlations: 
+            #self.expect_val_dict[frozenset({self.problem.position_translater.index(node+1)})]=float(node_correlation)
+            #self.expect_val_dict[frozenset({self.problem.position_translater.index(node1+1), self.problem.position_translater.index(node2+1)})]=float(edge_correlation)
+
+
+        max_expect_val_location = None # name/names of node/edge with highest absolute correlation 
+        max_expect_val_sign = None # sign of the correlation with the highest absolute value
+        max_expect_val = None # correlation value with the highest absolute value
+        
+
+        return max_expect_val_location, max_expect_val_sign, max_expect_val
+
+
+
+    

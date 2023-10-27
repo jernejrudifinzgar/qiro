@@ -1,20 +1,45 @@
+from typing import Any
 import numpy as np
 import itertools as it
 import copy
 
 
-class MAX2SAT:
+class Matrix():
+    def __init__(self, size):
+        self.size = size
+        self.matrix = np.zeros((size, size))
+    
+    def add_off_element(self, i, j, const):
+        """Adds an off-diagonal element to the Hamiltonian matrix."""
+        if np.abs(i) >= np.abs(j):
+            self.matrix[np.abs(i), np.abs(j)] += np.sign(i) * np.sign(j) * const
+        else:
+            self.matrix[np.abs(j), np.abs(i)] += np.sign(i) * np.sign(j) * const
+
+    def add_diag_element(self, i, const):
+        """Adds a diagonal element to the Hamiltonian matrix."""
+        self.matrix[np.abs(i), np.abs(i)] += np.sign(i) * const
+
+
+class Problem():
+    """General problem generator."""
+    def __init__(self, seed=42):
+        self.random_seed = seed
+
+    def calc_energy(self, assignment, single_energy_vector, correl_energy_matrix):
+        E_calc = np.sign(assignment).T @ correl_energy_matrix @ np.sign(assignment) + single_energy_vector.T @ np.sign(assignment)
+        return E_calc
+    
+
+class MAX2SAT(Problem):
     """Max 2-SAT problem generator."""
-    def __init__(self, num_var, num_clauses, seed=42):
+    def __init__(self, num_var, num_clauses):
         self.num_var = num_var
         self.num_clauses = num_clauses
         self.num_per_clause = 2
         self.var_list = []
         self.cnf = None
         self.cnf_start = None
-        self.matrix = None
-        self.position_translater = None
-        self.random_seed = seed
         self.generate_formula()
         self.SAT_to_Hamiltonian()
         self.matrix_start = copy.deepcopy(self.matrix)
@@ -54,21 +79,8 @@ class MAX2SAT:
         self.var_list.sort()
         self.remain_var_list = copy.deepcopy(self.var_list)
 
-    def add_off_element(self, i, j, const):
-        """Adds an off-diagonal element to the Hamiltonian matrix."""
-        if np.abs(i) >= np.abs(j):
-            self.matrix[np.abs(i), np.abs(j)] += np.sign(i) * np.sign(j) * const
-        else:
-            self.matrix[np.abs(j), np.abs(i)] += np.sign(i) * np.sign(j) * const
-
-    def add_diag_element(self, i, const):
-        """Adds a diagonal element to the Hamiltonian matrix."""
-        self.matrix[np.abs(i), np.abs(i)] += -np.sign(i) * const
-
     def SAT_to_Hamiltonian(self):
         """Converts the MAX-2-SAT formula to a Hamiltonian matrix."""
-        self.single_dict = {} # do we ever use this?
-        self.coupling_dict = {} # or this?
 
         self.position_translater = {0}
         for clause in self.cnf:
@@ -79,23 +91,20 @@ class MAX2SAT:
         self.position_translater = list(self.position_translater)
         self.position_translater.sort()
 
-        self.matrix = np.zeros((len(self.position_translater), len(self.position_translater)))
-
+        self.matrixClass = Matrix(len(self.position_translater))
+        self.matrix = self.matrixClass.matrix       
+        
         for clause in self.cnf:
             if len(clause) > 1:
                 ind_0 = self.position_translater.index(np.abs(clause[0])) * np.sign(clause[0])
                 ind_1 = self.position_translater.index(np.abs(clause[1])) * np.sign(clause[1])
-                self.add_off_element(i=int(ind_0), j=int(ind_1), const=1 / 4)
-                self.add_diag_element(i=int(ind_0), const=1 / 4)
-                self.add_diag_element(i=int(ind_1), const=1 / 4)
+                self.matrixClass.add_off_element(i=int(ind_0), j=int(ind_1), const=1 / 4)
+                self.matrixClass.add_diag_element(i=-int(ind_0), const=1 / 4)
+                self.matrixClass.add_diag_element(i=-int(ind_1), const=1 / 4)
             elif len(clause) == 1:
                 ind_0 = self.position_translater.index(np.abs(clause[0])) * np.sign(clause[0])
-                self.add_diag_element(i=int(ind_0), const=1 / 2)
-
-    def calc_energy(self, assignment, single_energy_vector, correl_energy_matrix):
-        E_calc = np.sign(assignment).T @ correl_energy_matrix @ np.sign(assignment) + single_energy_vector.T @ np.sign(assignment)
-        return E_calc
-
+                self.matrixClass.add_diag_element(i=-int(ind_0), const=1 / 2)
+    
     def calc_violated_clauses(self, solution):
         E = 0
         E_diff = 1
@@ -116,38 +125,28 @@ class MAX2SAT:
                             E_diff = 0
             E = E + E_diff
             E_diff = 1
+            E = E_diff + E
         return E
 
 
-class MIS:
+class MIS(Problem):
     """Maximum Independent Set problem generator."""
     def __init__(self, graph, alpha=1.1):
         """Init takes in a networkx graph object, and a penalty factor alpha."""
+        Problem.__init__(self)
         self.graph = copy.deepcopy(graph)
         self.alpha = alpha
-        self.matrix = None
-        self.position_translater = None
         self.var_list = None
+        self.position_translater=None
 
         # compute the matrix (i.e., Hamiltonian) from the graph. Also sets the varlist!
         self.graph_to_matrix()
         self.remain_var_list = copy.deepcopy(self.var_list)
-
-    def add_off_element(self, i, j, coeff):
-        if np.abs(i) >= np.abs(j):
-            self.matrix[np.abs(i), np.abs(j)] += coeff
-        else:
-            self.matrix[np.abs(j), np.abs(i)] += coeff
-
-    def add_diag_element(self, i, coeff):
-        self.matrix[np.abs(i), np.abs(i)] += coeff
-
     
     def graph_to_matrix(self):
-        
         # matrix is one dimension larger due to the 0-th row and column, which are set to 0 by convention.
-        self.matrix = np.zeros((self.graph.number_of_nodes() + 1, self.graph.number_of_nodes() + 1))
-
+        self.matrixClass = Matrix(self.graph.number_of_nodes()+1)
+        self.matrix = self.matrixClass.matrix
 
         # Transform graph nodes in ordered list of variables. These run from 1 -> n (instead of 0 -> n-1)
         variable_set = set()
@@ -162,16 +161,16 @@ class MIS:
         # we skip the zeroth index, which is set to 0 by convention
         for variable in variables:
             idx = variables.index(variable) + 1
-            self.add_diag_element(idx, -1/2)
+            self.matrixClass.add_diag_element(idx, -1/2)
 
         for correlation in self.graph.edges:
             # the first correlation + 1 comes from the fact that graph nodes run from 0...n-1
             # the fact that we add another +1 to the index is because the variables list runs 1....n 
             # and the indices in the matrix run 0...n
             idx1, idx2 = variables.index(correlation[0] + 1) + 1, variables.index(correlation[1] + 1) + 1
-            self.add_off_element(idx1, idx2, self.alpha/4)
-            self.add_diag_element(idx1, self.alpha/4)
-            self.add_diag_element(idx2, self.alpha/4)
+            self.matrixClass.add_off_element(idx1, idx2, self.alpha/4)
+            self.matrixClass.add_diag_element(idx1, self.alpha/4)
+            self.matrixClass.add_diag_element(idx2, self.alpha/4)
 
         # we define the appropriate position translater
         self.position_translater = [0] + variables
@@ -186,8 +185,6 @@ class MIS:
         
         return number_of_violations, size_of_set
 
-    def calc_energy(self, assignment, single_energy_vector, correl_energy_matrix):
-        E_calc = np.sign(assignment).T @ correl_energy_matrix @ np.sign(assignment) + single_energy_vector.T @ np.sign(assignment)
-        return E_calc
     
-        
+
+
