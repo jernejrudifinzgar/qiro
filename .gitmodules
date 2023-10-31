@@ -1,4 +1,0 @@
-[submodule "Qtensor"]
-	path = Qtensor
-	url = https://github.com/maxipa/Qtensor.git
-	branch = MIS1

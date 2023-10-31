@@ -16,7 +16,7 @@ class Problem:
         self,
         assignment: np.ndarray,
         single_energy_vector: np.ndarray,
-        correl_energy_matrix: np.ndarray,
+        coupl_energy_matrix: np.ndarray,
     ) -> float:
         """
         Calculates the energy of a given assignment.
@@ -29,7 +29,7 @@ class Problem:
         Returns:
             float: The calculated energy.
         """
-        E_calc = np.sign(assignment).T @ correl_energy_matrix @ np.sign(
+        E_calc = np.sign(assignment).T @ coupl_energy_matrix @ np.sign(
             assignment
         ) + single_energy_vector.T @ np.sign(assignment)
         return E_calc

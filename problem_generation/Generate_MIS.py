@@ -4,6 +4,7 @@ from utils.Matrix import Matrix
 import numpy as np
 from typing import Union
 import networkx as nx
+from itertools import chain, product, combinations
 
 
 class MIS(Problem):
@@ -76,3 +77,42 @@ class MIS(Problem):
                 number_of_violations += 1
 
         return number_of_violations, size_of_set
+
+
+# Misc. helper functions
+
+
+def find_mis(graph, maximum=True):
+    """Finds a maximAL independent set of a graph, and returns its bitstrings. If
+    maximum is set to True, then we return the maximUM such IS."""
+    if not maximum:
+        colored_nodes = nx.maximal_independent_set(graph)
+        return len(colored_nodes), colored_nodes
+    else:
+        solutions = []
+        maximum = 0
+        for subset in powerset(graph.nodes):
+            if is_independent(graph, subset):
+                if len(subset) > maximum:
+                    solutions = [subset]
+                    maximum = len(subset)
+                elif len(subset) == maximum:
+                    solutions.append(subset)
+        return maximum, solutions
+
+
+def powerset(iterable):
+    """Returns the powerset of an iterable."""
+    s = list(iterable)
+    return chain.from_iterable(combinations(s, q) for q in range(len(s) + 1))
+
+
+def is_independent(graph, solution):
+    """Checks if a given solution is independent."""
+    if isinstance(solution, dict):
+        sorted_keys = sorted(solution.keys())
+        solution = np.where([int(solution[i] > 0) for i in sorted_keys])[0]
+    for edge in product(solution, repeat=2):
+        if graph.has_edge(*edge):
+            return False
+    return True
