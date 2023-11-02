@@ -56,13 +56,9 @@ def run_job(hyperparams=None):
     else:
         device = AwsDevice(os.environ["AMZN_BRAKET_DEVICE_ARN"])
         # device = LocalSimulator('braket_ahs')
-    if graph_kind == 't':
-        register, graph = prepare_test_register(n_cells=graph_idx, parallel=not is_local, a=4.5e-6 * lattice_scale)
-    elif graph_kind == 'h':
+    if graph_kind == 'h':
         register, graph = prepare_register_hard_graph(
             os.path.join(input_dir, "hard-graphs-13-14/", f"hg{graph_idx}.txt"), scale=lattice_scale)
-    elif graph_kind == 'g':
-        register, graph = prepare_grid_register(which=graph_idx, parallel=False, a=4.5e-6 * lattice_scale)
     elif graph_kind == "e":
         register, graph = prepare_register_hard_graph(
             os.path.join(input_dir, "easy-graphs/", f"eg{graph_idx}.txt"), scale=lattice_scale)
