@@ -1,7 +1,7 @@
 # qiro
 Quantum-Informed Recursive Optimization Algorithms. 
 
-Contains most of the code; stuff to be added: parallel tempering, simulated annealing. 
+Contains most of the code of the correspodning publication: https://arxiv.org/abs/2308.13607
 
 ### Installation
 
@@ -20,20 +20,20 @@ pip install -r requirements.txt
 ```
 
 
-### File descriptions:
+### Module descriptions:
 
 #### QIRO_Execution.ipynb
 
 Jupyter Notebook where you can play around with different problems and execute RQAOA and QIRO for MIS and MAX-2-SAT. Should probably be the entry point for anyone who wants to use this code.
 
-#### Generating_Problems.py
+#### problem_generation
 
 Contains generation of MIS and MAX-2-SAT problems, and transforming them in the correct shape for QIRO and RQAOA.
 
 
-#### Calculating_Expectation_Values.py
+#### expval_calculation
 
-Contains functions for calculating the expectation values of the correlations from p=1 QAOA for MIS and MAX-2-SAT problems. Should in principle work for any quadratic Hamiltonian.
+Contains functions for calculating the expectation values of the correlations from p=1 QAOA for MIS and MAX-2-SAT problems. Should in principle work for any quadratic Hamiltonian. 
 
 #### QIRO_MAX_2_SAT.py
 
@@ -43,13 +43,14 @@ Contains the QIRO algorithm for MAX-2-SAT problems.
 
 Contains the QIRO algorithm for MIS problems.
 
-#### RQAOA.py
+#### misc/RQAOA.py
 
 Contains the RQAOA algorithm for any quadratic problem (among others, MIS and MAX-2-SAT).
 
-#### aws_quera.py
+#### misc/aws_quera.py
 
 Contains the code for running the QIRO algorithm to solve MIS on QuEra Aquila (AWS Braket).
+
 ### Classical Benchmarks
 #### greedy_mis.py
 
@@ -63,3 +64,6 @@ Contains the code for the parallel tempering algorithm.
 
 Contains the code for the simulated annealing algorithm.
 
+### Utils
+
+Some additional class definitions.
