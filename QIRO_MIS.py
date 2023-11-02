@@ -4,6 +4,7 @@ from problem_generation.Generate_MIS import MIS, find_mis
 import copy
 import networkx as nx
 import numpy as np
+from typing import Union
 
 
 class QIRO_MIS(QIRO):
@@ -115,7 +116,7 @@ class QIRO_MIS(QIRO):
     # Helper functions.                                                            #
     ################################################################################
 
-    def _update_single(self, variable_index, max_expect_val_sign):
+    def _update_single(self, variable_index: int, max_expect_val_sign: int) -> (list, list): 
         """Updates Hamiltonian according to fixed single point correlation"""
         node = variable_index - 1
         fixing_list = []
@@ -146,7 +147,7 @@ class QIRO_MIS(QIRO):
 
         return fixing_list, assignments
 
-    def _update_correlation(self, variables, max_expect_val_sign):
+    def _update_correlation(self, variables: Union(np.ndarray, list), max_expect_val_sign: int) -> (list, list):
         """Updates Hamiltonian according to fixed two point correlation -- RQAOA (for now)."""
 
         fixing_list = []
@@ -180,7 +181,7 @@ class QIRO_MIS(QIRO):
 
         return fixing_list, assignments
 
-    def _prune_graph(self):
+    def _prune_graph(self) -> None:
         """Prunes the graph by removing all connected components that have less than nc nodes. The assignments are determined
         to be the maximum independent sets of the connected components. The self.graph is updated correspondingly.
         """

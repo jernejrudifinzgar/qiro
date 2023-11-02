@@ -134,9 +134,9 @@ class MAX2SAT(Problem):
         if isinstance(solution, list) and not all(isinstance(x, int) for x in solution):
             raise TypeError("Solution must be a numpy array or list of integers")
         
-        assert len(solution) == self.num_var, (
+        assert len(solution) == len(self.matrix_start) - 1, (
             f"Solution length {len(solution)} does not match"
-            f" the number of variables in the SAT problem: {self.num_var}."
+            f" the number of variables in the SAT problem: {len(self.matrix_start) - 1}."
         )
         # Initialize E to store the number of clause violations
         E = 0

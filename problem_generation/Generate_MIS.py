@@ -82,8 +82,8 @@ class MIS(Problem):
 # Misc. helper functions
 
 
-def find_mis(graph, maximum=True):
-    """Finds a maximAL independent set of a graph, and returns its bitstrings. If
+def find_mis(graph: nx.Graph, maximum=True) -> (int, list):
+    """Finds a maximAL independent set (IS) of a graph, and returns its bitstrings. If
     maximum is set to True, then we return the maximUM such IS."""
     if not maximum:
         colored_nodes = nx.maximal_independent_set(graph)
