@@ -1,6 +1,6 @@
 import numpy as np
 import copy
-from monte_carlo_helpers import create_rnd_assignment, calc_energy, flip_single_spin
+from classical_benchmarks.monte_carlo_helpers import create_rnd_assignment, calc_energy, flip_single_spin
 
 def Execute(problem_matrix, variables, num_cycles, num_per_sweep, num_swaps, num_replicas, T_min, T_max, random_seed):
     global rg
@@ -10,7 +10,7 @@ def Execute(problem_matrix, variables, num_cycles, num_per_sweep, num_swaps, num
     # Create list with random assignments for each replica.
     assignment_list = []
     for num in range(num_replicas):
-        assignment_list.append(np.sign(create_rnd_assignment(variable_list=variables)))
+        assignment_list.append(np.sign(create_rnd_assignment(variable_list=variables, rg=rg)))
 
     # Transform the correlation matrix into a form such that the overall energy can be calculated with matrix products via the assignment-sign vector.
     # This involves splitting the correlation matrix into the diagonal (single-point correlations) and off-diagonal terms (set the diagonal to zero).
@@ -49,7 +49,7 @@ def Execute(problem_matrix, variables, num_cycles, num_per_sweep, num_swaps, num
             # Perform Monte Carlo sweeps.
             for i in range(num_per_sweep):
                 cand_state = copy.deepcopy(curr_state)
-                cand_state = flip_single_spin(assignment=cand_state)
+                cand_state = flip_single_spin(assignment=cand_state, rg=rg)
                 cand_E = calc_energy(cand_state, single_energy_vector=single_energy_vector, correl_energy_matrix=correl_energy_matrix)
                 # Update best energy and state if we find a lower energy configuration.
                 if cand_E < best_E:

@@ -1,6 +1,6 @@
 import numpy as np
 import copy
-from monte_carlo_helpers import create_rnd_assignment, calc_energy, flip_single_spin
+from classical_benchmarks.monte_carlo_helpers import create_rnd_assignment, calc_energy, flip_single_spin
 
 
 def Execute(problem_matrix, variables, num_iterations, temp, random_seed):
@@ -9,7 +9,7 @@ def Execute(problem_matrix, variables, num_iterations, temp, random_seed):
     rg = np.random.default_rng(random_seed)
     
     # Create an initial random assignment for the variables.
-    assignment = np.sign(create_rnd_assignment(variable_list=variables))
+    assignment = np.sign(create_rnd_assignment(variable_list=variables, rg=rg))
 
     # Transform the correlation matrix into a form such that the overall energy can be calculated with matrix products via the assignment-sign vector.
     # This involves splitting the correlation matrix into the diagonal (single-point correlations) and off-diagonal terms (set the diagonal to zero).
@@ -28,7 +28,7 @@ def Execute(problem_matrix, variables, num_iterations, temp, random_seed):
     # Main loop for the simulated annealing algorithm.
     for i in range(num_iterations):
         # Propose a new state by flipping a single spin in the current state.
-        cand_state = flip_single_spin(assignment=copy.deepcopy(curr_state))
+        cand_state = flip_single_spin(assignment=copy.deepcopy(curr_state), rg=rg)
         # Calculate the energy of the proposed state.
         cand_E = calc_energy(cand_state, single_energy_vector=single_energy_vector, correl_energy_matrix=correl_energy_matrix)
 
