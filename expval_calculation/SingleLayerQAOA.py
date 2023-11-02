@@ -45,7 +45,7 @@ class SingleLayerQAOAExpectationValues(ExpectationValues):
         # Set the type of the expectation value
         self.type = "SingleLayerQAOAExpectationValue"
 
-    def calc_expect_val(self):
+    def calc_expect_val(self) -> (list, int, float):
         """Calculate all one- and two-point correlation expectation values and return the one with highest absolute value."""
 
         # initialize dictionary for saving the correlations
@@ -126,7 +126,7 @@ class SingleLayerQAOAExpectationValues(ExpectationValues):
         max_expect_val_sign = rounding_element[1]
         max_expect_val = rounding_element[2]
 
-        return max_expect_val_location, max_expect_val_sign, max_expect_val
+        return max_expect_val_location, int(max_expect_val_sign), max_expect_val
 
     def optimize(self):
         """This function optimizes the QAOA parameters to minimize the energy."""

@@ -147,7 +147,7 @@ class QIRO_MIS(QIRO):
 
         return fixing_list, assignments
 
-    def _update_correlation(self, variables: Union(np.ndarray, list), max_expect_val_sign: int) -> (list, list):
+    def _update_correlation(self, variables: Union[np.ndarray, list], max_expect_val_sign: int) -> (list, list):
         """Updates Hamiltonian according to fixed two point correlation -- RQAOA (for now)."""
 
         fixing_list = []
