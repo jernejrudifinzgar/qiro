@@ -1,67 +1,56 @@
 import numpy as np
 import copy
+from monte_carlo_helpers import create_rnd_assignment, calc_energy, flip_single_spin
 
-def create_rnd_assignment(variable_list):
-    """The zero'th index is introduced due to the form of the correlation matrix and doesn't correspond to a
-    physical variable."""
-    global rg
-    assignment = np.array([0])
-    for num in variable_list:
-        sign = rg.choice((1, -1))
-        assignment = np.append(assignment, np.array([sign * num]), axis=0)
-    return assignment
-
-def calc_energy(assignment, single_energy_vector, correl_energy_matrix):
-    E_calc = np.sign(assignment).T @ correl_energy_matrix @ np.sign(assignment) + single_energy_vector.T @ np.sign(assignment)
-    return E_calc
-
-def flip_single_spin(assignment):
-    global rg
-    flip_var = rg.choice(range(1, len(assignment)))
-    assignment[flip_var] = assignment[flip_var] * (-1)
-    return assignment
 
 def Execute(problem_matrix, variables, num_iterations, temp, random_seed):
     global rg
+    # Initialize a random number generator with the provided seed.
     rg = np.random.default_rng(random_seed)
-    # Create random assignment
+    
+    # Create an initial random assignment for the variables.
     assignment = np.sign(create_rnd_assignment(variable_list=variables))
 
-    # Transform the correlation matrix into a form, so that the overall energy can be calculated with matrix products via the assignment-sign vector
-    # This means the correlation matrix gets splitted into the diagonal (single-point correl.) and off diagonal terms (set the diagonal to zero)
+    # Transform the correlation matrix into a form such that the overall energy can be calculated with matrix products via the assignment-sign vector.
+    # This involves splitting the correlation matrix into the diagonal (single-point correlations) and off-diagonal terms (set the diagonal to zero).
     single_energy_vector = copy.deepcopy(problem_matrix.diagonal())
     correl_energy_matrix = copy.deepcopy(problem_matrix)
     np.fill_diagonal(correl_energy_matrix, 0)
 
+    # Initialize the best found state and energy.
     best_state = assignment
     best_E = calc_energy(best_state, single_energy_vector=single_energy_vector, correl_energy_matrix=correl_energy_matrix)
 
+    # Initialize the current state and energy.
     curr_state = copy.deepcopy(best_state)
     curr_E = copy.deepcopy(best_E)
 
+    # Main loop for the simulated annealing algorithm.
     for i in range(num_iterations):
-        cand_state = copy.deepcopy(curr_state)
-        cand_state = flip_single_spin(assignment=cand_state)
+        # Propose a new state by flipping a single spin in the current state.
+        cand_state = flip_single_spin(assignment=copy.deepcopy(curr_state))
+        # Calculate the energy of the proposed state.
         cand_E = calc_energy(cand_state, single_energy_vector=single_energy_vector, correl_energy_matrix=correl_energy_matrix)
 
-        # update our best_energy in case we reduced it
+        # Update the best found state and energy if the proposed state is better.
         if cand_E < best_E:
             best_state = cand_state
             best_E = cand_E
 
-        # calculate the energy difference:
+        # Calculate the energy difference between the proposed and current state.
         diff = cand_E - curr_E
-
+        # Calculate the current temperature based on the cooling schedule.
         curr_temp = temp / (i + 1)
-
-        # calculate energy exp term
+        # Calculate the Metropolis criterion.
         crit = np.exp(-diff / curr_temp)
+        # Generate a random number for the acceptance test.
         p = rg.uniform(low=0.0, high=1.0)
-        # check if we should keep the new state & energy and update them
+        # Check if the proposed state should be accepted.
         if diff < 0 or p < crit:
-            curr_state = copy.deepcopy(cand_state)
-            curr_E = calc_energy(curr_state, single_energy_vector=single_energy_vector, correl_energy_matrix=correl_energy_matrix)
+            curr_state = cand_state
+            curr_E = cand_E
 
-    # Transform solution
+    # Transform the best found solution back into the original problem's variable space.
     solution = best_state * np.append(np.array([0]), variables, axis=0)
+    # Return the best found energy and the corresponding solution.
     return best_E, solution
