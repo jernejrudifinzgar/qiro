@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 import sys 
-#sys.path.append("./")
+sys.path.append("./")
 sys.path.append("./Qtensor")
 sys.path.append("./Qtensor/qtree_git")
 import networkx as nx
@@ -10,7 +10,6 @@ import networkx as nx
 from Calculating_Expectation_Values import SingleLayerQAOAExpectationValues, QtensorQAOAExpectationValuesMIS
 from QIRO import QIRO_MIS
 from time import time
-
 
 if __name__ == '__main__':
     p = 1

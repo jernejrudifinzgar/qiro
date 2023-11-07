@@ -24,10 +24,11 @@ class QIRO_MIS(QIRO):
     This class is responsible for the whole QIRO procedure; the output represents the optimized bitstring solution in the form
     of a dictionary as well as a list of optimal parameters from each elimination step
     """
-    def __init__(self, nc_input, expectation_values_input):
+    def __init__(self, nc_input, expectation_values_input, output_steps=True):
         super().__init__( nc = nc_input, expectation_values=expectation_values_input)
         # let us use the problem graph as the reference, and this current graph as the dynamic
         # object from which we will eliminate nodes:
+        self.output_steps=output_steps
         self.graph = copy.deepcopy(self.problem.graph)
         
     def update_single(self, variable_index, max_expect_val_sign):
@@ -52,7 +53,7 @@ class QIRO_MIS(QIRO):
         self.problem = MIS(self.graph, self.problem.alpha)
 
         if self.expectation_values.type == 'QtensorQAOAExpectationValuesMIS':
-            self.expectation_values = QtensorQAOAExpectationValuesMIS(self.problem, self.expectation_values.p)
+            self.expectation_values = QtensorQAOAExpectationValuesMIS(self.problem, self.expectation_values.p, pbar=self.expectation_values.pbar)
         elif self.expectation_values.type == 'SingleLayerQAOAExpectationValue':
             self.expectation_values = SingleLayerQAOAExpectationValues(self.problem)
 
@@ -72,7 +73,8 @@ class QIRO_MIS(QIRO):
                 assignments.append(-1)
                 self.graph.remove_node(variable - 1)                
         else:
-            print("Entered into anticorrelated case:")
+            if self.output_steps:
+                print("Entered into anticorrelated case:")
             # we remove the things we need to remove are the ones connected to both node, which are not both node.
             mutual_neighbors = set(self.graph.neighbors(variables[0] - 1)) & set(self.graph.neighbors(variables[1] - 1))
             fixing_list = [[n + 1] for n in mutual_neighbors]
@@ -84,7 +86,7 @@ class QIRO_MIS(QIRO):
         self.problem = MIS(self.graph, self.problem.alpha)
 
         if self.expectation_values.type == 'QtensorQAOAExpectationValuesMIS':
-            self.expectation_values = QtensorQAOAExpectationValuesMIS(self.problem, self.expectation_values.p)
+            self.expectation_values = QtensorQAOAExpectationValuesMIS(self.problem, self.expectation_values.p, pbar=self.expectation_values.pbar)
         elif self.expectation_values.type == 'SingleLayerQAOAExpectationValue':
             self.expectation_values = SingleLayerQAOAExpectationValues(self.problem)
 
@@ -110,7 +112,7 @@ class QIRO_MIS(QIRO):
         self.problem = MIS(self.graph, self.problem.alpha)
 
         if self.expectation_values.type == 'QtensorQAOAExpectationValuesMIS':
-            self.expectation_values = QtensorQAOAExpectationValuesMIS(self.problem, self.expectation_values.p)
+            self.expectation_values = QtensorQAOAExpectationValuesMIS(self.problem, self.expectation_values.p, pbar=self.expectation_values.pbar)
         elif self.expectation_values.type == 'SingleLayerQAOAExpectationValue':
             self.expectation_values = SingleLayerQAOAExpectationValues(self.problem)
 
@@ -147,7 +149,8 @@ class QIRO_MIS(QIRO):
                 max_expect_val_sign = np.sign(max_expect_val).astype(int)
 
                 if len(max_expect_val_location) == 1:
-                    print(f"single var {max_expect_val_location}. Sign: {max_expect_val_sign}")
+                    if self.output_steps:
+                        print(f"single var {max_expect_val_location}. Sign: {max_expect_val_sign}")
                     fixed_variables, assignments = self.update_single(*max_expect_val_location, max_expect_val_sign)
                     for var, assignment in zip(fixed_variables, assignments):
 
@@ -155,7 +158,8 @@ class QIRO_MIS(QIRO):
                             raise Exception("Variable to be eliminated is None. WTF?")
                         self.fixed_correlations.append([var, int(assignment), max_expect_val])
                 else:
-                    print(f'Correlation {max_expect_val_location}. Sign: {max_expect_val_sign}.')
+                    if self.output_steps:
+                        print(f'Correlation {max_expect_val_location}. Sign: {max_expect_val_sign}.')
                     fixed_variables, assignments = self.update_correlation(max_expect_val_location, max_expect_val_sign)
                     for var, assignment in zip(fixed_variables, assignments):
                         if var is None:
@@ -165,7 +169,8 @@ class QIRO_MIS(QIRO):
 
                 # perform pruning.
                 pruned_variables, pruned_assignments = self.prune_graph()
-                print(f"Pruned {len(pruned_variables)} variables.")
+                if self.output_steps:
+                    print(f"Pruned {len(pruned_variables)} variables.")
                 
                 for var, assignment in zip(pruned_variables, pruned_assignments):
                     if var is None:
@@ -175,11 +180,12 @@ class QIRO_MIS(QIRO):
                 fixed_variables += pruned_variables
                 which_correlation += 1
                 
-                if len(fixed_variables) == 0:
-                    print("No variables could be fixed.")
-                    print(f"Attempting with the {which_correlation}. largest correlation.")
-                else:
-                    print(f"We have fixed the following variables: {fixed_variables}. Moving on.")
+                if self.output_steps:
+                    if len(fixed_variables) == 0:
+                        print("No variables could be fixed.")
+                        print(f"Attempting with the {which_correlation}. largest correlation.")
+                    else:
+                        print(f"We have fixed the following variables: {fixed_variables}. Moving on.")
         
         solution = [var[0] * assig for var, assig, _ in self.fixed_correlations]
         sorted_solution = sorted(solution, key=lambda x: abs(x))

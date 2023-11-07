@@ -5,6 +5,7 @@ import copy
 from scipy.optimize import fsolve
 import qtensor
 import torch
+import random
 
 class ExpectationValues():
     """General expectation value calculator"""
@@ -252,6 +253,7 @@ class SingleLayerQAOAExpectationValues(ExpectationValues):
 
         max_expect_val_location, max_expect_val_sign, max_expect_val = self.calc_expect_val()
         self.fixed_correl.append([max_expect_val_location, max_expect_val_sign, max_expect_val])
+        
 
         return max_expect_val_location, max_expect_val_sign, max_expect_val
 
@@ -286,14 +288,19 @@ class SingleLayerQAOAExpectationValues(ExpectationValues):
 class QtensorQAOAExpectationValuesMIS(ExpectationValues):
     """Calculation of expectation values via tensor network contraction using Qtensor"""
 
-    def __init__(self, problem, p, gamma=None, beta=None, backend=qtensor.contraction_backends.TorchBackend(), ordering_algo='greedy'):
+    def __init__(self, problem, p, pbar=True, gamma=None, beta=None, backend=qtensor.contraction_backends.TorchBackend(), ordering_algo='greedy'):
         super().__init__(problem)
+        random.seed()
 
         if gamma == None:
-            gamma=[0.1] * p
-        if beta == None:
-            beta=[0.3] * p
+            #gamma=[0.1] * p
+            gamma=[random.uniform(0, 0.5)]*p
 
+        if beta == None:
+            #beta=[0.1] * p
+            beta=[random.uniform(0, 0.5)]*p
+
+        self.pbar=pbar
         self.p = p
         self.backend = backend
         self.alpha = self.problem.alpha
@@ -383,11 +390,13 @@ class QtensorQAOAExpectationValuesMIS(ExpectationValues):
             #self.expect_val_dict[frozenset({edge[0]+1, edge[1]+1})]=float(self.E_edges[edge])
             if abs(float(self.E_edges[edge])) > max_expect_val:
                 max_expect_val = abs(float(self.E_edges[edge]))
+                max_expect_val_sign = np.sign(float(self.E_edges[edge]))
                 max_expect_val_location = edge 
 
         return max_expect_val_location, max_expect_val_sign, max_expect_val
     
-    def optimize(self, steps=50, pbar=True, Opt = torch.optim.RMSprop, opt_kwargs=dict(), **kwargs):
+    def optimize(self, steps=50, Opt = torch.optim.RMSprop, opt_kwargs=dict(), **kwargs):
+        random.seed()
         opt = Opt(params=(self.gamma, self.beta) , **opt_kwargs)
         self.peos = self.energy_peo()
         print(self.graph)
@@ -402,7 +411,7 @@ class QtensorQAOAExpectationValuesMIS(ExpectationValues):
 
         self.param_history.append([x.detach().numpy().copy() for x in (self.gamma, self.beta)])
         
-        if pbar:
+        if self.pbar:
             from tqdm.auto import tqdm
             _pbar = tqdm(total=self.steps)
         else:
@@ -417,7 +426,7 @@ class QtensorQAOAExpectationValuesMIS(ExpectationValues):
 
             self.losses.append(self.loss.detach().numpy().data)
             self.param_history.append([x.detach().numpy().copy() for x in (self.gamma, self.beta)])
-            if pbar:
+            if self.pbar:
                 _pbar.update(1)
         
         max_expect_val = 0
@@ -437,6 +446,162 @@ class QtensorQAOAExpectationValuesMIS(ExpectationValues):
             if abs(float(self.E_edges[edge])) > max_expect_val:
                 max_expect_val = abs(float(self.E_edges[edge]))
                 max_expect_val_location = edge 
+
+        self.energy = self.loss
+
+        #does the same thing as above but more complicated
+        """ for i in self.E_nodes.values():
+            if abs(float(i)) > max_expect_val:
+                max_expect_val=abs(float(i))
+                max_expect_val_sign=np.sign(float(i))
+                for key, value in self.expect_val_dict.items():
+                    if value == float(i):
+                        max_expect_val_location = key
+                    
+        for i in self.E_edges:
+            if abs(float(i)) > max_expect_val:
+                max_expect_val=abs(float(i))
+                max_expect_val_sign=np.sign(float(i))
+                for key, value in self.expect_val_dict.items():
+                    if value == float(i):
+                        max_expect_val_location = key """
+
+        return max_expect_val_location, max_expect_val_sign, max_expect_val
+    
+
+
+##############################################################################
+
+
+
+class QtensorQAOAExpectationValuesMAXCUT(ExpectationValues):
+    """Calculation of expectation values via tensor network contraction using Qtensor"""
+
+    def __init__(self, problem, p, pbar=True, gamma=None, beta=None, backend=qtensor.contraction_backends.TorchBackend(), ordering_algo='greedy'):
+        super().__init__(problem)
+        random.seed()
+
+        if gamma == None:
+            #gamma=[0.1] * p
+            gamma=[random.uniform(0, 0.5)]*p
+
+        if beta == None:
+            #beta=[0.1] * p
+            beta=[random.uniform(0, 0.5)]*p
+
+        self.pbar=pbar
+        self.p = p
+        self.backend = backend
+        self.graph = self.problem.graph
+        self.type = 'QtensorQAOAExpectationValuesMAXCUT'
+        #if self.backend == qtensor.contraction_backends.TorchBackend():
+    
+        self.gamma, self.beta = torch.tensor(gamma, requires_grad=True), torch.tensor(beta, requires_grad=True)
+        #else:
+        #    self.gamma = gamma
+        #    self.beta = beta
+        self.p = len(self.gamma)
+        self.loss = None
+        self.ordering_algo = ordering_algo
+        self.peos = self.energy_peo()
+        self.E_nodes = None
+        self.E_edges = None
+
+    def energy_loss(self):
+        sim = qtensor.QtreeSimulator(backend=self.backend)
+        composer = qtensor.TorchQAOAComposer_MAXCUT(self.graph, gamma=self.gamma, beta = self.beta)
+        self.loss = torch.tensor([0.])
+        self.E_nodes = {}
+        self.E_edges ={}
+
+        #if peos is None:
+        #    peos = [None] *(self.graph.number_of_edges()+self.graph.number_of_nodes())
+
+        #peos_nodes = self.peos[:self.graph.number_of_nodes()]
+        #peos_edges = self.peos[self.graph.number_of_nodes():]
+
+        for edge in self.graph.edges():
+            #print(edge)
+            peo = self.peos[edge]
+            composer.energy_expectation_lightcone(edge)
+            E = torch.real(sim.simulate_batch(composer.circuit, peo=peo))
+            composer.builder.reset()
+            self.E_edges[edge]= E
+            self.loss += E 
+
+    #@lru_cache
+    def energy_peo(self):
+        opt = qtensor.toolbox.get_ordering_algo(self.ordering_algo)
+        peos = {}
+
+        for edge in self.graph.edges():
+            composer = qtensor.TorchQAOAComposer_MAXCUT(self.graph, gamma = self.gamma, beta = self.beta)
+            composer.energy_expectation_lightcone(edge)
+            tn = qtensor.optimisation.TensorNet.QtreeTensorNet.from_qtree_gates(composer.circuit)
+            peo, _ = opt.optimize(tn)
+            peos[edge] = peo
+
+        return peos
+    
+    def calc_expect_val(self):
+        self.energy_loss()
+        max_expect_val = 0
+                
+        for edge in self.graph.edges():
+            self.expect_val_dict[frozenset({self.problem.position_translater.index(max(edge)+1), self.problem.position_translater.index(min(edge)+1)})]=float(self.E_edges[edge])
+            #self.expect_val_dict[frozenset({edge[0]+1, edge[1]+1})]=float(self.E_edges[edge])
+            if abs(float(self.E_edges[edge])) > max_expect_val:
+                max_expect_val = abs(float(self.E_edges[edge]))
+                max_expect_val_sign = np.sign(float(self.E_edges[edge]))
+                max_expect_val_location = edge 
+
+        return max_expect_val_location, max_expect_val_sign, max_expect_val
+    
+    def optimize(self, steps=50, Opt = torch.optim.RMSprop, opt_kwargs=dict(), **kwargs):
+        random.seed()
+        opt = Opt(params=(self.gamma, self.beta) , **opt_kwargs)
+        self.peos = self.energy_peo()
+        print(self.graph)
+        self.expect_val_dict = {}
+        max_expect_val_location = None
+        max_expect_val_sign = None
+        max_expect_val = None
+        self.losses = []
+        self.steps = steps
+        self.param_history = []
+        #ExpectationValues.__init__(self, self.problem)
+
+        self.param_history.append([x.detach().numpy().copy() for x in (self.gamma, self.beta)])
+        
+        if self.pbar:
+            from tqdm.auto import tqdm
+            _pbar = tqdm(total=self.steps)
+        else:
+            _pbar = None
+
+        for i in range(self.steps):
+            self.energy_loss()
+
+            opt.zero_grad()
+            self.loss.backward()
+            opt.step()
+
+            self.losses.append(self.loss.detach().numpy().data)
+            self.param_history.append([x.detach().numpy().copy() for x in (self.gamma, self.beta)])
+            if self.pbar:
+                _pbar.update(1)
+        
+        max_expect_val = 0
+                
+        for edge in self.graph.edges():
+            self.expect_val_dict[frozenset({self.problem.position_translater.index(max(edge)+1), self.problem.position_translater.index(min(edge)+1)})]=float(self.E_edges[edge])
+            #self.expect_val_dict[frozenset({edge[0]+1, edge[1]+1})]=float(self.E_edges[edge])
+            if abs(float(self.E_edges[edge])) > max_expect_val:
+                max_expect_val = abs(float(self.E_edges[edge]))
+                max_expect_val_sign = np.sign(float(self.E_edges[edge]))
+                max_expect_val_location = edge 
+
+        self.energy = self.loss
 
         #does the same thing as above but more complicated
         """ for i in self.E_nodes.values():

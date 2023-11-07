@@ -12,7 +12,7 @@ from classical_benchmarks.greedy_mis import greedy_mis, random_greedy_mis
 from time import time
 import random
 
-def calculate_single_solution(G, nc, reg, n, ps, i):
+def calculate_single_solution(G, nc, reg, n, ps, pbar, output_steps, i):
     random.seed()
     output_dict={}
 
@@ -45,8 +45,8 @@ def calculate_single_solution(G, nc, reg, n, ps, i):
 
     for p in ps:
         print(f"\nRight now calculating p={p}")
-        expectation_values_Qtensor = QtensorQAOAExpectationValuesMIS(problem, p)
-        qiro_qtensor = QIRO_MIS(nc, expectation_values_Qtensor)
+        expectation_values_Qtensor = QtensorQAOAExpectationValuesMIS(problem, p, pbar=pbar)
+        qiro_qtensor = QIRO_MIS(nc, expectation_values_Qtensor, output_steps=output_steps)
         start_time = time()
         #qiro_qtensor.execute()
         qiro_qtensor.execute()

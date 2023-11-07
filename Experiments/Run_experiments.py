@@ -1,8 +1,9 @@
 import sys 
-print(sys.path)
+#print(sys.path)
 sys.path.append("./")
 sys.path.append("./Qtensor")
 sys.path.append("./Qtensor/qtree_git")
+
 import numpy as np
 import networkx as nx
 import Generating_Problems as Generator
@@ -17,17 +18,17 @@ import pickle
 import random
 import matplotlib.pyplot as plt
 
-def give_results(G, nc, reg, n, ps, number_of_cases, parallel = False):
+def give_results(G, nc, reg, n, ps, number_of_cases, pbar=True, output_steps=True, parallel = False):
     if parallel==False:
         results_list = []
         for i in range(number_of_cases):
-            result = calculate_single_solution(G, nc, reg, ns, ps, number_of_cases)
+            result = calculate_single_solution(G, nc, reg, ns, ps, pbar, output_steps, number_of_cases)
             results_list.append(result)
 
     elif parallel==True:
         
         pool = mp.Pool(mp.cpu_count())
-        results_list = pool.starmap(calculate_single_solution, [(G, nc, reg, n, ps, i) for i in range(number_of_cases)])
+        results_list = pool.starmap(calculate_single_solution, [(G, nc, reg, n, ps, pbar, output_steps, i) for i in range(number_of_cases)])
 
     return results_list
 
@@ -35,9 +36,9 @@ if __name__ == '__main__':
 
     reg = [3]
     #seed = 666
-    ps = [1, 2, 3]#, 4]
+    ps = [3]#[1, 2, 3]#, 4]
     nc = 3
-    ns = [40]    #[20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
+    ns = [60]    #[20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
     number_of_cases = 8
 
     #results_dict_all = {}
@@ -55,21 +56,23 @@ if __name__ == '__main__':
             prob = regularity/(n-1) 
             G = nx.erdos_renyi_graph(n, prob)
 
+        
+            imported_dict = pickle.load(open(f'./Experiments/results_run_1_reg_3_n_{60}_p_2_numCases_8.pkl', 'rb'))
+            G=graph=imported_dict[f'reg_3_n_{n}_p_2_numCases_8'][0]['graph']
+
             for p in ps:
+                p=[p]
                 results_dict = {}
-                results_dict["General info"]={'reg': reg, 'p': ps, 'n': ns, 'number of cases': number_of_cases}
+                results_dict["General info"]={'reg': reg, 'p': p, 'n': n, 'number of cases': number_of_cases}
                 print(f"\nRight now calculating regularity={regularity}, n={n}")
-                results=give_results(G, nc, regularity, n, ps, number_of_cases, parallel=True)
-                results_dict[f"reg_{regularity}_n_{n}_numCases_{number_of_cases}"]= results
+                results=give_results(G, nc, regularity, n, p, number_of_cases, pbar=False, output_steps=False, parallel=False)
+                results_dict[f"reg_{regularity}_n_{n}_p_{p[0]}_numCases_{number_of_cases}"]= results
                 #results_dict_all[f"reg_{regularity}_n_{n}_numCases_{number_of_cases}"]= results
 
-                with open(f"results_run_1_reg_{regularity}_n_{n}_p_{p}_numCases_{number_of_cases}.pkl", 'wb') as f:
+                with open(f"./Experiments/results_run_1_reg_{regularity}_n_{n}_p_{p[0]}_numCases_{number_of_cases}.pkl", 'wb') as f:
                     pickle.dump(results_dict, f)
 
-                print(f'\nSuccessfully saved results_run_1_reg_{regularity}_n_{n}_p_{p}_numCases_{number_of_cases}.pkl')
-
-    
-
+                print(f'\nSuccessfully saved results_run_1_reg_{regularity}_n_{n}_p_{p[0]}_numCases_{number_of_cases}.pkl')
     
     #graph1=results_dict["reg_3_n_6_numCases_2"][0]["graph"]
     #graph2=results_dict["reg_3_n_6_numCases_2"][1]["graph"]
