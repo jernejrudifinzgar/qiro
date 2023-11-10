@@ -30,7 +30,7 @@ matplotlib.rcParams['figure.figsize'] = (1.718*__plot_height, __plot_height)
 set_matplotlib_formats('svg')
 
 
-regs = [4]
+regs = [3]
 ns = [50, 100, 150, 200]
 seed = 666
 #G = nx.random_geometric_graph(30, 0.5)
