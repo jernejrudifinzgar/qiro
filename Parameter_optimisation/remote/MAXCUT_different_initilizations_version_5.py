@@ -30,7 +30,7 @@ set_matplotlib_formats('svg')
 
 version=3
 regs = [3]#, 4]
-ns = [50]#[50, 100, 150, 200]
+ns = [200]#[50, 100, 150, 200]
 seed = 667
 #G = nx.random_geometric_graph(30, 0.5)
 #G = nx.gnp_random_graph(n, 0.5, seed = seed)
