@@ -493,6 +493,7 @@ class QtensorQAOAExpectationValuesMAXCUT(ExpectationValues):
         self.p = p
         self.backend = backend
         self.graph = self.problem.graph
+        self.losses =[]
         self.type = 'QtensorQAOAExpectationValuesMAXCUT'
         #if self.backend == qtensor.contraction_backends.TorchBackend():
     
@@ -586,7 +587,8 @@ class QtensorQAOAExpectationValuesMAXCUT(ExpectationValues):
             self.loss.backward()
             opt.step()
 
-            self.losses.append(self.loss.detach().numpy().data)
+            #self.losses.append(self.loss.detach().numpy().data)
+            self.losses.append(float(self.loss))
             self.param_history.append([x.detach().numpy().copy() for x in (self.gamma, self.beta)])
             if self.pbar:
                 _pbar.update(1)

@@ -28,17 +28,17 @@ __plot_height = 9.119
 matplotlib.rcParams['figure.figsize'] = (1.718*__plot_height, __plot_height)
 set_matplotlib_formats('svg')
 
-
-version=2
+version=3
 regs = [3]#, 4]
-ns = [50, 100, 150, 200]
+ns = [200]#[50, 100, 150, 200]
 seed = 666
 #G = nx.random_geometric_graph(30, 0.5)
 #G = nx.gnp_random_graph(n, 0.5, seed = seed)
-num_runs=10
+num_runs=1
+num_random=5
 
-colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple']
-ps=[1, 2, 3]
+colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:pink', 'tab:grey', 'tab:olive']
+ps=[4]#[1, 2, 3]
 
 dictionary_reg = {}
 
@@ -68,7 +68,9 @@ for reg in regs:
 
             x = []
             energy_qtensor_transition_states = []
-            energy_qtensor_random_init = []
+            
+            energy_qtensor_random_init = [[], [], [], [], []]
+
             energy_qtensor_fixed_angle = []
             energy_qtensor_fixed_angle_optimization = []
 
@@ -85,14 +87,14 @@ for reg in regs:
                 dictionary_p_transition_states_sub={}
 
                 if p==1:
-                    expectation_values_single = SingleLayerQAOAExpectationValues(problem)
-                    expectation_values_single.optimize()
-                    gamma = [expectation_values_single.gamma]
-                    beta = [expectation_values_single.beta]
-                    energy_single = expectation_values_single.energy
-                    energy_qtensor_transition_states.append(energy_single)
-                    dictionary_p_transition_states_sub['energy']=energy_single
-                    dictionary_p_transition_states_sub['correlations']= expectation_values_single.expect_val_dict
+                    expectation_values_single_transition = SingleLayerQAOAExpectationValues(problem)
+                    expectation_values_single_transition.optimize()
+                    gamma = [expectation_values_single_transition.gamma]
+                    beta = [expectation_values_single_transition.beta]
+                    energy_single_transition = expectation_values_single_transition.energy
+                    energy_qtensor_transition_states.append(energy_single_transition)
+                    dictionary_p_transition_states_sub['energy']=energy_single_transition
+                    dictionary_p_transition_states_sub['correlations']= expectation_values_single_transition.expect_val_dict
 
                 else:
                     for j in range(p):
@@ -100,22 +102,23 @@ for reg in regs:
                         beta_ts=beta.copy()
                         gamma_ts.insert(j, 0)
                         beta_ts.insert(j, 0)
-                        expectation_values_qtensor = QtensorQAOAExpectationValuesMAXCUT(problem, p, gamma=gamma_ts, beta=beta_ts)
-                        expectation_values_qtensor.optimize()
-                        energy_qtensor = float(expectation_values_qtensor.energy)
-                        if j==0:
-                            energy_min=energy_qtensor
-                            gamma_min=[float(i) for i in expectation_values_qtensor.gamma]
-                            beta_min=[float(i) for i in expectation_values_qtensor.beta]
-                            correlations_min = expectation_values_qtensor.expect_val_dict.copy()
-                            losses_min = expectation_values_qtensor.losses.copy()
+                        expectation_values_qtensor_transition = QtensorQAOAExpectationValuesMAXCUT(problem, p, gamma=gamma_ts, beta=beta_ts)
+                        expectation_values_qtensor_transition.optimize()
+                        energy_qtensor_transition = float(expectation_values_qtensor_transition.energy)
 
-                        if energy_qtensor < energy_min:
-                            energy_min=energy_qtensor
-                            gamma_min=[float(i) for i in expectation_values_qtensor.gamma]
-                            beta_min=[float(i) for i in expectation_values_qtensor.beta]
-                            correlations_min = expectation_values_qtensor.expect_val_dict.copy()
-                            losses_min = expectation_values_qtensor.losses.copy()
+                        if j==0:
+                            energy_min=energy_qtensor_transition
+                            gamma_min=[float(i) for i in expectation_values_qtensor_transition.gamma]
+                            beta_min=[float(i) for i in expectation_values_qtensor_transition.beta]
+                            correlations_min = expectation_values_qtensor_transition.expect_val_dict.copy()
+                            losses_min = expectation_values_qtensor_transition.losses.copy()
+
+                        if energy_qtensor_transition < energy_min:
+                            energy_min=energy_qtensor_transition
+                            gamma_min=[float(i) for i in expectation_values_qtensor_transition.gamma]
+                            beta_min=[float(i) for i in expectation_values_qtensor_transition.beta]
+                            correlations_min = expectation_values_qtensor_transition.expect_val_dict.copy()
+                            losses_min = expectation_values_qtensor_transition.losses.copy()
 
                     energy_qtensor_transition_states.append(energy_min)
                     dictionary_p_transition_states_sub['energy'] = energy_min
@@ -130,45 +133,54 @@ for reg in regs:
 
                 dictionary_p_random_init_sub={}
                 dictionary_p_fixed_angles_sub={}
-                dictionary_p_fixed_angles_optimization_sub={}
 
-                #random initialization
-                expectation_values_qtensor = QtensorQAOAExpectationValuesMAXCUT(problem, p)
-                expectation_values_qtensor.optimize()
-                energy_qtensor = float(expectation_values_qtensor.energy)
-                energy_qtensor_random_init.append(energy_qtensor)
-                dictionary_p_random_init_sub['energy'] = energy_qtensor
-                dictionary_p_random_init_sub['correlations'] = expectation_values_qtensor.expect_val_dict.copy()
-                dictionary_p_random_init_sub['losses'] = expectation_values_qtensor.losses.copy()
-                x.append(p)
+
+                list_random=[]
+
+                for j in range (num_random):
+                    dictionary_p_fixed_angles_optimization_sub={}
+
+
+                    #random initialization
+                    expectation_values_qtensor_random = QtensorQAOAExpectationValuesMAXCUT(problem, p)
+                    expectation_values_qtensor_random.optimize()
+                    energy_qtensor_random = float(expectation_values_qtensor_random.energy)
+                    energy_qtensor_random_init[j].append(energy_qtensor_random)
+                    dictionary_p_random_init_sub['energy'] = energy_qtensor_random
+                    dictionary_p_random_init_sub['correlations'] = expectation_values_qtensor_random.expect_val_dict.copy()
+                    dictionary_p_random_init_sub['losses'] = expectation_values_qtensor_random.losses.copy()
+                    list_random.append(dictionary_p_random_init_sub)
+                
+                dictionary_p_random_init[f'p={p}'] = list_random
 
                 
+                
+                x.append(p)
+
                 #fixed angles
                 gamma, beta = data[f"{reg}"][f"{p}"]["gamma"], data[f"{reg}"][f"{p}"]["beta"]
                 gamma, beta = [value/(-2*np.pi) for value in gamma], [value/(2*np.pi) for value in beta]
-                print(gamma)
-                expectation_values_qtensor = QtensorQAOAExpectationValuesMAXCUT(problem, p, gamma=gamma, beta=beta)
-                print(expectation_values_qtensor.gamma)
-                expectation_values_qtensor.calc_expect_val()
-                energy_qtensor = float(expectation_values_qtensor.loss)
-                energy_qtensor_fixed_angle.append(energy_qtensor)
-                dictionary_p_fixed_angles_sub['energy'] = energy_qtensor
-                dictionary_p_fixed_angles_sub['correlations'] = expectation_values_qtensor.expect_val_dict.copy()
+                expectation_values_qtensor_fixed = QtensorQAOAExpectationValuesMAXCUT(problem, p, gamma=gamma, beta=beta)
+                expectation_values_qtensor_fixed.calc_expect_val()
+                energy_qtensor_fixed = float(expectation_values_qtensor_fixed.loss)
+                energy_qtensor_fixed_angle.append(energy_qtensor_fixed)
+                dictionary_p_fixed_angles_sub['energy'] = energy_qtensor_fixed
+                dictionary_p_fixed_angles_sub['correlations'] = expectation_values_qtensor_fixed.expect_val_dict.copy()
 
                 #fixed angles with optimization
                 gamma, beta = data[f"{reg}"][f"{p}"]["gamma"], data[f"{reg}"][f"{p}"]["beta"]
                 gamma, beta = [value/(-2*np.pi) for value in gamma], [value/(2*np.pi) for value in beta]
-                expectation_values_qtensor = QtensorQAOAExpectationValuesMAXCUT(problem, p, gamma=gamma, beta=beta)
-                expectation_values_qtensor.optimize()
-                energy_qtensor = float(expectation_values_qtensor.energy)
-                energy_qtensor_fixed_angle_optimization.append(energy_qtensor)
-                dictionary_p_fixed_angles_optimization_sub['energy'] = energy_qtensor
-                dictionary_p_fixed_angles_optimization_sub['correlations'] = expectation_values_qtensor.expect_val_dict.copy()
-                dictionary_p_fixed_angles_optimization_sub['losses'] = expectation_values_qtensor.losses.copy()
+                expectation_values_qtensor_fixed_optim = QtensorQAOAExpectationValuesMAXCUT(problem, p, gamma=gamma, beta=beta)
+                expectation_values_qtensor_fixed_optim.optimize()
+                energy_qtensor_fixed_optim = float(expectation_values_qtensor_fixed_optim.energy)
+                energy_qtensor_fixed_angle_optimization.append(energy_qtensor_fixed_optim)
+                dictionary_p_fixed_angles_optimization_sub['energy'] = energy_qtensor_fixed_optim
+                dictionary_p_fixed_angles_optimization_sub['correlations'] = expectation_values_qtensor_fixed_optim.expect_val_dict.copy()
+                dictionary_p_fixed_angles_optimization_sub['losses'] = expectation_values_qtensor_fixed_optim.losses.copy()
 
-                dictionary_p_random_init[f'p={p}'] = dictionary_p_random_init_sub
                 dictionary_p_fixed_angles[f'p={p}'] = dictionary_p_fixed_angles_sub
                 dictionary_p_fixed_angles_optimization[f'p={p}'] = dictionary_p_fixed_angles_optimization_sub
+                #dictionary_p_random_init[f'p={p}'] = dictionary_p_random_init_sub
 
 
             dictionary['analytic_single_p']=dictionary_single
@@ -179,7 +191,12 @@ for reg in regs:
                  
             list_runs.append(dictionary)
             
-            plt.plot(x, energy_qtensor_random_init, colors[1], label=f'Qtensor optimization with random initialization')
+            plt.plot(x, energy_qtensor_random_init[0], colors[1], label=f'Qtensor optimization with random initialization 1')
+            plt.plot(x, energy_qtensor_random_init[1], colors[5], label=f'Qtensor optimization with random initialization 2')
+            plt.plot(x, energy_qtensor_random_init[2], colors[6], label=f'Qtensor optimization with random initialization 3')
+            plt.plot(x, energy_qtensor_random_init[3], colors[7], label=f'Qtensor optimization with random initialization 4')
+            plt.plot(x, energy_qtensor_random_init[4], colors[8], label=f'Qtensor optimization with random initialization 5')
+
             plt.plot(x, energy_qtensor_fixed_angle, colors[2], label=f'Qtensor with fixed angles initialization')
             plt.plot(x, energy_qtensor_fixed_angle_optimization, colors[3], label=f'Qtensor optimization with fixed angles initialization')
             plt.plot(x, energy_qtensor_transition_states, colors[4], label=f'Qtensor optimization with transition states initialization')
