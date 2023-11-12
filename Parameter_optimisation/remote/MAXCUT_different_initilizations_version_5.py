@@ -38,7 +38,7 @@ num_runs=10
 num_random=5
 
 colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:pink', 'tab:grey', 'tab:olive']
-ps=[1, 2, 3, 4]
+ps=[1, 2, 3]
 
 dictionary_reg = {}
 
