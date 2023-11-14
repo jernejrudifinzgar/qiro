@@ -203,7 +203,7 @@ for reg in regs:
             if i==0 or i==4 or i==8:
                 plt.ylabel('Energy')
             if i==6 or i==7 or i==8 or i==9:
-                plt.xlabel('p')
+                plt.ylabel('Energy')
             plt.xticks(ps, x)
             plt.title(f'Run number {i+1}')
             #plt.set_title(f"Run number {i+1}")

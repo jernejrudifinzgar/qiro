@@ -399,7 +399,7 @@ class QtensorQAOAExpectationValuesMIS(ExpectationValues):
         random.seed()
         opt = Opt(params=(self.gamma, self.beta) , **opt_kwargs)
         self.peos = self.energy_peo()
-        print(self.graph)
+        #print(self.graph)
         self.expect_val_dict = {}
         max_expect_val_location = None
         max_expect_val_sign = None
@@ -560,9 +560,9 @@ class QtensorQAOAExpectationValuesMAXCUT(ExpectationValues):
     
     def optimize(self, steps=50, Opt = torch.optim.RMSprop, opt_kwargs=dict(), **kwargs):
         random.seed()
-        opt = Opt(params=(self.gamma, self.beta) , **opt_kwargs)
+        opt = Opt(params=(self.gamma, self.beta) , **kwargs)
         self.peos = self.energy_peo()
-        print(self.graph)
+        #print(self.graph)
         self.expect_val_dict = {}
         max_expect_val_location = None
         max_expect_val_sign = None
