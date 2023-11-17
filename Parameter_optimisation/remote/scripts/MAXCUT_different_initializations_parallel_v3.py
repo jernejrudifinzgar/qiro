@@ -203,7 +203,7 @@ def MAXCUT_QAOA_optimization_individual_initializations_multiple_n(graphs, ns, r
 
 if __name__ == '__main__':
     graphs = list(range(100))
-    ns = list(range(60, 220, 40))
+    ns = list(range(80, 220, 40))
     print(ns)
     #graphs=[0] #, 1, 2, 3, 4, 5, 6, 7, 8, 9]
     #ns=[60, 80, 100, 150, 200]

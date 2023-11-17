@@ -175,7 +175,7 @@ def fixed_angles_optimization(problem, regularity, ps, opt, **kwargs):
         dictionary_fixed_angles_optimization_sub = {}
         gamma, beta = data[f"{regularity}"][f"{p}"]["gamma"], data[f"{regularity}"][f"{p}"]["beta"]
         gamma, beta = [value/(-2*np.pi) for value in gamma], [value/(2*np.pi) for value in beta]
-        expectation_values_qtensor_fixed_optim = QtensorQAOAExpectationValuesMAXCUT(problem, p, gamma=gamma, beta=beta, pbar=True)
+        expectation_values_qtensor_fixed_optim = QtensorQAOAExpectationValuesMAXCUT(problem, p, gamma=gamma, beta=beta, pbar=False)
         expectation_values_qtensor_fixed_optim.optimize(Opt=optimizer, **kwargs)
         energy_qtensor_fixed_optim = float(expectation_values_qtensor_fixed_optim.energy)
         dictionary_fixed_angles_optimization_sub['energy'] = energy_qtensor_fixed_optim
@@ -191,7 +191,7 @@ def individual_MAXCUT_QAOA_optimization_single_initialization(G_num, n, regulari
     my_path = os.path.dirname(my_path)
     
     ps = list(range(1, max_p+1))
-    with open(f'100_regular_graphs_nodes_{n}_reg_{regularity}.pkl', 'rb') as file:
+    with open(f'rudis_100_regular_graphs_nodes_{n}_reg_{regularity}.pkl', 'rb') as file:
         data = pickle.load(file)
 
 
@@ -220,7 +220,7 @@ def individual_MAXCUT_QAOA_optimization_single_initialization(G_num, n, regulari
     
     elif initialization == 'fixed_angles_optimization':
         dictionary_fixed_angles_optimization = fixed_angles_optimization(problem, regularity, ps, opt, lr=learning_rate)
-        pickle.dump(dictionary_fixed_angles_optimization, open(my_path + f"data/nodes_{n}_reg_{regularity}_graph_{G_num}_initialization_{initialization}_opt_{opt}_lr_{learning_rate}.pkl", 'wb'))
+        pickle.dump(dictionary_fixed_angles_optimization, open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_initialization_{initialization}_opt_{opt}_lr_{learning_rate}.pkl", 'wb'))
         return dictionary_fixed_angles_optimization   
     
 
@@ -230,7 +230,7 @@ def individual_MAXCUT_QAOA_optimization_all_initializations(G_num, n, regularity
     
     dictionary={}
     ps = list(range(1, max_p+1))
-    with open(f'100_regular_graphs_nodes_{n}_reg_{regularity}.pkl', 'rb') as file:
+    with open(f'rudis_100_regular_graphs_nodes_{n}_reg_{regularity}.pkl', 'rb') as file:
         data = pickle.load(file)
 
     G = data[G_num]
@@ -253,7 +253,11 @@ def individual_MAXCUT_QAOA_optimization_all_initializations(G_num, n, regularity
 
 
     
-
+def individual_MAXCUT_QAOA_optimization_single_initialization_multiple_ns(G_num, ns, regularity, max_p, initialization, opt, learning_rate):
+    for n in ns:
+        individual_MAXCUT_QAOA_optimization_single_initialization(G_num, n, regularity, max_p, initialization, opt, learning_rate)
+    
+   
 
 
 
