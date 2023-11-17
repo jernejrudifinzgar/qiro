@@ -592,13 +592,13 @@ class QtensorQAOAExpectationValuesMAXCUT(ExpectationValues):
             self.losses.append(float(self.loss))
             self.param_history.append([x.detach().numpy().copy() for x in (self.gamma, self.beta)])
             
-            if i > 1:
-                if abs((self.losses[-1]-self.losses[-2])/self.losses[-1])<0.001:
-                    counter += 1
-                    if counter == 5: 
-                        break
-                else: 
-                    counter = 0
+            # if i > 1:
+            #     if abs((self.losses[-1]-self.losses[-2])/self.losses[-1])<0.001:
+            #         counter += 1
+            #         if counter == 5: 
+            #             break
+            #     else: 
+            #         counter = 0
 
 
             if self.pbar:
