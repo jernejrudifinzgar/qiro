@@ -2,11 +2,11 @@ import networkx as nx
 import pickle
 
 reg=3
-ns=[4]
-list_graphs=[]
+ns=[100, 150, 200]
 num_graphs=100
 
 for n in ns:
+    list_graphs=[]
     for i in range(num_graphs):
         G=nx.random_regular_graph(reg, n)
         list_graphs.append(G)

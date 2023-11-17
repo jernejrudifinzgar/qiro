@@ -76,12 +76,13 @@ def MAXCUT_QAOA_optimization_individual_initializations(num_graphs, ns, regulari
 
 
 def MAXCUT_QAOA_optimization_all_initializations(graphs, ns, regularity, max_p=3, parallel=True):
+    optimizers_list = ['Adam']#['SGD', 'RMSprop', 'Adam']
+    learning_rates_SGD = [0.0001, 0.0005, 0.001]
+    learning_rates_RMSprop = [0.001, 0.005, 0.01, 0.05]
+    learning_rates_Adam = [0.001, 0.005, 0.01, 0.05]
+   
     if parallel==True:
-        
-        optimizers_list = ['SGD', 'RMSprop', 'Adam']
-        learning_rates_SGD = [0.0001, 0.0005, 0.001]
-        learning_rates_RMSprop = [0.001, 0.005, 0.01, 0.05]
-        learning_rates_Adam = [0.001, 0.005, 0.01, 0.05]
+
         arguments_list=[]
         for n in ns:
             for graph in graphs:
@@ -107,10 +108,30 @@ def MAXCUT_QAOA_optimization_all_initializations(graphs, ns, regularity, max_p=3
         pickle.dump(dictionary, open(f"results_all.pkl", 'wb'))
         print('file saved successfully')
 
+    if parallel==False: 
+
+        for n in ns:
+            for graph in graphs:
+                for optimizer in optimizers_list:
+                    #if optimizer=='SGD':
+                    for lr in f'learning_rates_{optimizer}':
+                        individual_MAXCUT_QAOA_optimization_all_initializations(graph, n, regularity, max_p, optimizer, lr)
+                        
+                        
+                    
+                    
+"""                     elif optimizer=='RMSprop':
+                        for lr in learning_rates_RMSprop:
+                            arguments_list.append((graph, n, regularity, max_p, optimizer, lr))
+                    elif optimizer=='Adam':
+                        for lr in learning_rates_Adam:
+                            arguments_list.append((graph, n, regularity, max_p, optimizer, lr)) """
+
+
 if __name__ == '__main__':
-    graphs=[0, 1, 2, 3, 4]
-    ns=[50, 100, 150, 200]
+    graphs=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    ns=[50]#, 100, 150, 200]
     regularity=3
-    MAXCUT_QAOA_optimization_all_initializations(graphs, ns, regularity)
+    MAXCUT_QAOA_optimization_all_initializations(graphs, ns, regularity, parallel=False)
 
 

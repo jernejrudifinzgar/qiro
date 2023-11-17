@@ -1,7 +1,7 @@
 import sys 
-sys.path.append("../../Qtensor")
-sys.path.append("../../Qtensor/qtree_git")
-sys.path.append("../../")
+sys.path.append("../../../Qtensor")
+sys.path.append("../../../Qtensor/qtree_git")
+sys.path.append("../../../")
 
 from qtensor import ZZQtreeQAOAComposer, ZZQtreeQAOAComposer_MIS, ZZQtreeQAOAComposer_MAXCUT
 from qtensor import QAOAQtreeSimulator, QAOAQtreeSimulator_MIS, QAOAQtreeSimulator_MAXCUT
@@ -21,6 +21,7 @@ import pprint
 from functools import partial
 import random
 import json
+import os
 import itertools
 import matplotlib.pyplot as plt
 import matplotlib
@@ -47,7 +48,7 @@ def random_init(problem, ps, opt, **kwargs):
     elif opt=='RMSprop':
         optimizer=torch.optim.RMSprop
     elif opt=='Adam':
-        optimizer=torch.optim.RMSprop
+        optimizer=torch.optim.Adam
         
     dictionary_random_init={}
     for p in ps:
@@ -92,7 +93,7 @@ def transition_states(problem, ps, opt, **kwargs):
     elif opt=='RMSprop':
         optimizer=torch.optim.RMSprop
     elif opt=='Adam':
-        optimizer=torch.optim.RMSprop
+        optimizer=torch.optim.Adam
     dictionary_transition_states={}
     for p in ps: 
         dictionary_transition_states_sub={}
@@ -165,7 +166,7 @@ def fixed_angles_optimization(problem, regularity, ps, opt, **kwargs):
     elif opt=='RMSprop':
         optimizer=torch.optim.RMSprop
     elif opt=='Adam':
-        optimizer=torch.optim.RMSprop
+        optimizer=torch.optim.Adam
 
     with open('angles_regular_graphs.json', 'r') as file:
         data = json.load(file)
@@ -221,6 +222,9 @@ def individual_MAXCUT_QAOA_optimization_single_initialization(G_num, n, regulari
     
 
 def individual_MAXCUT_QAOA_optimization_all_initializations(G_num, n, regularity, max_p, opt, learning_rate):
+    my_path = os.path.dirname(__file__)
+    my_path = os.path.dirname(my_path)
+    
     dictionary={}
     ps = list(range(1, max_p+1))
     with open(f'100_regular_graphs_nodes_{n}_reg_{regularity}.pkl', 'rb') as file:
@@ -241,7 +245,7 @@ def individual_MAXCUT_QAOA_optimization_all_initializations(G_num, n, regularity
     dictionary['fixed_angles_optimization']=dictionary_fixed_angles_optimization
 
     print(dictionary)
-    pickle.dump(dictionary, open(f"nodes_{n}_reg_{regularity}_graph_{G_num}_opt_{opt}_lr_{learning_rate}.pkl", 'wb'))
+    pickle.dump(dictionary, open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_opt_{opt}_lr_{learning_rate}.pkl", 'wb'))
 
 
     

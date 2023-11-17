@@ -580,6 +580,7 @@ class QtensorQAOAExpectationValuesMAXCUT(ExpectationValues):
         else:
             _pbar = None
 
+        counter = 0
         for i in range(self.steps):
             self.energy_loss()
 
@@ -590,6 +591,16 @@ class QtensorQAOAExpectationValuesMAXCUT(ExpectationValues):
             #self.losses.append(self.loss.detach().numpy().data)
             self.losses.append(float(self.loss))
             self.param_history.append([x.detach().numpy().copy() for x in (self.gamma, self.beta)])
+            
+            if i > 1:
+                if abs((self.losses[-1]-self.losses[-2])/self.losses[-1])<0.001:
+                    counter += 1
+                    if counter == 5: 
+                        break
+                else: 
+                    counter = 0
+
+
             if self.pbar:
                 _pbar.update(1)
         

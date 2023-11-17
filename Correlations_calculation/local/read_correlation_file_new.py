@@ -21,8 +21,7 @@ if __name__ == '__main__':
     instance = 0
 
     
-    with open(f'correlations_MAXCUT_reg_{reg}_nodes_{n}_version_{version}.pkl', 'rb') as file:
-        data_list = pickle.load(file)
+    
 
     #Get number of different instances:
     num_instances = len(data_list)
