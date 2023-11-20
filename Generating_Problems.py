@@ -226,6 +226,15 @@ class MAXCUT(Problem):
         # we define the appropriate position translater
         self.position_translater = [0] + variables
 
+    def evaluate_cuts(self, solution):
+        """Returns the number of cuts found."""
+        number_of_cuts = 0
+        for n1, n2 in self.graph.edges:
+            if solution[n1] * solution[n2] < 0.:
+                number_of_cuts += 1
+        
+        return number_of_cuts
+
     
 
 
