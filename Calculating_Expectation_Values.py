@@ -3,6 +3,8 @@ import numpy as np
 import itertools as it
 import copy
 from scipy.optimize import fsolve
+import sys
+print(sys.path)
 import qtensor
 import torch
 import random
