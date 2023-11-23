@@ -43,6 +43,7 @@ class MAX2SAT(Problem):
         self.generate_formula()
         self.SAT_to_Hamiltonian()
         self.matrix_start = copy.deepcopy(self.matrix)
+        self.type = "M2S"
 
     def generate_formula(self):
         """This generates a random MAX-2-SAT formula."""
@@ -138,6 +139,7 @@ class MIS(Problem):
         self.alpha = alpha
         self.var_list = None
         self.position_translater=None
+        self.type = "MIS"
 
         # compute the matrix (i.e., Hamiltonian) from the graph. Also sets the varlist!
         self.graph_to_matrix()
@@ -192,8 +194,10 @@ class MAXCUT(Problem):
     def __init__(self, graph):
         Problem.__init__(self)
         self.graph = copy.deepcopy(graph)
+        self.original_graph = copy.deepcopy(graph)
         self.var_list = None
         self.position_translater=None
+        self.type = "MAXCUT"
 
         # compute the matrix (i.e., Hamiltonian) from the graph. Also sets the varlist!
         self.graph_to_matrix()
@@ -226,10 +230,11 @@ class MAXCUT(Problem):
         # we define the appropriate position translater
         self.position_translater = [0] + variables
 
+
     def evaluate_cuts(self, solution):
         """Returns the number of cuts found."""
         number_of_cuts = 0
-        for n1, n2 in self.graph.edges:
+        for n1, n2 in self.original_graph.edges:
             if solution[n1] * solution[n2] < 0.:
                 number_of_cuts += 1
         
