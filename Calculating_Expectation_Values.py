@@ -4,6 +4,7 @@ import itertools as it
 import copy
 from scipy.optimize import fsolve
 import qtensor
+from qtensor import TorchQAOAComposer_QUBO
 print('hallo')
 import os
 print('expectationvaluesfile:', os.path.realpath(__file__))
@@ -677,7 +678,7 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
             for j in range(1, i+1):
                 #if self.problem.matrix[i, j] != 0:
                 
-                composer = qtensor.TorchQAOAComposer_QUBO(self.problem.graph, self.problem.matrix, self.problem.position_translater, gamma = self.gamma, beta = self.beta)
+                composer = TorchQAOAComposer_QUBO(self.problem.graph, self.problem.matrix, self.problem.position_translater, gamma = self.gamma, beta = self.beta)
                 if i == j:
                     composer.energy_expectation_lightcone([self.problem.position_translater[i]-1])
 
@@ -692,7 +693,7 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
 
     def energy_loss(self):
         sim = qtensor.QtreeSimulator(backend=self.backend)
-        composer = qtensor.TorchQAOAComposer_QUBO(self.problem.graph, self.problem.matrix, self.problem.position_translater, gamma=self.gamma, beta=self.beta)
+        composer = TorchQAOAComposer_QUBO(self.problem.graph, self.problem.matrix, self.problem.position_translater, gamma=self.gamma, beta=self.beta)
         self.loss = torch.tensor([0.])
         self.E_nodes = {}
 
