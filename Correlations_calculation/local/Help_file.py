@@ -53,7 +53,7 @@ def calculate_correlations_single_instance(reg, n, ps, run):
     dictionary_p_random_init={}
     for p in ps:
         #random initialization
-        expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p)
+        expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, initialization='fixed_angles_optimization', opt=torch.optim.SGD, opt_kwargs={'lr':0.0001})
         expectation_values_qtensor.optimize()
         energy_qtensor = float(expectation_values_qtensor.energy)
         energy_qtensor_random_init.append(energy_qtensor)
@@ -61,6 +61,14 @@ def calculate_correlations_single_instance(reg, n, ps, run):
         dictionary_sub = {}
         dictionary_sub['energy'] = energy_qtensor
         dictionary_sub['correlations'] = expectation_values_qtensor.expect_val_dict.copy()
+        dictionary_sub['losses'] = expectation_values_qtensor.losses.copy()
+
+        fig = plt.figure()
+        x=list(range(1, len(expectation_values_qtensor.losses)+1))
+        plt.plot(x, expectation_values_qtensor.losses)
+        fig.savefig(f'Energies_weighted_MAXCUT_graphs_reg_{reg}_n_{n}_version_{version}.png')
+        plt.close()
+        
         dictionary_p_random_init[f"p={p}"] = dictionary_sub
     dictionary['analytic_single_p'] = dictionary_single.copy()
     dictionary['random_init'] = dictionary_p_random_init.copy()

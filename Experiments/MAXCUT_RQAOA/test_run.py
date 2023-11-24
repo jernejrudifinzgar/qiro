@@ -30,12 +30,13 @@ from RQAOA import RQAOA
 import torch.multiprocessing as mp
 from time import time
 
-def execute_RQAOA_single_instance(n, p):
+def execute_RQAOA_single_instance(n, p, run):
     reg = 3
     seed = 666
-    G = nx.random_regular_graph(reg, n, seed=seed)
+    random.seed()
+    G = nx.random_regular_graph(reg, n)
     problem = Generator.MAXCUT(G)
-    expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p)
+    expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, initialization='fixed_angle_initialization', opt=torch.optim.SGD, opt_kwargs=dict(lr=0.0001))
     RQAOA_qtensor = RQAOA(expectation_values_qtensor, 3, type_of_problem="MAXCUT")
     time_start = time()
     cuts_qtensor, solution_qtensor = RQAOA_qtensor.execute()
@@ -48,7 +49,7 @@ def execute_RQAOA_single_instance(n, p):
         RQAOA_single = RQAOA(expectation_values_single, 3, type_of_problem="MAXCUT")
         cuts_single, solution_single = RQAOA_single.execute()
 
-    f = open(f"results_test_run_n_{n}_p_{p}.txt", "w+")
+    f = open(f"results_test_run_{run}_n_{n}_p_{p}.txt", "w+")
     f.write(f"\nRequired time in seconds for RQAOA: {required_time}")
     f.write(f"\nRequired time in minutes for RQAOA: {required_time/60}")
     f.write(f"\nRequired time in hours for RQAOA: {required_time/3600}")
@@ -61,11 +62,12 @@ def execute_RQAOA_single_instance(n, p):
 
     return cuts_qtensor, solution_qtensor
 
-def execute_RQAOA_multiple_instances(ns, ps):
+def execute_RQAOA_multiple_instances(ns, ps, num_runs):
     arguments_list = []
     for n in ns:
         for p in ps: 
-            arguments_list.append((n, p))
+            for run in range(num_runs):
+                arguments_list.append((n, p, run))
 
     num_processes = len(arguments_list)
     pool = mp.Pool(num_processes)
@@ -75,10 +77,11 @@ def execute_RQAOA_multiple_instances(ns, ps):
         
 if __name__ == '__main__':
     reg = 3
-    ns = [60, 80, 100, 120, 140, 160, 180, 200]
+    ns = [6, 8]#[60, 80, 100, 120, 140, 160, 180, 200]
     seed = 666
-    ps= [1, 2, 3]
+    ps= [1, 2]#, 3]
+    num_runs = 2
     
-    execute_RQAOA_multiple_instances(ns, ps)
+    execute_RQAOA_multiple_instances(ns, ps, num_runs)
 
     

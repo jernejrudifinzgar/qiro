@@ -4,6 +4,7 @@ import itertools as it
 import copy
 from scipy.optimize import fsolve
 import qtensor
+import json
 import torch
 import random
 
@@ -641,18 +642,29 @@ class QtensorQAOAExpectationValuesMAXCUT(ExpectationValues):
 class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
     """Calculation of expectation values via tensor network contraction using Qtensor"""
 
-    def __init__(self, problem, p, pbar=True, gamma=None, beta=None, backend=qtensor.contraction_backends.TorchBackend(), ordering_algo='greedy'):
+    def __init__(self, problem, p, pbar=True, gamma=None, beta=None, initialization='random', regularity=3, opt=torch.optim.RMSprop, opt_kwargs=dict(lr=0.001), backend=qtensor.contraction_backends.TorchBackend(), ordering_algo='greedy'):
         super().__init__(problem)
         random.seed()
 
-        if gamma == None:
-            #gamma=[0.1] * p
-            gamma=[random.uniform(0, 0.5)]*p
+        if initialization=='fixed_angles_optimization':
+            with open('angles_regular_graphs.json', 'r') as file:
+                data = json.load(file)
 
-        if beta == None:
-            #beta=[0.1] * p
-            beta=[random.uniform(0, 0.5)]*p
+            gamma, beta = data[f"{regularity}"][f"{p}"]["gamma"], data[f"{regularity}"][f"{p}"]["beta"]
+            gamma, beta = [value/(-2*np.pi) for value in gamma], [value/(2*np.pi) for value in beta]
+            print('is working')
 
+        else:
+            if gamma == None:
+                #gamma=[0.1] * p
+                gamma=[random.uniform(0, 0.5)]*p
+
+            if beta == None:
+                #beta=[0.1] * p
+                beta=[random.uniform(0, 0.5)]*p
+
+        self.opt = opt
+        self.opt_kwargs = opt_kwargs
         self.pbar=pbar
         self.p = p
         self.backend = backend
@@ -737,9 +749,9 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
         return max_expect_val_location, max_expect_val_sign, max_expect_val
     
 
-    def optimize(self, steps=50, Opt = torch.optim.RMSprop, opt_kwargs=dict(), **kwargs):
+    def optimize(self, steps=50, **kwargs):
         random.seed()
-        opt = Opt(params=(self.gamma, self.beta) , **opt_kwargs)
+        opt = self.opt(params=(self.gamma, self.beta) , **self.opt_kwargs)
         self.peos = self.energy_peo()
         self.expect_val_dict = {}
         max_expect_val_location = None
@@ -757,17 +769,27 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
         else:
             _pbar = None
 
+        counter = 0
         for i in range(self.steps):
             self.energy_loss()
 
             opt.zero_grad()
             self.loss.backward()
             opt.step()
-
-            self.losses.append(self.loss.detach().numpy().data)
+            
+            self.losses.append(float(self.loss))
+            #self.losses.append(self.loss.detach().numpy().data)
             self.param_history.append([x.detach().numpy().copy() for x in (self.gamma, self.beta)])
             if self.pbar:
                 _pbar.update(1)
+
+            if i>1:
+                if abs((self.losses[-1]-self.losses[-2])/self.losses[-1]) < 0.0005:
+                    counter += 1
+                    if counter == 5:
+                        break
+                else:
+                    counter == 0
         
         max_expect_val_location, max_expect_val_sign, max_expect_val = self.create_expect_val_dict()
         self.energy = self.loss

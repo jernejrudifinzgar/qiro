@@ -141,8 +141,8 @@ def MAXCUT_QAOA_optimization_all_initializations(graphs, ns, regularity, max_p=3
                             individual_MAXCUT_QAOA_optimization_all_initializations(graph, n, regularity, max_p, optimizer, lr)
 
 if __name__ == '__main__':
-    graphs=[0] #, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    ns=[50]#, 100, 150, 200]
+    graphs=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    ns=[200]#, 100, 150, 200]
     regularity=3
     #MAXCUT_QAOA_optimization_all_initializations(graphs, ns, regularity, parallel=False)
     MAXCUT_QAOA_optimization_individual_initializations(graphs, ns, regularity, max_p=4, parallel=False)

@@ -120,11 +120,11 @@ def calculate_correlations_multiple_runs(ns, ps, num_runs, parallel = False):
 if __name__ == '__main__':
     version=1
     regs = [3] #, 4]
-    ns = [100]#[50, 100, 150, 200]
+    ns = [50]#[50, 100, 150, 200]
     seed = 666
     #G = nx.random_geometric_graph(30, 0.5)
     #G = nx.gnp_random_graph(n, 0.5, seed = seed)
-    num_runs=10
-    ps=[1, 2, 3]
+    num_runs=1
+    ps=[1, 2]#, 3]
 
-    calculate_correlations_multiple_runs(regs, ns, ps, num_runs, version, parallel=True)
+    calculate_correlations_multiple_runs(regs, ns, ps, num_runs, version, parallel=False)
