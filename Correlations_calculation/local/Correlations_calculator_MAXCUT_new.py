@@ -127,4 +127,8 @@ if __name__ == '__main__':
     num_runs=1
     ps=[1, 2]#, 3]
 
+<<<<<<< HEAD
     calculate_correlations_multiple_runs(regs, ns, ps, num_runs, version, parallel=False)
+=======
+    calculate_correlations_multiple_runs(regs, ns, ps, num_runs, version, parallel=True)
+>>>>>>> 342ede8d4e7ebdd81fcdcd074de07b00881f25cd
