@@ -24,13 +24,12 @@ import random
 import json
 import matplotlib.pyplot as plt
 import matplotlib
-from Help_file import calculate_correlations_multiple_runs
 from IPython.display import set_matplotlib_formats
 __plot_height = 8.919
 matplotlib.rcParams['figure.figsize'] = (1.718*__plot_height, __plot_height)
 set_matplotlib_formats('svg')
 
-"""
+
 def calculate_correlations_single_instance(reg, n, ps, run):
     dictionary = {}
     dictionary_single = {}
@@ -68,7 +67,7 @@ def calculate_correlations_single_instance(reg, n, ps, run):
 
     return [dictionary, energy_single, energy_qtensor_random_init]
 
-def calculate_correlations_multiple_runs(ns, ps, num_runs, parallel = False):
+def calculate_correlations_multiple_runs(regs, ns, ps, num_runs, version, parallel = False):
     colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple']
     dictionary_reg = {}
     for reg in regs:
@@ -77,7 +76,7 @@ def calculate_correlations_multiple_runs(ns, ps, num_runs, parallel = False):
         
             if parallel:
                 pool = mp.Pool(num_runs)
-                results_list = pool.starmap(calculate_correlations_multiple_runs, [(reg, n, ps, i) for i in range(num_runs)])
+                results_list = pool.starmap(calculate_correlations_single_instance, [(reg, n, ps, i) for i in range(num_runs)])
 
             else:
                 results_list = []
@@ -112,19 +111,3 @@ def calculate_correlations_multiple_runs(ns, ps, num_runs, parallel = False):
             print('file saved successfully')
 
         dictionary_reg[reg]=dictionary_n
-
-    #pickle.dump(dictionary_reg, open(f"weighted_graphs_energies_all.pkl", 'wb'))
-    #print('file saved successfully')
-"""
-
-if __name__ == '__main__':
-    version=1
-    regs = [3] #, 4]
-    ns = [100]#[50, 100, 150, 200]
-    seed = 666
-    #G = nx.random_geometric_graph(30, 0.5)
-    #G = nx.gnp_random_graph(n, 0.5, seed = seed)
-    num_runs=10
-    ps=[1, 2, 3]
-
-    calculate_correlations_multiple_runs(regs, ns, ps, num_runs, version, parallel=True)

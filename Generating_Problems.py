@@ -2,6 +2,8 @@ from typing import Any
 import numpy as np
 import itertools as it
 import copy
+import random 
+import time
 
 
 class Matrix():
@@ -191,13 +193,17 @@ class MIS(Problem):
 
 class MAXCUT(Problem):
     """MAXCUT problem generator."""
-    def __init__(self, graph):
+    def __init__(self, graph, weighted=False):
         Problem.__init__(self)
         self.graph = copy.deepcopy(graph)
         self.original_graph = copy.deepcopy(graph)
         self.var_list = None
         self.position_translater=None
-        self.type = "MAXCUT"
+        self.weighted = weighted
+        if self.weighted:
+            self.type = "weighted_MAXCUT"
+        else:
+            self.type = "MAXCUT"
 
         # compute the matrix (i.e., Hamiltonian) from the graph. Also sets the varlist!
         self.graph_to_matrix()
@@ -220,12 +226,23 @@ class MAXCUT(Problem):
         # Filling the matrix (here the type of optimization problem is encoded, MIS in this case)
         # we skip the zeroth index, which is set to 0 by convention
 
+        if self.weighted:
+            weights = [-1, 1]
+            random.seed(time.time())
+            for (u,v) in self.graph.edges():
+                self.graph.edges[u, v]['weight'] = random.choice(weights)
+            self.original_graph = copy.deepcopy(self.graph)
+
         for correlation in self.graph.edges:
             # the first correlation + 1 comes from the fact that graph nodes run from 0...n-1
             # the fact that we add another +1 to the index is because the variables list runs 1....n 
             # and the indices in the matrix run 0...n
             idx1, idx2 = variables.index(correlation[0] + 1) + 1, variables.index(correlation[1] + 1) + 1
-            self.matrixClass.add_off_element(idx1, idx2, 1)
+            if self.weighted:
+                weight = self.graph.edges[correlation[0], correlation[1]]['weight']
+                self.matrixClass.add_off_element(idx1, idx2, weight)
+            else:
+                self.matrixClass.add_off_element(idx1, idx2, 1)
 
         # we define the appropriate position translater
         self.position_translater = [0] + variables
