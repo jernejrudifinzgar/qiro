@@ -1,7 +1,12 @@
 import sys 
+import os
 sys.path.append("../../Qtensor")
 sys.path.append("../../Qtensor/qtree_git")
 sys.path.append("../..")
+
+#print(os.path.abspath(os.curdir))
+#print(os.chdir("../../Qtensor"))
+#print(os.path.abspath(os.curdir))
 
 from qtensor import ZZQtreeQAOAComposer, ZZQtreeQAOAComposer_MIS, ZZQtreeQAOAComposer_MAXCUT
 from qtensor import QAOAQtreeSimulator, QAOAQtreeSimulator_MIS, QAOAQtreeSimulator_MAXCUT
@@ -72,7 +77,7 @@ if __name__ == '__main__':
     reg = 3
     ns = [60, 80, 100, 120, 140, 160, 180, 200]
     seed = 666
-    ps= [1, 2, 3]
+    ps= [1]#, 2, 3]
     
     execute_RQAOA_multiple_instances(ns, ps)
 
