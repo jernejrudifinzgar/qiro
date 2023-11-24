@@ -77,7 +77,7 @@ if __name__ == '__main__':
     reg = 3
     ns = [60, 80, 100, 120, 140, 160, 180, 200]
     seed = 666
-    ps= [1]#, 2, 3]
+    ps= [1, 2, 3]
     
     execute_RQAOA_multiple_instances(ns, ps)
 
