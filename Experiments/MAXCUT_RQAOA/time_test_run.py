@@ -36,7 +36,7 @@ def execute_RQAOA_single_instance(n, p, run):
     random.seed()
     G = nx.random_regular_graph(reg, n)
     problem = Generator.MAXCUT(G)
-    expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, initialization='fixed_angle_initialization', opt=torch.optim.SGD, opt_kwargs=dict(lr=0.0001))
+    expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, initialization='fixed_angles_initialization', opt=torch.optim.SGD, opt_kwargs=dict(lr=0.0001))
     RQAOA_qtensor = RQAOA(expectation_values_qtensor, 3, type_of_problem="MAXCUT")
     time_start = time()
     cuts_qtensor, solution_qtensor = RQAOA_qtensor.execute()
@@ -77,10 +77,10 @@ def execute_RQAOA_multiple_instances(ns, ps, num_runs):
         
 if __name__ == '__main__':
     reg = 3
-    ns = [6, 8]#[60, 80, 100, 120, 140, 160, 180, 200]
+    ns = [60, 80, 100, 120, 140, 160, 180, 200]
     seed = 666
-    ps= [1, 2]#, 3]
-    num_runs = 2
+    ps= [1, 2, 3]
+    num_runs = 4
     
     execute_RQAOA_multiple_instances(ns, ps, num_runs)
 

@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     version = 3
     reg = 3
-    n = 50
+    n = 200
     ps = [1, 2, 3]
     num_runs = 10
     instance = 0

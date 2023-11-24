@@ -784,7 +784,7 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
                 _pbar.update(1)
 
             if i>1:
-                if abs((self.losses[-1]-self.losses[-2])/self.losses[-1]) < 0.0005:
+                if abs((self.losses[-1]-self.losses[-2])/self.losses[-1]) < 0.00025:
                     counter += 1
                     if counter == 5:
                         break

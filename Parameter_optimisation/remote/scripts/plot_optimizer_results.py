@@ -206,7 +206,7 @@ def plot_losses__different_opt_init_n_50(ns, ps, regularity, graphs):
     arguments = [
                 #[0.01, 'Adam', 'fixed_angles_optimization'],
                 #[0.05, 'Adam', 'random_init'],
-                [0.05, 'Adam', 'transition_states'], 
+                #[0.05, 'Adam', 'transition_states'], 
                 #[0.001, 'RMSprop', 'fixed_angles_optimization'], 
                 #[0.005, 'RMSprop', 'random_init'], 
                 #[0.01, 'RMSprop', 'transition_states'],
@@ -226,9 +226,9 @@ def plot_losses__different_opt_init_n_50(ns, ps, regularity, graphs):
                 fig = plt.figure()
                 fig.suptitle(f'Losses for different initializations with optimized optimizers for p={p} for graphs with n = {n} and reg = {regularity}')
 
-                with open(my_path + f'/data/nodes_{n}_reg_{regularity}_graph_{graph}_opt_SGD_lr_{0.0001}.pkl', 'rb') as file:
+                with open(my_path + f'/data/nodes_{n}_reg_{regularity}_graph_{graph}_initialization_fixed_angles_optimization_opt_SGD_lr_{0.0001}.pkl', 'rb') as file:
                     data = pickle.load(file)
-                energy_single = data['analytic_single_p']['energy']
+                #energy_single = data['analytic_single_p']['energy']
                 #plt.scatter([1], energy_single, color=colors[0], label=f'Grid search with analytic expression')
 
                 counter = 1
@@ -264,7 +264,7 @@ def plot_losses__different_opt_init_n_50(ns, ps, regularity, graphs):
 
                         losses_short.append(loss)
                         if len(losses_short)>1:
-                            if abs((losses_short[-1]-losses_short[-2])/losses_short[-1]) < 0.005:
+                            if abs((losses_short[-1]-losses_short[-2])/losses_short[-1]) < 0.00025:
                                 counter_losses += 1
                                 if counter_losses == 5:
                                     break
@@ -275,7 +275,7 @@ def plot_losses__different_opt_init_n_50(ns, ps, regularity, graphs):
                     plt.plot(x, losses, color=colors[counter], label=f'{argument[2]} with {argument[1]} and lr={argument[0]} optimization')
                     counter += 1
 
-                    if len(arguments)==2:
+                    if len(arguments)==1:
                         if initialization == 'transition_states':
                             plt.text(x[-1], losses[-1], losses[-1], ha='left', va='bottom')
                             plt.text(x_short[-1], losses_short[-1]*(1-0.02), losses_short[-1], ha='center', va='bottom')
@@ -295,7 +295,7 @@ def plot_losses__different_opt_init_n_50(ns, ps, regularity, graphs):
                 plt.legend(loc='upper right', bbox_to_anchor=(1,1))
                 plt.subplots_adjust(hspace=0.4)
                 fig.savefig(my_path + f'/graphs/Losses_reg_{regularity}_n_{n}_graph_{graph}_p_{p}_different_optimized_initializations.png')
-                #plt.show()
+                plt.show()
                 plt.close()
 
         
@@ -304,7 +304,7 @@ graphs=[i for i in range(10)]
 ns=[50]#, 100, 150, 200]
 regularity=3
 optimizers_list = ['SGD', 'RMSprop', 'Adam']
-ps = [2, 3]
+ps = [3]
 
 learning_rates_SGD = [0.0001, 0.0005, 0.001]
 learning_rates_RMSprop = [0.001, 0.005, 0.01, 0.05]
@@ -318,11 +318,11 @@ regularity=3
 optimizers_list = ['SGD', 'RMSprop']
 """
 
-graphs=[0, 1, 2, 3, 4, 5, 6]
+graphs=[14, 19, 23, 35, 47, 54, 64]
 optimizers_list = ['Adam']
 
 if __name__ == '__main__':
     #plot_energy_optimizer_different_lr(ns, regularity, graphs, optimizers_list, initializers_list)
     #plot_losses_optimizer_different_lr(ns, regularity, graphs, optimizers_list, initializers_list)
-    plot_energy__different_opt_init_n_50([50], ps, regularity, graphs)
-    plot_losses__different_opt_init_n_50([50], ps, regularity, graphs)
+    #plot_energy__different_opt_init_n_50([200], ps, regularity, graphs)
+    plot_losses__different_opt_init_n_50([200], ps, regularity, graphs)
