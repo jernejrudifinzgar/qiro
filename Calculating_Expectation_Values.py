@@ -4,6 +4,9 @@ import itertools as it
 import copy
 from scipy.optimize import fsolve
 import qtensor
+print('hallo')
+import os
+print('expectationvaluesfile:', os.path.realpath(__file__))
 import torch
 import random
 
