@@ -28,6 +28,7 @@ import pprint
 from functools import partial
 import random
 import json
+import pickle
 import matplotlib.pyplot as plt
 from RQAOA import RQAOA
 import torch.multiprocessing as mp
@@ -38,8 +39,14 @@ def execute_RQAOA_single_instance(n, p, run):
     my_path = os.path.dirname(my_path)
     reg = 3
     seed = 666
-    random.seed()
-    G = nx.random_regular_graph(reg, n)
+    #random.seed()
+    #G = nx.random_regular_graph(reg, n)
+
+    with open(f'rudis_100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
+        data = pickle.load(file)
+
+    G = data[run]
+
     problem = Generator.MAXCUT(G)
     expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, initialization='fixed_angles_initialization', opt=torch.optim.SGD, opt_kwargs=dict(lr=0.0001))
     RQAOA_qtensor = RQAOA(expectation_values_qtensor, 3, type_of_problem="MAXCUT")
