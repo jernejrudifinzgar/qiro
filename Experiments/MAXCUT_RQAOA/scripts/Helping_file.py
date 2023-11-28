@@ -1,8 +1,11 @@
 import sys 
 import os
-sys.path.append("../../Qtensor")
-sys.path.append("../../Qtensor/qtree_git")
-sys.path.append("../..")
+import resource
+#from memory_profiler import profile
+
+sys.path.append("../../../Qtensor")
+sys.path.append("../../../Qtensor/qtree_git")
+sys.path.append("../../..")
 
 #print(os.path.abspath(os.curdir))
 #print(os.chdir("../../Qtensor"))
@@ -31,6 +34,8 @@ import torch.multiprocessing as mp
 from time import time
 
 def execute_RQAOA_single_instance(n, p, run):
+    my_path = os.path.dirname(__file__)
+    my_path = os.path.dirname(my_path)
     reg = 3
     seed = 666
     random.seed()
@@ -49,7 +54,7 @@ def execute_RQAOA_single_instance(n, p, run):
         RQAOA_single = RQAOA(expectation_values_single, 3, type_of_problem="MAXCUT")
         cuts_single, solution_single = RQAOA_single.execute()
 
-    f = open(f"results_test_run_{run}_n_{n}_p_{p}.txt", "w+")
+    f = open(my_path + f"/data/results_test_run_{run}_n_{n}_p_{p}.txt", "w+")
     f.write(f"\nRequired time in seconds for RQAOA: {required_time}")
     f.write(f"\nRequired time in minutes for RQAOA: {required_time/60}")
     f.write(f"\nRequired time in hours for RQAOA: {required_time/3600}")
@@ -62,6 +67,7 @@ def execute_RQAOA_single_instance(n, p, run):
 
     return cuts_qtensor, solution_qtensor
 
+#@profile
 def execute_RQAOA_multiple_instances(ns, ps, num_runs):
     arguments_list = []
     for n in ns:
@@ -74,14 +80,3 @@ def execute_RQAOA_multiple_instances(ns, ps, num_runs):
     results = pool.starmap(execute_RQAOA_single_instance, arguments_list)
 
     return results
-        
-if __name__ == '__main__':
-    reg = 3
-    ns = [60, 80, 100, 120, 140, 160, 180, 200]
-    seed = 666
-    ps= [1, 2, 3]
-    num_runs = 4
-    
-    execute_RQAOA_multiple_instances(ns, ps, num_runs)
-
-    
