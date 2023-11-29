@@ -39,13 +39,62 @@ def execute_RQAOA_single_instance(n, p, run):
     my_path = os.path.dirname(my_path)
     reg = 3
     seed = 666
-    #random.seed()
-    #G = nx.random_regular_graph(reg, n)
 
-    with open(f'rudis_100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
-        data = pickle.load(file)
+    ns_graphs = list(range(60, 220, 20))
 
-    G = data[run]
+    if n in ns_graphs:
+        with open(f'rudis_100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
+            data = pickle.load(file)
+        G = data[run]
+    else: 
+        random.seed()
+        G = nx.random_regular_graph(reg, n)
+
+    problem = Generator.MAXCUT(G)
+    expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, initialization='fixed_angles_initialization', opt=torch.optim.SGD, opt_kwargs=dict(lr=0.0001))
+    RQAOA_qtensor = RQAOA(expectation_values_qtensor, 3, type_of_problem="MAXCUT")
+    time_start = time()
+    cuts_qtensor, solution_qtensor = RQAOA_qtensor.execute()
+    time_end = time()
+    required_time = time_end-time_start
+    
+    if p==1:
+        problem = Generator.MAXCUT(G)
+        expectation_values_single = SingleLayerQAOAExpectationValues(problem)
+        RQAOA_single = RQAOA(expectation_values_single, 3, type_of_problem="MAXCUT")
+        cuts_single, solution_single = RQAOA_single.execute()
+
+    f = open(my_path + f"/data/results_test_run_{run}_n_{n}_p_{p}.txt", "w+")
+    f.write(f"\nRequired time in seconds for RQAOA: {required_time}")
+    f.write(f"\nRequired time in minutes for RQAOA: {required_time/60}")
+    f.write(f"\nRequired time in hours for RQAOA: {required_time/3600}")
+    f.write(f"\nCalculated number of cuts with tensor networks: {cuts_qtensor}")
+    f.write(f"\nCalculated solution with tensor networks: {solution_qtensor}")
+    if p==1:
+        f.write(f"\nCalculated number of cuts with analytic method:: {cuts_single}")
+        f.write(f"\nCalculated solution with analytic method: {solution_single}")
+    f.close()
+
+    return cuts_qtensor, solution_qtensor
+
+def execute_RQAOA_single_instance_m_steps(n, p, run, m):
+    my_path = os.path.dirname(__file__)
+    my_path = os.path.dirname(my_path)
+    reg = 3
+    seed = 666
+
+    ns_graphs = list(range(60, 220, 20))
+    print(ns_graphs)
+
+    if n in ns_graphs:
+        with open(f'rudis_100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
+            data = pickle.load(file)
+        G = data[run]
+    else: 
+        random.seed()
+        G = nx.random_regular_graph(reg, n)
+
+
 
     problem = Generator.MAXCUT(G)
     expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, initialization='fixed_angles_initialization', opt=torch.optim.SGD, opt_kwargs=dict(lr=0.0001))

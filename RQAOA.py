@@ -161,6 +161,15 @@ class RQAOA(QIRO):
             if n != self.problem.position_translater[exp_value_coeff[0]]-1:
                 self.problem.graph.add_edge(n, self.problem.position_translater[exp_value_coeff[0]]-1)
 
+        max_connectivity = 0
+        for node in self.problem.graph.nodes():
+            neighbors = self.problem.graph.neighbors(node)
+            connectivity = len(list(neighbors))
+            if connectivity>max_connectivity:
+                max_connectivity=connectivity
+        
+        print(f'Max connectivity of graph with {len(self.problem.matrix)-1} nodes: ', max_connectivity)
+
 
     def calc_complete_solution(self, brute_forced_solution):
         """
