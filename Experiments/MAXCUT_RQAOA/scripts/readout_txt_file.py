@@ -11,7 +11,7 @@ import numpy as np
 
 ns = [60, 80, 100, 120, 140, 160, 180, 200]
 ps= [1, 2, 3]
-num_runs = 0
+runs = [1]
 
 colors=['tab:blue', 'tab:orange', 'tab:green']#, 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive']
 
@@ -22,8 +22,7 @@ my_path = os.path.dirname(__file__)
 my_path = os.path.dirname(my_path)
 for n in ns:
     for p in ps:
-        for run in range(num_runs+1):
-            print(p_times)
+        for run in runs:
             try:
                 file = open (my_path + f"/data/results_test_run_{run}_n_{n}_p_{p}.txt")
                 lines = file.readlines()
@@ -63,7 +62,7 @@ p_times_dict = {'p=1': p_times[0],
                 'p=2': p_times[1],
                 'p=3': p_times[2]}
     
-fig = plt.figure()
+#fig, ax = plt.subplots(layout='constrained')
 
 for p, time in p_times_dict.items():
     offset = width * multiplier
@@ -71,6 +70,9 @@ for p, time in p_times_dict.items():
     plt.bar_label(rects, padding=3)
     multiplier += 1
 
+plt.xticks([r + ])
+
+#ax.set_ylim(bottom=0)
 plt.show()
 
 

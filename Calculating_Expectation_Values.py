@@ -721,6 +721,7 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
 
 
     def create_expect_val_dict(self):
+        self.expect_val_dict={}
         max_expect_val = 0
         for i in range(1, len(self.problem.matrix)):
             for j in range(1, i+1):
@@ -730,6 +731,7 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
                         self.expect_val_dict[frozenset({i})] = energy
                     else:
                         self.expect_val_dict[frozenset({j, i})] = energy
+                        
                 
                     if abs(energy) > max_expect_val:
                         max_expect_val = abs(energy)
