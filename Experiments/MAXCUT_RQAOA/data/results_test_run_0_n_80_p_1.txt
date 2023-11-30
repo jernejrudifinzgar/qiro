@@ -1,16 +1,16 @@
 
-Required time in seconds for RQAOA: 1233.3992943763733
-Required time in minutes for RQAOA: 20.55665490627289
-Required time in hours for RQAOA: 0.34261091510454816
-Calculated number of cuts with tensor networks: 110
-Calculated solution with tensor networks: [  1  -2  -3  -4  -5   6   7  -8   9 -10 -11 -12  13 -14  15  16  17 -18
- -19 -20 -21 -22 -23  24 -25 -26  27  28  29  30  31  32  33  34 -35 -36
- -37  38 -39  40  41  42  43  44  45  46  47 -48 -49  50  51 -52 -53 -54
- -55  56  57  58  59 -60  61 -62 -63 -64 -65  66 -67  68 -69 -70 -71  72
-  73 -74  75 -76  77 -78  79 -80]
-Calculated number of cuts with analytic method:: 108
-Calculated solution with analytic method: [ -1  -2  -3  -4  -5   6   7   8   9 -10 -11 -12  13 -14  15  16  17  18
- -19  20  21  22 -23  24 -25 -26 -27  28  29  30  31  32  33 -34 -35 -36
- -37 -38 -39  40  41  42  43  44  45 -46  47 -48 -49  50 -51 -52 -53 -54
- -55  56  57 -58 -59 -60  61 -62  63 -64 -65  66 -67  68 -69 -70 -71  72
-  73 -74  75 -76  77  78 -79 -80]
+Required time in seconds for RQAOA: 1755.0231721401215
+Required time in minutes for RQAOA: 29.250386202335356
+Required time in hours for RQAOA: 0.4875064367055893
+Calculated number of cuts with tensor networks: 107
+Calculated solution with tensor networks: [ -1   2   3  -4  -5   6   7   8  -9 -10 -11  12 -13  14  15 -16  17 -18
+  19 -20  21  22 -23 -24  25  26 -27  28  29  30  31  32 -33  34 -35  36
+  37 -38  39 -40 -41  42  43  44  45 -46 -47  48 -49 -50 -51 -52  53 -54
+ -55  56 -57 -58  59  60  61 -62  63 -64 -65  66  67  68  69 -70 -71 -72
+ -73 -74 -75 -76  77 -78 -79 -80]
+Calculated number of cuts with analytic method:: 105
+Calculated solution with analytic method: [ -1  -2  -3   4   5  -6   7  -8   9  10  11 -12  13  14 -15  16  17  18
+ -19  20 -21 -22  23  24 -25 -26  27 -28 -29 -30 -31 -32 -33  34  35 -36
+  37  38 -39  40  41 -42 -43  44 -45  46  47 -48 -49  50  51  52 -53 -54
+ -55 -56  57  58 -59 -60 -61 -62 -63 -64  65 -66 -67 -68 -69  70  71  72
+  73  74  75 -76  77  78  79 -80]
