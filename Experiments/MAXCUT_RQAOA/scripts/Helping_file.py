@@ -113,7 +113,7 @@ def execute_RQAOA_single_instance_recalculation(n, p, run, recalculation):
 
     problem = Generator.MAXCUT(G)
     expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, initialization='fixed_angles_initialization', opt=torch.optim.SGD, opt_kwargs=dict(lr=0.0001))
-    RQAOA_qtensor = RQAOA_recalculate(expectation_values_qtensor, 3, recalculations=recalculation, type_of_problem="MAXCUT")
+    RQAOA_qtensor = RQAOA_recalculate(expectation_values_qtensor, 5, recalculations=recalculation, type_of_problem="MAXCUT")
     time_start = time()
     cuts_qtensor, solution_qtensor = RQAOA_qtensor.execute()
     time_end = time()
