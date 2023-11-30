@@ -169,7 +169,7 @@ def execute_RQAOA_parallel_recalculation(ns, ps, runs, recalculation):
         for run in runs:
             arguments_list.append((ns, p, run, recalculation))
     
-    pool = mp.pool(len(arguments_list))
+    pool = mp.Pool(len(arguments_list))
     pool.starmap(execute_RQAOA_multiple_instances_different_n, arguments_list)
 
 
