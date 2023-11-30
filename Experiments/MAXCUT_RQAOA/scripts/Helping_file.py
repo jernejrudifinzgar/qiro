@@ -47,8 +47,8 @@ def execute_RQAOA_single_instance(n, p, run):
             data = pickle.load(file)
         G = data[run]
     else: 
-        random.seed()
-        G = nx.random_regular_graph(reg, n)
+        #random.seed()
+        G = nx.random_regular_graph(reg, n, seed = 666)
 
     problem = Generator.MAXCUT(G)
     expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, initialization='fixed_angles_initialization', opt=torch.optim.SGD, opt_kwargs=dict(lr=0.0001))
@@ -108,8 +108,8 @@ def execute_RQAOA_single_instance_recalculation(n, p, run, recalculation):
             data = pickle.load(file)
         G = data[run]
     else: 
-        random.seed()
-        G = nx.random_regular_graph(reg, n)
+        #random.seed()
+        G = nx.random_regular_graph(reg, n, seed=666)
 
     problem = Generator.MAXCUT(G)
     expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, initialization='fixed_angles_initialization', opt=torch.optim.SGD, opt_kwargs=dict(lr=0.0001))
@@ -142,7 +142,6 @@ def execute_RQAOA_single_instance_recalculation(n, p, run, recalculation):
 
     pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_recalc_{recalculation}.pkl", 'wb'))
 
-
     return cuts_qtensor, solution_qtensor
 
 def execute_RQAOA_multiple_instances_recalculation(ns, ps, num_runs, recalculation):
@@ -158,9 +157,22 @@ def execute_RQAOA_multiple_instances_recalculation(ns, ps, num_runs, recalculati
 
     return results
 
+
 def execute_RQAOA_multiple_instances_different_n(ns, p, run, recalculation):
     for n in ns: 
         execute_RQAOA_single_instance_recalculation(n, p, run, recalculation)
+
+
+def execute_RQAOA_parallel_recalculation(ns, ps, runs, recalculation):
+    arguments_list = []
+    for p in ps:
+        for run in runs:
+            arguments_list.append(ns, p, run, recalculation)
+    
+    pool = mp.pool(len(arguments_list))
+    pool.starmap(execute_RQAOA_multiple_instances_different_n, arguments_list)
+
+
 
 def execute_RQAOA_multiple_instances_recalculation(ns, ps, num_runs, recalculation):
     arguments_list = []
