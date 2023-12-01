@@ -37,14 +37,14 @@ from Helping_file import *
         
 if __name__ == '__main__':
     reg = 3
-    ns = [20]#[60, 80, 100, 120, 140, 160, 180, 200]
+    ns = [60, 100]#, 140, 180]
     seed = 666
-    ps= [1]#, 3]#, 2]#, 3]
-    num_runs = 1
-    print(execute_RQAOA_single_instance_recalculation(ns[0], ps[0], num_runs, 1))
-    print(execute_RQAOA_single_instance(ns[0], ps[0], num_runs))
-
+    ps= [1, 2, 3]
+    #num_runs = 10
+    runs=list(range(5, 10, 1))
+    #execute_RQAOA_single_instance(ns[0], ps[0], num_runs)
     #execute_RQAOA_multiple_instances(ns, ps, num_runs)
+    execute_RQAOA_parallel_recalculation(ns, ps, runs, 6)
 
     print(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
     print(resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss)
