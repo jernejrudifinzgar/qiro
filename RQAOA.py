@@ -38,6 +38,7 @@ class RQAOA(QIRO):
         self.solution = []
         self.fixed_correlations = []
         self.type_of_problem = type_of_problem
+        self.energies_list = []
 
 
     def execute(self):
@@ -49,11 +50,13 @@ class RQAOA(QIRO):
             self.solution (numpy.ndarray): The found solution as an array of variable assignments.
         """
         # Iterate through nq steps of RQAOA, where nq is the number of quantum variables
+        energies_list = []
         for step in range(self.nq):
             print(f"RQAOA Step: {step + 1}")
 
             # Optimize to find the expectation values, and determine which correlation to fix
             exp_value_coeff, exp_value_sign, max_exp_value = self.expectation_values.optimize()
+            self.energies_list.append(self.expectation_values.energy)
             # Store the fixed correlation for later use in solution reconstruction
             self.fixed_correlations.append([exp_value_coeff, int(exp_value_sign), max_exp_value])
 
@@ -163,13 +166,16 @@ class RQAOA(QIRO):
                 self.problem.graph.add_edge(n, self.problem.position_translater[exp_value_coeff[0]]-1)
 
         max_connectivity = 0
+        list_connectivity = []
         for node in self.problem.graph.nodes():
             neighbors = self.problem.graph.neighbors(node)
             connectivity = len(list(neighbors))
+            list_connectivity.append(connectivity)
             if connectivity>max_connectivity:
                 max_connectivity=connectivity
         
         print(f'Max connectivity of graph with {len(self.problem.matrix)-1} nodes: ', max_connectivity)
+        print('Connectivity:', list_connectivity)
 
 
     def calc_complete_solution(self, brute_forced_solution):
@@ -422,13 +428,16 @@ class RQAOA_recalculate(QIRO):
                 self.problem.graph.add_edge(n, self.problem.position_translater[exp_value_coeff[0]]-1)
 
         max_connectivity = 0
+        list_connectivity = []
         for node in self.problem.graph.nodes():
             neighbors = self.problem.graph.neighbors(node)
             connectivity = len(list(neighbors))
+            list_connectivity.append(connectivity)
             if connectivity>max_connectivity:
                 max_connectivity=connectivity
         
         print(f'Max connectivity of graph with {len(self.problem.matrix)-1} nodes: ', max_connectivity)
+        print('Connectivity:', list_connectivity)
 
 
     def calc_complete_solution(self, brute_forced_solution):

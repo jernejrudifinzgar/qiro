@@ -37,14 +37,15 @@ from Helping_file import *
         
 if __name__ == '__main__':
     reg = 3
-    ns = [60, 100]#, 140, 180]
+    ns = [30]#, 140, 180]
     seed = 666
     ps= [1, 2, 3]
     #num_runs = 10
-    runs=list(range(5, 10, 1))
+    runs=list(range(0, 5, 1))
+    version=1
     #execute_RQAOA_single_instance(ns[0], ps[0], num_runs)
     #execute_RQAOA_multiple_instances(ns, ps, num_runs)
-    execute_RQAOA_parallel_recalculation(ns, ps, runs, 6)
+    execute_RQAOA_parallel_recalculation(ns, ps, runs, 3, version)
 
     print(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
     print(resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss)
