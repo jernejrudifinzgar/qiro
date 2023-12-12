@@ -10,18 +10,8 @@ matplotlib.rcParams['figure.figsize'] = (1.718*__plot_height, __plot_height)
 set_matplotlib_formats('svg')
 import numpy as np
 
-ns = [60, 80, 100, 120, 140, 160, 180, 200]
-ps= [1, 2, 3]
-recalculation = 6
-regularity = 3
-runs = list(range(10))
 
-colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive']
-
-my_path = os.path.dirname(__file__)
-my_path = os.path.dirname(my_path)
-
-def plot_cuts_recalculation(ns, ps, runs, recalculation, regularity):
+def plot_cuts_recalculation(ns, ps, runs, recalculation, regularity, version):
     for n in ns:
         list_exact = []
         list_x = []
@@ -45,7 +35,7 @@ def plot_cuts_recalculation(ns, ps, runs, recalculation, regularity):
             for run in runs:
                 try:
                     #with open (my_path + f"/data/results_run_{run}_n_{n}_p_{p}.pkl", 'rb') as f:
-                    with open (my_path + f"/data/results_run_{run}_n_{n}_p_{p}_recalc_{recalculation}.pkl", 'rb') as f:
+                    with open (my_path + f"/data/results_run_{run}_n_{n}_p_{p}_recalc_{recalculation}_version_{version}.pkl", 'rb') as f:
                         data = pickle.load(f)
                     cuts_qtensor = data['cuts_qtensor']
                     list_qtensor_cuts.append(cuts_qtensor)
@@ -78,7 +68,7 @@ def plot_cuts_recalculation(ns, ps, runs, recalculation, regularity):
     
 
 
-def plot_cuts_wo_recalculation(ns, ps, runs, recalculation, regularity):
+def plot_cuts_wo_recalculation(ns, ps, runs, recalculation, regularity, version):
     for n in ns:
         list_exact = []
         list_x = []
@@ -106,7 +96,7 @@ def plot_cuts_wo_recalculation(ns, ps, runs, recalculation, regularity):
 
             for run in runs:
                 try: 
-                    with open (my_path + f"/data/results_test_run_{run}_n_{n}_p_{p}.txt") as f:
+                    with open (my_path + f"/data/results_test_run_{run}_n_{n}_p_{p}_version_{version}.txt") as f:
                         lines = f.readlines()
                     # if p==1:
                     #     for line in lines:
@@ -164,4 +154,18 @@ def plot_cuts_wo_recalculation(ns, ps, runs, recalculation, regularity):
         #plt.show()
         plt.close()
 
-plot_cuts_wo_recalculation(ns, ps, runs, recalculation, regularity)
+
+if __name__ == '__main__':
+    ns = [30] #[60, 80, 100, 120, 140, 160, 180, 200]
+    ps= [1, 2, 3]
+    recalculations = [3, 6]
+    regularity = 3
+    runs = list(range(20))
+    version = 1
+
+    colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive']
+
+    my_path = os.path.dirname(__file__)
+    my_path = os.path.dirname(my_path)
+
+plot_cuts_wo_recalculation(ns, ps, runs, recalculations, regularity, version)

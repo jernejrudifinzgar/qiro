@@ -3,6 +3,7 @@ from QIRO import QIRO
 import copy
 import networkx as nx
 from operator import itemgetter
+import os
 
 class RQAOA(QIRO):
     """
@@ -22,7 +23,7 @@ class RQAOA(QIRO):
         type_of_problem (str, optional): The type of the optimization problem to solve. Currently supports "MAX_2_SAT" and "MIS" (Maximum Independent Set). Default is "MAX_2_SAT".
     """
 
-    def __init__(self, expectation_values_input, nc, type_of_problem="MAX_2_SAT"):
+    def __init__(self, expectation_values_input, nc, type_of_problem="MAX_2_SAT", connectivity_output=False):
         """
         Initializes the RQAOA instance.
         
@@ -39,6 +40,7 @@ class RQAOA(QIRO):
         self.fixed_correlations = []
         self.type_of_problem = type_of_problem
         self.energies_list = []
+        self.connectivity_output = connectivity_output
 
 
     def execute(self):
@@ -174,8 +176,14 @@ class RQAOA(QIRO):
             if connectivity>max_connectivity:
                 max_connectivity=connectivity
         
-        print(f'Max connectivity of graph with {len(self.problem.matrix)-1} nodes: ', max_connectivity)
-        print('Connectivity:', list_connectivity)
+        if self.connectivity_output:
+            #print(f'Max connectivity of graph with {len(self.problem.matrix)-1} nodes: ', max_connectivity)
+            #print('Connectivity:', list_connectivity)
+        
+            f = open(f"connectivity_n_{len(self.problem.original_graph.nodes())}_p_{self.expectation_values.p}.txt", "a")
+            f.write(f"\n\nMax connectivity of graph with {len(self.problem.matrix)-1} nodes: {max_connectivity}")
+            f.write(f"\nConnectivity all nodes: {list_connectivity}")
+            f.close()
 
 
     def calc_complete_solution(self, brute_forced_solution):

@@ -70,7 +70,7 @@ for p, time in p_times_dict.items():
     plt.bar_label(rects, padding=3)
     multiplier += 1
 
-plt.xticks([r + ])
+#plt.xticks([r + ])
 
 #ax.set_ylim(bottom=0)
 plt.show()
