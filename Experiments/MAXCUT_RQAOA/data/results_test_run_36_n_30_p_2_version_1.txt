@@ -1,0 +1,7 @@
+
+Required time in seconds for RQAOA: 5895.648726940155
+Required time in minutes for RQAOA: 98.26081211566925
+Required time in hours for RQAOA: 1.637680201927821
+Calculated number of cuts with tensor networks: 39
+Calculated solution with tensor networks: [  1   2   3   4  -5  -6  -7   8   9  10 -11 -12 -13  14 -15  16 -17 -18
+ -19  20 -21 -22 -23  24  25  26 -27 -28  29  30]
