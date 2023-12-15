@@ -57,7 +57,7 @@ def execute_RQAOA_single_instance(n, p, run, version, connectivity_output=False)
         G = nx.random_regular_graph(reg, n)
 
     problem = Generator.MAXCUT(G)
-    expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, initialization='fixed_angles_initialization', opt=torch.optim.SGD, opt_kwargs=dict(lr=0.0001))
+    expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, initialization='fixed_angles_optimization', opt=torch.optim.SGD, opt_kwargs=dict(lr=0.0001))
     RQAOA_qtensor = RQAOA(expectation_values_qtensor, 5, type_of_problem="MAXCUT", connectivity_output=connectivity_output)
     time_start = time()
     cuts_qtensor, solution_qtensor = RQAOA_qtensor.execute()
@@ -66,7 +66,7 @@ def execute_RQAOA_single_instance(n, p, run, version, connectivity_output=False)
     solution_dict = {}
     solution_dict['cuts_qtensor'] = cuts_qtensor
     solution_dict['solution_qtensor'] = solution_qtensor
-    solution_dict['energies'] = RQAOA_qtensor.energies_list
+    solution_dict['energies_qtensor'] = RQAOA_qtensor.energies_list
     
     if p==1:
         problem = Generator.MAXCUT(G)
@@ -75,6 +75,7 @@ def execute_RQAOA_single_instance(n, p, run, version, connectivity_output=False)
         cuts_single, solution_single = RQAOA_single.execute()
         solution_dict['cuts_single']=cuts_single
         solution_dict['solution_single']=solution_single
+        solution_dict['energies_qtensor'] = RQAOA_qtensor.energies_list
 
     f = open(my_path + f"/data/results_test_run_{run}_n_{n}_p_{p}_version_{version}.txt", "w+")
     f.write(f"\nRequired time in seconds for RQAOA: {required_time}")
@@ -127,7 +128,7 @@ def execute_RQAOA_single_instance_recalculation(n, p, run, recalculation, versio
         G = nx.random_regular_graph(reg, n)
 
     problem = Generator.MAXCUT(G)
-    expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, initialization='fixed_angles_initialization', opt=torch.optim.SGD, opt_kwargs=dict(lr=0.0001))
+    expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, initialization='fixed_angles_optimization', opt=torch.optim.SGD, opt_kwargs=dict(lr=0.0001))
     RQAOA_qtensor = RQAOA_recalculate(expectation_values_qtensor, 5, recalculations=recalculation, type_of_problem="MAXCUT")
     time_start = time()
     cuts_qtensor, solution_qtensor = RQAOA_qtensor.execute()

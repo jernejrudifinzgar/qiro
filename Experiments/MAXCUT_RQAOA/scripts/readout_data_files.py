@@ -124,7 +124,7 @@ def plot_cuts_recalculation_per_graph(ns, ps, runs, regularity, version):
         #plt.scatter(runs, list_exact, c=colors[counter], label = 'exact num of cuts')
         plt.xticks(runs, list_x)
         plt.legend()
-        #fig.savefig(my_path + f'/results/Cuts_different_calculations_n_{n}.png')
+        fig.savefig(my_path + f'/results/Cuts_different_calculations_per_graph_n_{n}.png')
         plt.show()
         #plt.close()
 
@@ -193,7 +193,7 @@ def plot_cuts_recalculation_per_p(ns, ps, runs, regularity, version):
         plt.plot(ps, cuts_recalc_6_list, c=colors[counter], label = f'tensor network cuts for p={p} with 6-recalc')
 
         plt.legend()
-        #fig.savefig(my_path + f'/results/Cuts_different_calculations_n_{n}.png')
+        fig.savefig(my_path + f'/results/Cuts_different_calculations_per_p_n_{n}.png')
         plt.show()
 
 
@@ -207,7 +207,7 @@ if __name__ == '__main__':
     ps= [1, 2, 3]
     recalculations = [3, 6]
     regularity = 3
-    runs = list(range(20))
+    runs = list(range(40))
     version = 1
 
     colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']

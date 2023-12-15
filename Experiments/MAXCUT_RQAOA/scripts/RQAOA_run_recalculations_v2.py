@@ -41,11 +41,12 @@ if __name__ == '__main__':
     seed = 666
     ps= [1, 2, 3]
     #num_runs = 10
-    runs=list(range(20, 40, 1))
-    version=1
+    runs=list(range(0, 30, 1))
+    version=2
     #execute_RQAOA_single_instance(ns[0], ps[0], num_runs)
     #execute_RQAOA_multiple_instances(ns, ps, num_runs)
     execute_RQAOA_parallel_recalculation(ns, ps, runs, 3, version)
+    execute_RQAOA_parallel_recalculation(ns, ps, runs, 6, version)
 
     print(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
     print(resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss)

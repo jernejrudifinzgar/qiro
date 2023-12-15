@@ -646,6 +646,7 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
         super().__init__(problem)
         random.seed()
 
+        #TODO check fixed angles parameters for non-regular graphs
         if initialization=='fixed_angles_optimization':
             with open('angles_regular_graphs.json', 'r') as file:
                 data = json.load(file)
@@ -677,7 +678,7 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
         self.peos = self.energy_peo()
         self.E_nodes = None
 
-
+    #TODO Move to optimization part and check which correlations are necessary  
     #@lru_cache
     def energy_peo(self):
         opt = qtensor.toolbox.get_ordering_algo(self.ordering_algo)
@@ -697,7 +698,6 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
                 peo, _ = opt.optimize(tn)
                 peos[(i, j)] = peo
         return peos
-
 
     def energy_loss(self):
         sim = qtensor.QtreeSimulator(backend=self.backend)
@@ -743,18 +743,16 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
 
         return max_expect_val_location, max_expect_val_sign, max_expect_val
 
-
     def calc_expect_val(self):
         self.energy_loss()
         max_expect_val_location, max_expect_val_sign, max_expect_val = self.create_expect_val_dict()
         
         return max_expect_val_location, max_expect_val_sign, max_expect_val
     
-
     def optimize(self, steps=50, **kwargs):
         random.seed()
-        opt = self.opt(params=(self.gamma, self.beta) , **self.opt_kwargs)
         self.peos = self.energy_peo()
+        opt = self.opt(params=(self.gamma, self.beta) , **self.opt_kwargs)
         self.expect_val_dict = {}
         max_expect_val_location = None
         max_expect_val_sign = None
@@ -786,7 +784,7 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
                 _pbar.update(1)
 
             if i>1:
-                if abs((self.losses[-1]-self.losses[-2])/self.losses[-1]) < 0.0001:
+                if abs((self.losses[-1]-self.losses[-2])/self.losses[-1]) < 0.0000001:
                     counter += 1
                     if counter == 5:
                         break
