@@ -76,8 +76,8 @@ def MIS_QAOA_optimization_individual_initializations(num_graphs, ns, regularity,
 
 
 def MIS_QAOA_optimization_all_initializations(graphs, ns, regularity, version, max_p=3, parallel=True):
-    optimizers_list = ['SGD', 'RMSprop', 'Adam']
-    learning_rates_SGD = [0.0001, 0.0005, 0.001]
+    optimizers_list = ['SGD']#, 'RMSprop', 'Adam']
+    learning_rates_SGD = [0.0001]#, 0.0005, 0.001]
     learning_rates_RMSprop = [0.001, 0.005, 0.01, 0.05]
     learning_rates_Adam = [0.001, 0.005, 0.01, 0.05]
    
@@ -125,7 +125,7 @@ def MIS_QAOA_optimization_all_initializations(graphs, ns, regularity, version, m
 
 
 if __name__ == '__main__':
-    graphs=[0, 1, 2, 3, 4]#, 6, 7, 8, 9]
+    graphs=[0, 1, 2, 3, 4, 5, 6, 7]#, 8, 9]
     ns=[30]#, 100, 150, 200]
     regularity=3
     version = 1

@@ -4,6 +4,7 @@ import copy
 import networkx as nx
 from operator import itemgetter
 import os
+import random
 
 class RQAOA(QIRO):
     """
@@ -254,12 +255,8 @@ class RQAOA_recalculate(QIRO):
         self.solution = []
         self.fixed_correlations = []
         self.type_of_problem = type_of_problem
+        self.energies_list = []
         self.recalculations = recalculations
-
-    def get_max(self, item):
-        correlation = item[0]
-        correlation_list = list(correlation)
-        return max(correlation_list)
     
     def execute(self):
         """
@@ -270,6 +267,7 @@ class RQAOA_recalculate(QIRO):
             self.solution (numpy.ndarray): The found solution as an array of variable assignments.
         """
         # Iterate through nq steps of RQAOA, where nq is the number of quantum variables
+        energies_list = []
         for step in range(self.nq):
             print(f"RQAOA Step: {step + 1}")
 
@@ -277,6 +275,7 @@ class RQAOA_recalculate(QIRO):
 
                 # Optimize to find the expectation values, and determine which correlation to fix
                 exp_value_coeff, exp_value_sign, max_exp_value = self.expectation_values.optimize()
+                self.energies_list.append(self.expectation_values.energy)
                 expect_val_dict = self.expectation_values.expect_val_dict.copy()
                 #highest_values_dict = dict(sorted(expect_val_dict.items(), key=itemgetter(1), reverse=True)[:6]) 
                 #highest_values_dict=dict(sorted(highest_values_dict.items() , key=self.get_max , reverse = True))
@@ -289,13 +288,20 @@ class RQAOA_recalculate(QIRO):
             #exp_value_sign = np.sign(highest_values_dict[exp_value_coeff])
             #max_exp_value = abs(highest_values_dict[exp_value_coeff])
             
-            exp_value_coeff = max(expect_val_dict, key=expect_val_dict.get)
-            print(exp_value_coeff)
+            #exp_value_coeff = max(expect_val_dict, key=expect_val_dict.get)
+            #print(exp_value_coeff)
+
+
+            
+            max_value = max(expect_val_dict.values())
+            exp_value_coeff_list = [k for k, v in expect_val_dict.items() if v == max_value]
+
+            index = random.randrange(len(exp_value_coeff_list))
+            exp_value_coeff = exp_value_coeff_list[index]
+
             exp_value_sign = np.sign(expect_val_dict[exp_value_coeff])
             max_exp_value = abs(expect_val_dict[exp_value_coeff])
             exp_value_coeff_translated = ([self.expectation_values.problem.position_translater[min(list(exp_value_coeff))], self.problem.position_translater[max(list(exp_value_coeff))]])
-          
-
 
             # Store the fixed correlation for later use in solution reconstruction
             self.fixed_correlations.append([exp_value_coeff_translated, int(exp_value_sign), max_exp_value])
@@ -303,10 +309,10 @@ class RQAOA_recalculate(QIRO):
             # If we're fixing a single-point correlation
             if len(exp_value_coeff) == 1:
                 # Update the Hamiltonian to reflect the fixed single-point correlation
-                self.update_single([self.problem.position_translater.index(exp_value_coeff[0])], exp_value_sign)
+                self.update_single([self.problem.position_translater.index(exp_value_coeff_translated[0])], exp_value_sign)
                 # Update lists to reflect that a variable has been fixed
-                self.problem.remain_var_list.remove(exp_value_coeff[0])
-                self.problem.position_translater.remove(exp_value_coeff[0])
+                self.problem.remain_var_list.remove(exp_value_coeff_translated[0])
+                self.problem.position_translater.remove(exp_value_coeff_translated[0])
             # If we're fixing a two-point correlation
             else:
                 # Update the Hamiltonian to reflect the fixed two-point correlation
@@ -316,16 +322,16 @@ class RQAOA_recalculate(QIRO):
 
                 self.problem.position_translater.remove(exp_value_coeff_translated[1])
 
-                del expect_val_dict[exp_value_coeff]
-                for correlation in expect_val_dict.copy().keys():
-                    if min(list(correlation))==max(list(exp_value_coeff)) or max(list(correlation))==max(list(exp_value_coeff)):
-                        del expect_val_dict[correlation]
-                    elif min(list(correlation))>max(list(exp_value_coeff)):
-                        expect_val_dict[frozenset({min(list(correlation))-1, max(list(correlation))-1})] = expect_val_dict[correlation]
-                        del expect_val_dict[correlation]
-                    elif max(list(correlation))>max(list(exp_value_coeff)):
-                        expect_val_dict[frozenset({min(list(correlation)), max(list(correlation))-1})] = expect_val_dict[correlation]
-                        del expect_val_dict[correlation]
+                # del expect_val_dict[exp_value_coeff]
+                # for correlation in expect_val_dict.copy().keys():
+                #     if min(list(correlation))==max(list(exp_value_coeff)) or max(list(correlation))==max(list(exp_value_coeff)):
+                #         del expect_val_dict[correlation]
+                #     elif min(list(correlation))>max(list(exp_value_coeff)):
+                #         expect_val_dict[frozenset({min(list(correlation))-1, max(list(correlation))-1})] = expect_val_dict[correlation]
+                #         del expect_val_dict[correlation]
+                #     elif max(list(correlation))>max(list(exp_value_coeff)):
+                #         expect_val_dict[frozenset({min(list(correlation)), max(list(correlation))-1})] = expect_val_dict[correlation]
+                #         del expect_val_dict[correlation]
 
 
 

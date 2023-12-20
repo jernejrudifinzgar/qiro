@@ -42,7 +42,7 @@ def execute_RQAOA_single_instance(n, p, run, version, connectivity_output=False,
 
     ns_graphs_rudi = list(range(60, 220, 20))
 
-    ns_graphs_maxi = [30]
+    ns_graphs_maxi = [30, 50]
 
     if n in ns_graphs_rudi:
         with open(f'rudis_100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:

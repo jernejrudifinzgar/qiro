@@ -723,6 +723,9 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
     def create_expect_val_dict(self):
         self.expect_val_dict={}
         max_expect_val = 0
+        max_expect_val_list = []
+        max_expect_val_location_list = []
+        max_expect_val_sign_list = []
         for i in range(1, len(self.problem.matrix)):
             for j in range(1, i+1):
                 if self.problem.matrix[i, j] != 0:
@@ -734,12 +737,37 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
                         
                 
                     if abs(energy) > max_expect_val:
+                        max_expect_val_list = []
+                        max_expect_val_location_list = []
+                        max_expect_val_sign_list = []
+
                         max_expect_val = abs(energy)
                         max_expect_val_sign = np.sign(energy)
                         if i == j:
                             max_expect_val_location = ([self.problem.position_translater[i]])
                         else:
                             max_expect_val_location = ([self.problem.position_translater[i], self.problem.position_translater[j]])
+                        
+                        max_expect_val_location_list.append(max_expect_val_location)
+                        max_expect_val_list.append(max_expect_val)
+                        max_expect_val_sign_list.append(max_expect_val_sign)
+
+                    # elif abs(energy) == max_expect_val:
+                    #     if i == j:
+                    #         max_expect_val_location_help = ([self.problem.position_translater[i]])
+                    #     else:
+                    #         max_expect_val_location_help = ([self.problem.position_translater[i], self.problem.position_translater[j]])
+
+                    #     max_expect_val_location_list.append(max_expect_val_location_help)
+                    #     max_expect_val_list.append(abs(energy))
+                    #     max_expect_val_sign_list.append(np.sign(energy))
+
+        if len(max_expect_val_list) > 1:
+            print(max_expect_val_list)
+            index = random.randrange(len(max_expect_val_list))
+            max_expect_val = max_expect_val_list[index]
+            max_expect_val_location = max_expect_val_location_list[index]
+            max_expect_val_sign = max_expect_val_sign_list[index]
 
         return max_expect_val_location, max_expect_val_sign, max_expect_val
 
