@@ -167,7 +167,7 @@ def individual_MIS_QAOA_optimization_single_initialization(G_num, n, regularity,
         return dictionary_transition_states.copy()
     
 
-def individual_MIS_QAOA_optimization_all_initializations(G_num, n, regularity, max_p, opt, learning_rate):
+def individual_MIS_QAOA_optimization_all_initializations(G_num, n, regularity, max_p, opt, learning_rate, version):
     my_path = os.path.dirname(__file__)
     my_path = os.path.dirname(my_path)
     
@@ -187,7 +187,7 @@ def individual_MIS_QAOA_optimization_all_initializations(G_num, n, regularity, m
     dictionary['random_init']=dictionary_random
 
     print(dictionary)
-    pickle.dump(dictionary, open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_opt_{opt}_lr_{learning_rate}.pkl", 'wb'))
+    pickle.dump(dictionary, open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_opt_{opt}_lr_{learning_rate}_version_{version}.pkl", 'wb'))
 
 
     

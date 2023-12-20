@@ -75,7 +75,7 @@ def MIS_QAOA_optimization_individual_initializations(num_graphs, ns, regularity,
         print('file saved successfully')
 
 
-def MIS_QAOA_optimization_all_initializations(graphs, ns, regularity, max_p=3, parallel=True):
+def MIS_QAOA_optimization_all_initializations(graphs, ns, regularity, version, max_p=3, parallel=True):
     optimizers_list = ['SGD', 'RMSprop', 'Adam']
     learning_rates_SGD = [0.0001, 0.0005, 0.001]
     learning_rates_RMSprop = [0.001, 0.005, 0.01, 0.05]
@@ -89,13 +89,13 @@ def MIS_QAOA_optimization_all_initializations(graphs, ns, regularity, max_p=3, p
                 for optimizer in optimizers_list:
                     if optimizer=='SGD':
                         for lr in learning_rates_SGD:
-                            arguments_list.append((graph, n, regularity, max_p, optimizer, lr))
+                            arguments_list.append((graph, n, regularity, max_p, optimizer, lr, version))
                     elif optimizer=='RMSprop':
                         for lr in learning_rates_RMSprop:
-                            arguments_list.append((graph, n, regularity, max_p, optimizer, lr))
+                            arguments_list.append((graph, n, regularity, max_p, optimizer, lr, version))
                     elif optimizer=='Adam':
                         for lr in learning_rates_Adam:
-                            arguments_list.append((graph, n, regularity, max_p, optimizer, lr))
+                            arguments_list.append((graph, n, regularity, max_p, optimizer, lr, version))
                 
         num_processes=len(arguments_list)
         pool = mp.Pool(num_processes) 
@@ -128,6 +128,7 @@ if __name__ == '__main__':
     graphs=[0, 1, 2, 3, 4]#, 6, 7, 8, 9]
     ns=[30]#, 100, 150, 200]
     regularity=3
-    MIS_QAOA_optimization_all_initializations(graphs, ns, regularity, parallel=True)
+    version = 1
+    MIS_QAOA_optimization_all_initializations(graphs, ns, regularity, version, parallel=True)
 
 
