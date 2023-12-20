@@ -1,0 +1,4 @@
+
+Required time in seconds: 1993.1235573291779
+Required time in minutes: 33.2187259554863
+Required time in hours: 0.5536454325914383
