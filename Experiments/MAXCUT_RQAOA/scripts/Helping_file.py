@@ -34,7 +34,7 @@ from RQAOA import RQAOA, RQAOA_recalculate
 import torch.multiprocessing as mp
 from time import time
 
-def execute_RQAOA_single_instance(n, p, run, version, connectivity_output=False):
+def execute_RQAOA_single_instance(n, p, run, version, connectivity_output=False, output_results=False):
     my_path = os.path.dirname(__file__)
     my_path = os.path.dirname(my_path)
     reg = 3
@@ -90,6 +90,8 @@ def execute_RQAOA_single_instance(n, p, run, version, connectivity_output=False)
 
     pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_wo_recalc_version_{version}.pkl", 'wb'))
 
+    if output_results:
+        print('Cuts qtensor:', cuts_qtensor)
 
     return cuts_qtensor, solution_qtensor
 
@@ -111,16 +113,22 @@ def execute_RQAOA_multiple_instances(ns, ps, num_runs):
 ##########################################
 
 
-def execute_RQAOA_single_instance_recalculation(n, p, run, recalculation, version):
+def execute_RQAOA_single_instance_recalculation(n, p, run, recalculation, version, output_results=False):
     my_path = os.path.dirname(__file__)
     my_path = os.path.dirname(my_path)
     reg = 3
     seed = 666
 
-    ns_graphs = list(range(60, 220, 20))
+    ns_graphs_rudi = list(range(60, 220, 20))
 
-    if n in ns_graphs:
+    ns_graphs_maxi = [30]
+
+    if n in ns_graphs_rudi:
         with open(f'rudis_100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
+            data = pickle.load(file)
+        G = data[run]
+    elif n in ns_graphs_maxi:
+        with open(f'100_regular_graphs_nodes_{n}_reg_3.pkl', 'rb') as file:
             data = pickle.load(file)
         G = data[run]
     else: 
@@ -155,6 +163,9 @@ def execute_RQAOA_single_instance_recalculation(n, p, run, recalculation, versio
         f.write(f"\nCalculated number of cuts with analytic method:: {cuts_single}")
         f.write(f"\nCalculated solution with analytic method: {solution_single}")
     f.close()
+
+    if output_results:
+        print('Cuts:', cuts_qtensor)
 
     pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_recalc_{recalculation}_version_{version}.pkl", 'wb'))
 

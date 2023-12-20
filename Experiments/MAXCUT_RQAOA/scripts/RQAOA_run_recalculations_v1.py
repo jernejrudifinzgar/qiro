@@ -37,7 +37,7 @@ from Helping_file import *
         
 if __name__ == '__main__':
     reg = 3
-    ns = [30]#, 140, 180]
+    ns = [50]#, 140, 180]
     seed = 666
     ps= [1, 2, 3]
     #num_runs = 10

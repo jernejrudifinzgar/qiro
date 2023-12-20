@@ -39,14 +39,23 @@ if __name__ == '__main__':
     reg = 3
     ns = [30]#, 140, 180]
     seed = 666
-    ps= [1, 2, 3]
+    ps= [1]#, 2, 3]
     #num_runs = 10
-    runs=list(range(0, 30, 1))
-    version=2
-    #execute_RQAOA_single_instance(ns[0], ps[0], num_runs)
+    runs=list(range(0, 20, 1))
+    version=3
+    list_wo=[]
+    list_w=[]
+    for run in runs:
+        cuts_wo, solution_wo = execute_RQAOA_single_instance(ns[0], ps[0], run, version, output_results=True)
+        cuts_w, solution_w = execute_RQAOA_single_instance_recalculation(ns[0], ps[0], run, 1, version, output_results=True)
+        list_wo.append(cuts_wo)
+        list_w.append(cuts_w)
+        print(list_wo)
+        print(list_w)
     #execute_RQAOA_multiple_instances(ns, ps, num_runs)
-    execute_RQAOA_parallel_recalculation(ns, ps, runs, 3, version)
-    execute_RQAOA_parallel_recalculation(ns, ps, runs, 6, version)
-
+    #execute_RQAOA_parallel_recalculation(ns, ps, runs, 1, version)
+    #execute_RQAOA_parallel_recalculation(ns, ps, runs, 6, version)
+    print(list_wo)
+    print(list_w)
     print(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
     print(resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss)

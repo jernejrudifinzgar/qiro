@@ -41,11 +41,7 @@ def plot_energy_optimizer_different_lr(ns, regularity, graphs, optimizers, initi
                         if counter == 2:
                             energies_fixed_angles_list=[]
                             energy_single = data['analytic_single_p']['energy']
-                            for p in ps:
-                                energy_fixed_angles = data['fixed_angles'][f'p={p}']['energy']
-                                energies_fixed_angles_list.append(energy_fixed_angles)
                             plt.scatter([1], energy_single, color=colors[0], label=f'Grid search with analytic expression')
-                            plt.plot(ps, energies_fixed_angles_list, color=colors[1], label=f'Fixed angles without optimization')
 
                         energies_list=[]
                         for p in ps:
@@ -83,11 +79,11 @@ def plot_losses_optimizer_different_lr(ns, ps, regularity, graphs, optimizers, i
 
             for initializer in initializers:
                 #try:
-                with open(my_path + f'/data/nodes_{n}_reg_{regularity}_graph_{0}_opt_{optimizer}_lr_{learning_rates[0]}.pkl', 'rb') as file:
-                    data = pickle.load(file)
-                max_p = len(data[initializer])
-                ps=list(range(1, max_p+1))
-                x = list(range(1, len(data[initializer][f'p={2}']['losses'])+1))
+                #with open(my_path + f'/data/nodes_{n}_reg_{regularity}_graph_{0}_opt_{optimizer}_lr_{learning_rates[0]}.pkl', 'rb') as file:
+                #    data = pickle.load(file)
+                #max_p = len(data[initializer])
+                #ps=list(range(1, max_p+1))
+                #x = list(range(1, len(data[initializer][f'p={2}']['losses'])+1))
                 
                 for p in ps:
 
@@ -125,9 +121,9 @@ def plot_losses_optimizer_different_lr(ns, ps, regularity, graphs, optimizers, i
                             plt.title(f'Graph number {i+1}')
                         plt.legend(loc='lower left', bbox_to_anchor=(1,0.2))
                         plt.subplots_adjust(hspace=0.3)
-                        fig.savefig(my_path + f'/graphs/Losses_reg_{regularity}_n_{n}_p_{p}_opt_{optimizer}_init_{initializer}.png')
-                        plt.close()
-                        #plt.show()
+                        #fig.savefig(my_path + f'/graphs/Losses_reg_{regularity}_n_{n}_p_{p}_opt_{optimizer}_init_{initializer}.png')
+                        #plt.close()
+                        plt.show()
                 #except:
                 #    pass
 
@@ -303,11 +299,11 @@ def plot_losses__different_opt_init_n_30(ns, ps, regularity, graphs):
 
         
     
-graphs=[i for i in range(6)]
+graphs=[i for i in range(1)]
 ns=[30]#, 100, 150, 200]
 regularity=3
-optimizers_list = ['SGD', 'RMSprop', 'Adam']
-ps = [1, 2, 3]
+optimizers_list = ['SGD']#, 'RMSprop', 'Adam']
+ps = [1, 2]#, 3]
 
 learning_rates_SGD = [0.0001, 0.0005, 0.001]
 learning_rates_RMSprop = [0.001, 0.005, 0.01, 0.05]
@@ -322,7 +318,7 @@ optimizers_list = ['SGD', 'RMSprop']
 """
 
 if __name__ == '__main__':
-    #plot_energy_optimizer_different_lr(ns, regularity, graphs, optimizers_list, initializers_list)
-    #plot_losses_optimizer_different_lr(ns, ps, regularity, graphs, optimizers_list, initializers_list)
-    plot_energy__different_opt_init_n_30([30], ps, regularity, graphs)
+    plot_energy_optimizer_different_lr(ns, regularity, graphs, optimizers_list, initializers_list)
+    plot_losses_optimizer_different_lr(ns, ps, regularity, graphs, optimizers_list, initializers_list)
+    #plot_energy__different_opt_init_n_30([30], ps, regularity, graphs)
     #plot_losses__different_opt_init_n_30([200], ps, regularity, graphs)

@@ -55,8 +55,8 @@ def random_init(problem, ps, opt, **kwargs):
         dictionary_random_init_sub={}
 
         if p==1:
-            expectation_values_qtensor_random = QtensorQAOAExpectationValuesQUBO(problem, p, pbar=True)
-            expectation_values_qtensor_random.optimize(Opt=optimizer, **kwargs)
+            expectation_values_qtensor_random = QtensorQAOAExpectationValuesQUBO(problem, p, pbar=True, opt = optimizer, opt_kwargs=dict(**kwargs))
+            expectation_values_qtensor_random.optimize()
             energy_qtensor_random = float(expectation_values_qtensor_random.energy)
             dictionary_random_init_sub['energy'] = energy_qtensor_random
             dictionary_random_init_sub['correlations'] = expectation_values_qtensor_random.expect_val_dict.copy()
@@ -64,8 +64,8 @@ def random_init(problem, ps, opt, **kwargs):
 
         else:
             for j in range(p):
-                expectation_values_qtensor_random = QtensorQAOAExpectationValuesQUBO(problem, p, pbar=True)
-                expectation_values_qtensor_random.optimize(Opt=optimizer, **kwargs)
+                expectation_values_qtensor_random = QtensorQAOAExpectationValuesQUBO(problem, p, pbar=True, opt = optimizer, opt_kwargs=dict(**kwargs))
+                expectation_values_qtensor_random.optimize()
                 energy_qtensor_random = float(expectation_values_qtensor_random.energy)
 
                 if j==0:
@@ -101,8 +101,8 @@ def transition_states(problem, ps, opt, **kwargs):
         if p==1:
             expectation_values_single_transition = SingleLayerQAOAExpectationValues(problem)
             expectation_values_single_transition.optimize()
-            gamma = [expectation_values_single_transition.gamma]
-            beta = [expectation_values_single_transition.beta]
+            gamma = [expectation_values_single_transition.gamma/np.pi]
+            beta = [expectation_values_single_transition.beta/np.pi]
             energy_single_transition = expectation_values_single_transition.energy
             dictionary_transition_states_sub['energy'] = energy_single_transition
             dictionary_transition_states_sub['correlations'] = expectation_values_single_transition.expect_val_dict.copy()
@@ -113,8 +113,8 @@ def transition_states(problem, ps, opt, **kwargs):
                 beta_ts = beta.copy()
                 gamma_ts.insert(j, 0)
                 beta_ts.insert(j, 0)
-                expectation_values_qtensor_transition = QtensorQAOAExpectationValuesQUBO(problem, p, gamma=gamma_ts, beta=beta_ts, pbar=True)
-                expectation_values_qtensor_transition.optimize(Opt=optimizer, **kwargs)
+                expectation_values_qtensor_transition = QtensorQAOAExpectationValuesQUBO(problem, p, gamma=gamma_ts, beta=beta_ts, pbar=True, opt = optimizer, opt_kwargs=dict(**kwargs))
+                expectation_values_qtensor_transition.optimize()
                 energy_qtensor_transition = float(expectation_values_qtensor_transition.energy)
 
                 if j==0:

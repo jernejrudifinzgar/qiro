@@ -32,7 +32,7 @@ set_matplotlib_formats('svg')
 from Calculation import *
     
 
-def MIS_QAOA_optimization_individual_initializations(num_graphs, ns, regularity, max_p=2, parallel=True):
+def MIS_QAOA_optimization_individual_initializations(num_graphs, ns, regularity, max_p=3, parallel=True):
     if parallel==True:
         
         graphs_list = list(range(0,num_graphs))
@@ -125,7 +125,7 @@ def MIS_QAOA_optimization_all_initializations(graphs, ns, regularity, max_p=3, p
 
 
 if __name__ == '__main__':
-    graphs=[0, 1, 2, 3, 4, 5]#, 6, 7, 8, 9]
+    graphs=[0, 1, 2, 3, 4]#, 6, 7, 8, 9]
     ns=[30]#, 100, 150, 200]
     regularity=3
     MIS_QAOA_optimization_all_initializations(graphs, ns, regularity, parallel=True)
