@@ -17,7 +17,7 @@ def plot_energy_optimizer_different_lr(ns, regularity, graphs, optimizers, initi
     for n in ns: 
         for optimizer in optimizers:
             if optimizer == 'SGD':
-                learning_rates = [0.0001, 0.0005, 0.001]
+                learning_rates = [0.0001, 0.0005]#, 0.001]
             elif optimizer == 'RMSprop':
                 learning_rates = [0.001, 0.005, 0.01, 0.05]
             elif optimizer == 'Adam':
@@ -70,7 +70,7 @@ def plot_losses_optimizer_different_lr(ns, ps, regularity, graphs, optimizers, i
     for n in ns: 
         for optimizer in optimizers:
             if optimizer == 'SGD':
-                learning_rates = [0.0001, 0.0005, 0.001]
+                learning_rates = [0.0001, 0.0005]#, 0.001]
             elif optimizer == 'RMSprop':
                 learning_rates = [0.001, 0.005, 0.01, 0.05]
             elif optimizer == 'Adam':
