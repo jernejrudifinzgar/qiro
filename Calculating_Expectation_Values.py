@@ -29,6 +29,7 @@ class SingleLayerQAOAExpectationValues(ExpectationValues):
         self.c = None
         self.gamma = gamma[0]*np.pi
         self.beta = beta[0]*np.pi
+        self.losses = None
         self.type = 'SingleLayerQAOAExpectationValue'
 
     """the single_cos und coupling_cos functions are sub-functions which are called in the calculation of the

@@ -1,6 +1,6 @@
 import numpy as np
 import copy
-from Calculating_Expectation_Values import QtensorQAOAExpectationValuesMIS, SingleLayerQAOAExpectationValues
+from Calculating_Expectation_Values import QtensorQAOAExpectationValuesMIS, SingleLayerQAOAExpectationValues, QtensorQAOAExpectationValuesQUBO
 from Generating_Problems import MIS
 import networkx as nx
 from aws_quera import find_mis
@@ -58,6 +58,9 @@ class QIRO_MIS(QIRO):
         # object from which we will eliminate nodes:
         self.output_steps=output_steps
         self.graph = copy.deepcopy(self.problem.graph)
+        self.energies_list = []
+        self.losses_list = []
+        self.num_nodes = []
         
     def update_single(self, variable_index, max_expect_val_sign):
         """Updates Hamiltonian according to fixed single point correlation"""
@@ -80,8 +83,8 @@ class QIRO_MIS(QIRO):
         # reinitailize the problem object with the new, updated, graph:
         self.problem = MIS(self.graph, self.problem.alpha)
 
-        if self.expectation_values.type == 'QtensorQAOAExpectationValuesMIS':
-            self.expectation_values = QtensorQAOAExpectationValuesMIS(self.problem, self.expectation_values.p, pbar=self.expectation_values.pbar)
+        if self.expectation_values.type == 'QtensorQAOAExpectationValuesQUBO':
+            self.expectation_values = QtensorQAOAExpectationValuesQUBO(self.problem, self.expectation_values.p, pbar=self.expectation_values.pbar)
         elif self.expectation_values.type == 'SingleLayerQAOAExpectationValue':
             self.expectation_values = SingleLayerQAOAExpectationValues(self.problem)
 
@@ -113,8 +116,8 @@ class QIRO_MIS(QIRO):
         # reinitailize the problem object with the new, updated, graph:
         self.problem = MIS(self.graph, self.problem.alpha)
 
-        if self.expectation_values.type == 'QtensorQAOAExpectationValuesMIS':
-            self.expectation_values = QtensorQAOAExpectationValuesMIS(self.problem, self.expectation_values.p, pbar=self.expectation_values.pbar)
+        if self.expectation_values.type == 'QtensorQAOAExpectationValuesQUBO':
+            self.expectation_values = QtensorQAOAExpectationValuesQUBO(self.problem, self.expectation_values.p, pbar=self.expectation_values.pbar)
         elif self.expectation_values.type == 'SingleLayerQAOAExpectationValue':
             self.expectation_values = SingleLayerQAOAExpectationValues(self.problem)
 
@@ -139,8 +142,8 @@ class QIRO_MIS(QIRO):
 
         self.problem = MIS(self.graph, self.problem.alpha)
 
-        if self.expectation_values.type == 'QtensorQAOAExpectationValuesMIS':
-            self.expectation_values = QtensorQAOAExpectationValuesMIS(self.problem, self.expectation_values.p, pbar=self.expectation_values.pbar)
+        if self.expectation_values.type == 'QtensorQAOAExpectationValuesQUBO':
+            self.expectation_values = QtensorQAOAExpectationValuesQUBO(self.problem, self.expectation_values.p, pbar=self.expectation_values.pbar)
         elif self.expectation_values.type == 'SingleLayerQAOAExpectationValue':
             self.expectation_values = SingleLayerQAOAExpectationValues(self.problem)
 
@@ -163,6 +166,10 @@ class QIRO_MIS(QIRO):
             
             self.expectation_values.optimize()
 
+            self.energies_list.append(self.expectation_values.energy)
+            self.losses_list.append(self.expectation_values.losses)
+            self.num_nodes.append(self.graph.number_of_nodes())
+
             #plt.plot(self.expectation_values.losses, label = self.problem.graph.number_of_nodes())
             #plt.draw()
          
@@ -173,6 +180,9 @@ class QIRO_MIS(QIRO):
             while len(fixed_variables) == 0:
                 max_expect_val_location, max_expect_val = sorted_correlation_dict[which_correlation]
                 
+                #print('translater', self.problem.position_translater)
+                #print('location', max_expect_val_location)
+                #print(self.expectation_values.expect_val_dict)
                 max_expect_val_location = [self.problem.position_translater[idx] for idx in max_expect_val_location]
                 max_expect_val_sign = np.sign(max_expect_val).astype(int)
 
