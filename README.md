@@ -30,7 +30,6 @@ Jupyter Notebook where you can play around with different problems and execute R
 
 Contains generation of MIS and MAX-2-SAT problems, and transforming them in the correct shape for QIRO and RQAOA.
 
-
 #### expval_calculation
 
 Contains functions for calculating the expectation values of the correlations from p=1 QAOA for MIS and MAX-2-SAT problems. Should in principle work for any quadratic Hamiltonian. 

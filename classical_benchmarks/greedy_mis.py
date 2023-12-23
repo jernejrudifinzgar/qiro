@@ -49,35 +49,3 @@ def random_greedy_mis(graph, seed=None, return_sol=False):
         return indep_set
     else:
         return len(indep_set)
-
-def solve_greedy(path, idx, nreps=1):
-    data = []
-    for i in range(45):
-        print(i)
-        f_in = os.listdir(path)[i * 100 + idx]
-        graph = nx.read_adjlist(os.path.join(path, f_in), nodetype=int)
-        labs = f_in[:-8].split("-")
-        # tmp = [n, k, i]
-        for _ in range(nreps):
-            tmp = [int(labs[0]), int(labs[1]), int(labs[2])]
-            mis = greedy_mis(graph)
-            tmp.append(mis)
-            data.append(tmp)
-
-    return np.array(data)
-
-def solve_random_greedy(path, idx, nreps=1):
-    data = []
-    for i in range(45):
-        print(i)
-        f_in = os.listdir(path)[i * 100 + idx]
-        graph = nx.read_adjlist(os.path.join(path, f_in), nodetype=int)
-        labs = f_in[:-8].split("-")
-        # tmp = [n, k, i]
-        for _ in range(nreps):
-            tmp = [int(labs[0]), int(labs[1]), int(labs[2])]
-            mis = random_greedy_mis(graph)
-            tmp.append(mis)
-            data.append(tmp)
-
-    return np.array(data)
