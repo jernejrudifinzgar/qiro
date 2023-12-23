@@ -1,5 +1,5 @@
 import numpy as np
-
+import pennylane as qml
 
 class Problem:
     """
@@ -33,3 +33,28 @@ class Problem:
             assignment
         ) + single_energy_vector.T @ np.sign(assignment)
         return E_calc
+
+    def matrix_to_pennylane_hamiltonian(self, matrix: np.ndarray) -> qml.Hamiltonian:
+        """
+        Translates a matrix to a Pennylane Hamiltonian.
+
+        Parameters:
+            matrix: np.ndarray - The matrix to be translated.
+
+        Returns:
+            qml.Hamiltonian: The translated Hamiltonian.
+        """
+        # initialize the Hamiltonian
+        hamiltonian = qml.Hamiltonian([], [])
+
+        # loop over the matrix elements
+        for i in range(1, matrix.shape[0]):
+            for j in range(1, matrix.shape[1]):
+                if matrix[i, j] != 0:
+                    if i == j:
+                        hamiltonian += matrix[i, j] * qml.PauliZ(i - 1)
+                    else:
+                        hamiltonian += matrix[i, j] * qml.PauliZ(i - 1) @ qml.PauliZ(j - 1)
+
+        return hamiltonian
+     
