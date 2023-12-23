@@ -1,5 +1,6 @@
 from QIRO import QIRO
 from expval_calculation.SingleLayerQAOA import SingleLayerQAOAExpectationValues
+from expval_calculation.StateVecQAOA import StateVecQAOAExpectationValues
 from problem_generation.Generate_MIS import MIS, find_mis
 import copy
 import networkx as nx
@@ -47,7 +48,6 @@ class QIRO_MIS(QIRO):
                 max_expect_val_location, max_expect_val = sorted_correlation_dict[
                     which_correlation
                 ]
-
                 max_expect_val_location = [
                     self.problem.position_translater[idx]
                     for idx in max_expect_val_location
@@ -140,6 +140,8 @@ class QIRO_MIS(QIRO):
  
         if self.expectation_values.type == "SingleLayerQAOAExpectationValue":
             self.expectation_values = SingleLayerQAOAExpectationValues(self.problem)
+        elif self.expectation_values.type == "StateVecQAOAExpectationValues":
+            self.expectation_values = StateVecQAOAExpectationValues(self.problem, self.expectation_values.p)
         # elif self.expectation_values.type == "QtensorQAOAExpectationValuesMIS":
         #     self.expectation_values = QtensorQAOAExpectationValuesMIS(
         #         self.problem, self.expectation_values.p
@@ -174,6 +176,8 @@ class QIRO_MIS(QIRO):
 
         if self.expectation_values.type == "SingleLayerQAOAExpectationValue":
             self.expectation_values = SingleLayerQAOAExpectationValues(self.problem)
+        elif self.expectation_values.type == "StateVecQAOAExpectationValues":
+            self.expectation_values = StateVecQAOAExpectationValues(self.problem, self.expectation_values.p)
         # elif self.expectation_values.type == "QtensorQAOAExpectationValuesMIS":
         #     self.expectation_values = QtensorQAOAExpectationValuesMIS(
         #         self.problem, self.expectation_values.p
@@ -205,6 +209,8 @@ class QIRO_MIS(QIRO):
 
         if self.expectation_values.type == "SingleLayerQAOAExpectationValue":
             self.expectation_values = SingleLayerQAOAExpectationValues(self.problem)
+        elif self.expectation_values.type == "StateVecQAOA":
+            self.expectation_values = StateVecQAOAExpectationValues(self.problem, self.expectation_values.p)
         # elif self.expectation_values.type == "QtensorQAOAExpectationValuesMIS":
         #     self.expectation_values = QtensorQAOAExpectationValuesMIS(
         #         self.problem, self.expectation_values.p
