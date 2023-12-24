@@ -37,7 +37,7 @@ class StateVecQAOAExpectationValues(ExpectationValues):
                     print("Cost after step {:5d}: {: .7f}".format(i + 1, self._cost_function(parameters)))
         
             # if verbose:
-            print(f"Optimization run {retry + 1} finished.")
+            print(f"Optimization run {retry + 1} finished. Energy {self._cost_function(parameters)}")
             if retry == 0:
                 self.qaoa_parameters = parameters
             else:
@@ -66,16 +66,14 @@ class StateVecQAOAExpectationValues(ExpectationValues):
         translated_mci = [self.problem.position_translater[i] for i in indices_list[max_correlation_index]]
 
         self.expect_val_dict = {}
-        print(indices_list)
+        # compute energy
+        self.energy = self._cost_function(self.qaoa_parameters)
     
         for i, key in enumerate(operator_dict.keys()):
             self.expect_val_dict[key] = float(exp_val[i])
     
         return translated_mci, int(np.sign(exp_val[max_correlation_index])), float(max_correlation)
         
-
-
-
 
     def _qaoa_layer(self, gamma, beta):
         qml.qaoa.cost_layer(gamma, self.cost_h)
