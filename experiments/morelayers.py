@@ -13,7 +13,7 @@ from copy import deepcopy
 def mappable(idx, partition):
     reps = 1
     ps = ["single", 1, 2]
-    n = 10
+    n = 12
     densities = [k / (n - 1) for k in [3, 6]]
     data = []
     for p in ps:
@@ -28,12 +28,13 @@ def mappable(idx, partition):
                     mis_expval = SingleLayerQAOAExpectationValues(mis_problem)
                 else:
                     mis_expval = StateVecQAOAExpectationValues(mis_problem, p, num_opts=10, num_opt_steps=200)
-                
+                mis_expval.optimize()
+                energy = mis_expval.energy
                 qmis = QIRO_MIS(expectation_values_input=mis_expval, nc_input=1)
                 qmis.execute()
                 qmis.problem.graph = deepcopy(graph)
                 mis_size = qmis.problem.evaluate_solution(qmis.solution)[1]
-                density_data.append(mis_size)
+                density_data.append([energy, mis_size])
                 print(f"p={p}, density={density}, repseed={repseed}, mis_size={mis_size}")
             p_data.append(density_data)
         data.append(p_data)
