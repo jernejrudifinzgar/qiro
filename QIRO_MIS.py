@@ -141,7 +141,8 @@ class QIRO_MIS(QIRO):
         if self.expectation_values.type == "SingleLayerQAOAExpectationValue":
             self.expectation_values = SingleLayerQAOAExpectationValues(self.problem)
         elif self.expectation_values.type == "StateVecQAOAExpectationValues":
-            self.expectation_values = StateVecQAOAExpectationValues(self.problem, self.expectation_values.p)
+            self.expectation_values = StateVecQAOAExpectationValues(self.problem, self.expectation_values.p, device=self.expectation_values.device_name,
+                                                                    num_opts=self.expectation_values.num_opts, num_opt_steps=self.expectation_values.num_opt_steps)
         # elif self.expectation_values.type == "QtensorQAOAExpectationValuesMIS":
         #     self.expectation_values = QtensorQAOAExpectationValuesMIS(
         #         self.problem, self.expectation_values.p
@@ -177,7 +178,8 @@ class QIRO_MIS(QIRO):
         if self.expectation_values.type == "SingleLayerQAOAExpectationValue":
             self.expectation_values = SingleLayerQAOAExpectationValues(self.problem)
         elif self.expectation_values.type == "StateVecQAOAExpectationValues":
-            self.expectation_values = StateVecQAOAExpectationValues(self.problem, self.expectation_values.p)
+            self.expectation_values = StateVecQAOAExpectationValues(self.problem, self.expectation_values.p, device=self.expectation_values.device_name,
+                                                                    num_opts=self.expectation_values.num_opts, num_opt_steps=self.expectation_values.num_opt_steps)
         # elif self.expectation_values.type == "QtensorQAOAExpectationValuesMIS":
         #     self.expectation_values = QtensorQAOAExpectationValuesMIS(
         #         self.problem, self.expectation_values.p
@@ -210,7 +212,8 @@ class QIRO_MIS(QIRO):
         if self.expectation_values.type == "SingleLayerQAOAExpectationValue":
             self.expectation_values = SingleLayerQAOAExpectationValues(self.problem)
         elif self.expectation_values.type == "StateVecQAOA":
-            self.expectation_values = StateVecQAOAExpectationValues(self.problem, self.expectation_values.p)
+            self.expectation_values = StateVecQAOAExpectationValues(self.problem, self.expectation_values.p, device=self.expectation_values.device_name,
+                                                                    num_opts=self.expectation_values.num_opts, num_opt_steps=self.expectation_values.num_opt_steps)
         # elif self.expectation_values.type == "QtensorQAOAExpectationValuesMIS":
         #     self.expectation_values = QtensorQAOAExpectationValuesMIS(
         #         self.problem, self.expectation_values.p

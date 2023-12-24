@@ -11,8 +11,8 @@ from copy import deepcopy
 
 
 def mappable(idx, partition):
-    reps = 2
-    ps = ["single", 1, 2]
+    reps = 3
+    ps = ["single", 1, 2, 3]
     n = 12
     densities = [k / (n - 1) for k in [3, 6]]
     data = []
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     with mp.Pool(len(map_params)) as pool:
         results = pool.starmap(mappable, map_params)
 
-    np.save("morelayers.npy", np.array(results).astype(int))
+    np.save("morelayers.npy", np.array(results))
                 
 
     

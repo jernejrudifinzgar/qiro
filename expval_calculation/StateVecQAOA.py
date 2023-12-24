@@ -12,17 +12,18 @@ class StateVecQAOAExpectationValues(ExpectationValues):
 
         self.num_qubits = self.problem.matrix.shape[0] - 1
         self.wires = range(self.num_qubits)
-        self.dev = qml.device(device, wires=self.wires)
+        self.device_name = device
+        self.dev = qml.device(self.device_name, wires=self.wires)
 
         self.mixer_h = qml.qaoa.x_mixer(self.wires)
         self.cost_h = self.problem.matrix_to_pennylane_hamiltonian(self.problem.matrix)
         self.p = p
-        self.qaoa_parameters = np.array(np.reshape(np.random.rand(2 * p), (p, 2)), requires_grad=True)
+        self.qaoa_parameters = np.pi * np.array(np.reshape(np.random.rand(2 * p), (p, 2)), requires_grad=True)
 
         self.num_opts = num_opts
         self.num_opt_steps = num_opt_steps
 
-        self.type = "StateVecQAOA"
+        self.type = "StateVecQAOAExpectationValues"
 
     def optimize(self, verbose=False):
         opt = qml.GradientDescentOptimizer()
@@ -30,7 +31,7 @@ class StateVecQAOAExpectationValues(ExpectationValues):
         for retry in range(self.num_opts):
             parameters = self.qaoa_parameters
             if retry > 0:
-                parameters = np.array(np.reshape(np.random.rand(2 * self.p), (self.p, 2)), requires_grad=True)
+                parameters = np.array(np.pi * np.reshape(np.random.rand(2 * self.p), (self.p, 2)), requires_grad=True)
             for i in range(self.num_opt_steps):
                 parameters = opt.step(self._cost_function, parameters)
                 if (i + 1) % 5 == 0 and verbose:
