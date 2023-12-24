@@ -1,5 +1,7 @@
 import os
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
+import sys
+sys.path.append("..")
 
 from problem_generation.Generate_MIS import *
 from expval_calculation.StateVecQAOA import StateVecQAOAExpectationValues
@@ -27,11 +29,12 @@ def mappable(idx, partition):
                 else:
                     mis_expval = StateVecQAOAExpectationValues(mis_problem, p, num_opts=10, num_opt_steps=200)
                 
-                qmis = QIRO_MIS(expectation_values_input=mis_expval, nc=1)
+                qmis = QIRO_MIS(expectation_values_input=mis_expval, nc_input=1)
                 qmis.execute()
                 qmis.problem.graph = deepcopy(graph)
                 mis_size = qmis.problem.evaluate_solution(qmis.solution)[1]
                 density_data.append(mis_size)
+                print(f"p={p}, density={density}, repseed={repseed}, mis_size={mis_size}")
             p_data.append(density_data)
         data.append(p_data)
     return data
@@ -48,7 +51,7 @@ if __name__ == "__main__":
     with mp.Pool(len(map_params)) as pool:
         results = pool.starmap(mappable, map_params)
 
-    np.save("experiments/morelayers.npy", np.array(results).astype(int))
+    np.save("morelayers.npy", np.array(results).astype(int))
                 
 
     
