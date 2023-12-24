@@ -11,7 +11,7 @@ from copy import deepcopy
 
 
 def mappable(idx, partition):
-    reps = 1
+    reps = 2
     ps = ["single", 1, 2]
     n = 12
     densities = [k / (n - 1) for k in [3, 6]]
