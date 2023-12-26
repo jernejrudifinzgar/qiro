@@ -22,12 +22,12 @@ def mappable(idx, partition):
             density_data = []
             graph = nx.erdos_renyi_graph(n, density, seed=idx)
             for repseed in range(reps):
-                mis_problem = MIS(deepcopy(graph), alpha=1.1, seed=repseed + reps * partition)
+                mis_problem = MIS(deepcopy(graph), alpha=1.1, seed=100 + repseed + reps * partition)
                 mis_problem.graph_to_matrix()
                 if p == "single":
                     mis_expval = SingleLayerQAOAExpectationValues(mis_problem)
                 else:
-                    mis_expval = StateVecQAOAExpectationValues(mis_problem, p, num_opts=10, num_opt_steps=200)
+                    mis_expval = StateVecQAOAExpectationValues(mis_problem, p, num_opts=15, num_opt_steps=300)
                 mis_expval.optimize()
                 energy = mis_expval.energy
                 qmis = QIRO_MIS(expectation_values_input=mis_expval, nc_input=1)
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     with mp.Pool(len(map_params)) as pool:
         results = pool.starmap(mappable, map_params)
 
-    np.save("morelayers.npy", np.array(results))
+    np.save("morelayers_1.npy", np.array(results))
                 
 
     
