@@ -11,7 +11,7 @@ from copy import deepcopy
 
 
 def mappable(idx, partition):
-    reps = 3
+    reps = 2
     ps = ["single", 1, 2, 3]
     n = 12
     densities = [k / (n - 1) for k in [3, 6]]
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     import multiprocessing as mp
     from itertools import product
 
-    num_partitions = 3
+    num_partitions = 5
     num_parallel = 50
 
     map_params = list(product(range(num_parallel), range(num_partitions)))
