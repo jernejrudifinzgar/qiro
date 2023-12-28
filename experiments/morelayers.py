@@ -20,7 +20,7 @@ def mappable(idx, partition):
         p_data = []
         for density in densities:
             density_data = []
-            graph = nx.erdos_renyi_graph(n, density, seed=idx)
+            graph = nx.erdos_renyi_graph(n, density, seed=idx + 50)
             for repseed in range(reps):
                 mis_problem = MIS(deepcopy(graph), alpha=1.1, seed=100 + repseed + reps * partition)
                 mis_problem.graph_to_matrix()
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     with mp.Pool(len(map_params)) as pool:
         results = pool.starmap(mappable, map_params)
 
-    np.save("morelayers_1.npy", np.array(results))
+    np.save("morelayers_2.npy", np.array(results))
                 
 
     
