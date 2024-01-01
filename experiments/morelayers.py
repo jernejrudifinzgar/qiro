@@ -14,7 +14,7 @@ def mappable(idx, partition):
     reps = 2
     ps = ["single", 1, 2, 3]
     n = 12
-    densities = [k / (n - 1) for k in [3, 6]]
+    densities = [k / (n - 1) for k in [9]]
     data = []
     for p in ps:
         p_data = []
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     with mp.Pool(len(map_params)) as pool:
         results = pool.starmap(mappable, map_params)
 
-    np.save("morelayers_2.npy", np.array(results))
+    np.save("morelayers_3.npy", np.array(results))
                 
 
     
