@@ -23,7 +23,7 @@ def plot_cuts_recalculation_per_graph(ns, ps, runs, regularity, version):
             #with open(my_path + f"/data/regular_graphs_maxcuts.json", 'r') as f:
             #    graphs = json.load(f)
             #optimal_cuts = graphs[str(regularity)][str(n)][str(run)]['optimal_cut']
-            with open('100_regular_graphs_nodes_30_reg_3_solutions.pkl', 'rb') as file:
+            with open(f'100_regular_graphs_nodes_{30}_reg_3_solutions.pkl', 'rb') as file:
                 data = pickle.load(file)
             list_exact = data.copy()
             list_x.append(f'{run}')  
@@ -85,29 +85,31 @@ def plot_cuts_recalculation_per_graph(ns, ps, runs, regularity, version):
                 except:
                     print(f'file for {n} nodes, p={p} and run {run} is not available')
 
-                try:
-                    #with open (my_path + f"/data/results_run_{run}_n_{n}_p_{p}.pkl", 'rb') as f:
-                    with open (my_path + f"/data/results_run_{run}_n_{n}_p_{p}_recalc_3_version_{version}.pkl", 'rb') as f:
-                        data = pickle.load(f)
-                    cuts_qtensor = data['cuts_qtensor']
-                    list_qtensor_cuts_recalc_3.append(cuts_qtensor)
-                    list_qtensor_cuts_norm_recalc_3.append(cuts_qtensor/list_exact[run])
-                    list_graphs_qtensor_recalc_3.append(run)
+                #3recalc
+                # try:
+                #     #with open (my_path + f"/data/results_run_{run}_n_{n}_p_{p}.pkl", 'rb') as f:
+                #     with open (my_path + f"/data/results_run_{run}_n_{n}_p_{p}_recalc_3_version_{version}.pkl", 'rb') as f:
+                #         data = pickle.load(f)
+                #     cuts_qtensor = data['cuts_qtensor']
+                #     list_qtensor_cuts_recalc_3.append(cuts_qtensor)
+                #     list_qtensor_cuts_norm_recalc_3.append(cuts_qtensor/list_exact[run])
+                #     list_graphs_qtensor_recalc_3.append(run)
 
-                except:
-                    print(f'file for {n} nodes, p={p} and run {run} is not available')
+                # except:
+                #     print(f'file results_run_{run}_n_{n}_p_{p}_recalc_3_version_{version}.pkl is not available')
 
-                try:
-                    #with open (my_path + f"/data/results_run_{run}_n_{n}_p_{p}.pkl", 'rb') as f:
-                    with open (my_path + f"/data/results_run_{run}_n_{n}_p_{p}_recalc_6_version_{version}.pkl", 'rb') as f:
-                        data = pickle.load(f)
-                    cuts_qtensor = data['cuts_qtensor']
-                    list_qtensor_cuts_recalc_6.append(cuts_qtensor)
-                    list_qtensor_cuts_norm_recalc_6.append(cuts_qtensor/list_exact[run])
-                    list_graphs_qtensor_recalc_6.append(run)
+                #6recalc
+                # try:
+                #     #with open (my_path + f"/data/results_run_{run}_n_{n}_p_{p}.pkl", 'rb') as f:
+                #     with open (my_path + f"/data/results_run_{run}_n_{n}_p_{p}_recalc_6_version_{version}.pkl", 'rb') as f:
+                #         data = pickle.load(f)
+                #     cuts_qtensor = data['cuts_qtensor']
+                #     list_qtensor_cuts_recalc_6.append(cuts_qtensor)
+                #     list_qtensor_cuts_norm_recalc_6.append(cuts_qtensor/list_exact[run])
+                #     list_graphs_qtensor_recalc_6.append(run)
 
-                except:
-                    print(f'file results_run_{run}_n_{n}_p_{p}_recalc_6_version_{version}.pkl is not available')
+                # except:
+                #     print(f'file results_run_{run}_n_{n}_p_{p}_recalc_6_version_{version}.pkl is not available')
 
             
             counter_cuts = 0
@@ -149,7 +151,7 @@ def plot_cuts_recalculation_per_graph(ns, ps, runs, regularity, version):
         for i in list_graphs_single:
             average_list.append(average)
         plt.plot(list_graphs_single, average_list, color=colors[counter], linestyle='dashed', label = 'average cut ratio with analytic p=1')
-        plt.scatter(list_graphs_single, list_single_cuts_norm, c=colors[counter], label = 'cuts analytic for p=1')
+        #plt.scatter(list_graphs_single, list_single_cuts_norm, c=colors[counter], label = 'cuts analytic for p=1')
         counter += 1
         counter += 1
         #plt.scatter(runs, list_exact, c=colors[counter], label = 'exact num of cuts')
@@ -178,7 +180,7 @@ def plot_cuts_recalculation_per_p(ns, ps, runs, regularity, version):
             #with open(my_path + f"/data/regular_graphs_maxcuts.json", 'r') as f:
             #    graphs = json.load(f)
             #optimal_cuts = graphs[str(regularity)][str(n)][str(run)]['optimal_cut']
-            with open('100_regular_graphs_nodes_30_reg_3_solutions.pkl', 'rb') as file:
+            with open(f'100_regular_graphs_nodes_{n}_reg_3_solutions.pkl', 'rb') as file:
                 data = pickle.load(file)
             list_exact = data.copy()
 
@@ -200,11 +202,6 @@ def plot_cuts_recalculation_per_p(ns, ps, runs, regularity, version):
                     cuts_norm = cuts/list_exact[run]
                     cuts_qtensor_recalc_6 += cuts_norm
                     counter_qtensor_recalc_6 += 1
-                    if p == 1:
-                            cuts = data['cuts_single']
-                            cuts_norm = cuts/list_exact[run]
-                            cuts_single += cuts_norm
-                            counter_single += 1
                 except:
                     print(f'file results_run_{run}_n_{n}_p_{p}_recalc_6_version_{version}.pkl is not available')
 
@@ -225,14 +222,19 @@ def plot_cuts_recalculation_per_p(ns, ps, runs, regularity, version):
                     cuts_norm = cuts/list_exact[run]
                     cuts_qtensor += cuts_norm
                     counter_qtensor += 1
+                    if p == 1:
+                            cuts = data['cuts_single']
+                            cuts_norm = cuts/list_exact[run]
+                            cuts_single += cuts_norm
+                            counter_single += 1
                 except:
                     print(f'file results_run_{run}_n_{n}_p_{p}_wo_recalc_version_{version}.pkl is not available')
             
             cuts_list.append(cuts_qtensor/counter_qtensor)
             print('qtensor:', counter_qtensor)
             
-            cuts_recalc_3_list.append(cuts_qtensor_recalc_3/counter_qtensor_recalc_3)
-            cuts_recalc_6_list.append(cuts_qtensor_recalc_6/counter_qtensor_recalc_6)
+            cuts_recalc_3_list.append(cuts_qtensor_recalc_3/(counter_qtensor_recalc_3))
+            cuts_recalc_6_list.append(cuts_qtensor_recalc_6/(counter_qtensor_recalc_6))
             if p==1:
                 cuts_single_list.append(cuts_single/counter_single)
 
@@ -260,12 +262,12 @@ def plot_cuts_recalculation_per_p(ns, ps, runs, regularity, version):
         plt.show()
 
 if __name__ == '__main__':
-    ns = [30] #[60, 80, 100, 120, 140, 160, 180, 200]
+    ns = [50] #[60, 80, 100, 120, 140, 160, 180, 200]
     ps= [1, 2, 3]
     recalculations = [3, 6]
     regularity = 3
-    runs = list(range(30))
-    version = 2
+    runs = list(range(20))
+    version = 1
 
     colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']
 

@@ -37,12 +37,16 @@ from Helping_file import *
         
 if __name__ == '__main__':
     reg = 3
-    ns = [30]#, 140, 180]
+    ns = [50]#, 140, 180]
     seed = 666
-    ps= [1, 2]#, 3]
+    ps= [1, 2, 3]
     #num_runs = 10
-    runs=list(range(0, 5, 1))
-    version=6
+    runs=list(range(0, 10, 1))
+    version = 1
+    #execute_RQAOA_single_instance(ns[0], ps[0], num_runs)
+    #execute_RQAOA_multiple_instances(ns, ps, num_runs)
+    execute_RQAOA_parallel(ns, ps, runs, version)
+ 
     # list_wo=[]
     # list_w=[]
     # for run in runs:
@@ -60,15 +64,15 @@ if __name__ == '__main__':
 
 
 
-    begin_time = time()
-    execute_RQAOA_parallel(ns, ps, runs, version)
-    end_time = time()
-    required_time = end_time-begin_time
+    # begin_time = time()
+    # execute_RQAOA_parallel(ns, ps, runs, version)
+    # end_time = time()
+    # required_time = end_time-begin_time
 
-    f = open(f"time_twice.txt", "w+")
-    f.write(f"\nRequired time in seconds: {required_time}")
-    f.write(f"\nRequired time in minutes: {required_time/60}")
-    f.write(f"\nRequired time in hours: {required_time/3600}")
-    f.close()
-    print(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-    print(resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss)
+    # f = open(f"time_twice.txt", "w+")
+    # f.write(f"\nRequired time in seconds: {required_time}")
+    # f.write(f"\nRequired time in minutes: {required_time/60}")
+    # f.write(f"\nRequired time in hours: {required_time/3600}")
+    # f.close()
+    # print(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+    # print(resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss)

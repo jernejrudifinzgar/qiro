@@ -49,7 +49,7 @@ def execute_RQAOA_single_instance(n, p, run, version, connectivity_output=False,
             data = pickle.load(file)
         G = data[run]
     elif n in ns_graphs_maxi:
-        with open(f'100_regular_graphs_nodes_30_reg_3.pkl', 'rb') as file:
+        with open(f'100_regular_graphs_nodes_{n}_reg_3.pkl', 'rb') as file:
             data = pickle.load(file)
         G = data[run]
     else: 

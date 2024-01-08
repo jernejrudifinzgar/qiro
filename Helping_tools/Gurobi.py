@@ -55,8 +55,10 @@ def solve_max_cut(G, id=None, timeout=1, nthr=1, verbose=True, return_optimality
         return int(m._cur_obj) if not return_optimality else [obj, 0]
     
 if __name__ == '__main__':
+
+    n = 50
     list_solutions = []
-    with open('100_regular_graphs_nodes_30_reg_3.pkl', 'rb') as f:
+    with open(f'100_regular_graphs_nodes_{n}_reg_3.pkl', 'rb') as f:
         data = pickle.load(f)
     counter = 0
     for graph in data:
@@ -65,5 +67,5 @@ if __name__ == '__main__':
         print(f"Solution for graph {counter} found")
         list_solutions.append(solution)
 
-    pickle.dump(list_solutions, open("100_regular_graphs_nodes_30_reg_3_solutions.pkl", 'wb'))
+    pickle.dump(list_solutions, open(f"100_regular_graphs_nodes_{n}_reg_3_solutions.pkl", 'wb'))
 
