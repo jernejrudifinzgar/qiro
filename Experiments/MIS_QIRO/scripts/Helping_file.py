@@ -35,7 +35,7 @@ import torch.multiprocessing as mp
 from time import time
 
 
-def execute_QIRO_single_instance(n, p, run, version, connectivity_output=False, output_results=False):
+def execute_QIRO_single_instance(n, p, run, version, output_results=False):
     my_path = os.path.dirname(__file__)
     my_path = os.path.dirname(my_path)
     reg = 3
