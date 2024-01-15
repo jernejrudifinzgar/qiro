@@ -66,7 +66,7 @@ if __name__ == '__main__':
     ns = [30]
     ps = [1, 2, 3]
     runs = list(range(40))
-    version = 1
+    version = 5
 
     plot_MIS_size_per_graph(ns, ps, runs, version)
         

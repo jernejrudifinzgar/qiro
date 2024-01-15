@@ -13,6 +13,8 @@ def get_change_time(ns, ps, runs, version):
                     readable_time = time.ctime(mod_time)
 
                     print(f"Run {run}, p {p}: {readable_time}")
+                else:
+                    print(f"Run {run}, p {p} not available")
 
 
 
