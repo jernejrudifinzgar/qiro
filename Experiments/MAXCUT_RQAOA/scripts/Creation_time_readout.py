@@ -9,7 +9,7 @@ def get_change_time(ns, ps, runs, version):
             for run in runs:
                 file_path = my_path + f"/data/results_run_{run}_n_{n}_p_{p}_wo_recalc_version_{version}.pkl"
                 if os.path.exists(file_path):
-                    mod_time = os.pathgetmtime(file_path)
+                    mod_time = os.path.getmtime(file_path)
                     readable_time = time.ctime(mod_time)
 
                     print(readable_time)
