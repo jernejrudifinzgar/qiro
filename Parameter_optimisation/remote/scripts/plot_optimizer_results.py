@@ -151,7 +151,8 @@ def plot_energy__different_opt_init_n_50(ns, ps, regularity, graphs):
 
     arguments = [
                 #[0.01, 'Adam', 'fixed_angles_optimization'],
-                #[0.05, 'Adam', 'random_init'],
+                [0.0001, 'SGD', 'fixed_angles'], 
+                [0.05, 'Adam', 'random_init'],
                 [0.05, 'Adam', 'transition_states'], 
                 #[0.001, 'RMSprop', 'fixed_angles_optimization'], 
                 #[0.005, 'RMSprop', 'random_init'], 
@@ -195,7 +196,8 @@ def plot_energy__different_opt_init_n_50(ns, ps, regularity, graphs):
             plt.title(f'Graph number {i+1}')
             plt.legend(loc='upper right', bbox_to_anchor=(1,1))
             plt.subplots_adjust(hspace=0.4)
-            fig.savefig(my_path + f'/graphs/Energies_reg_{regularity}_n_{n}_graph_{graph}_different_optimized_initializations.png')
+            #fig.savefig(my_path + f'/graphs/Energies_reg_{regularity}_n_{n}_graph_{graph}_different_optimized_initializations.png')
+            plt.show()
             plt.close()
 
 def plot_losses__different_opt_init_n_50(ns, ps, regularity, graphs):
@@ -301,10 +303,10 @@ def plot_losses__different_opt_init_n_50(ns, ps, regularity, graphs):
         
     
 graphs=[i for i in range(10)]
-ns=[50]#, 100, 150, 200]
+ns=[30]#, 100, 150, 200]
 regularity=3
 optimizers_list = ['SGD', 'RMSprop', 'Adam']
-ps = [3]
+ps = [1, 2, 3]
 
 learning_rates_SGD = [0.0001, 0.0005, 0.001]
 learning_rates_RMSprop = [0.001, 0.005, 0.01, 0.05]
@@ -318,11 +320,11 @@ regularity=3
 optimizers_list = ['SGD', 'RMSprop']
 """
 
-graphs=[14, 19, 23, 35, 47, 54, 64]
+graphs=[0]
 optimizers_list = ['Adam']
 
 if __name__ == '__main__':
     #plot_energy_optimizer_different_lr(ns, regularity, graphs, optimizers_list, initializers_list)
     #plot_losses_optimizer_different_lr(ns, regularity, graphs, optimizers_list, initializers_list)
-    #plot_energy__different_opt_init_n_50([200], ps, regularity, graphs)
-    plot_losses__different_opt_init_n_50([200], ps, regularity, graphs)
+    plot_energy__different_opt_init_n_50([50], ps, regularity, graphs)
+    #plot_losses__different_opt_init_n_50([200], ps, regularity, graphs)

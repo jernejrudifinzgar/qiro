@@ -80,6 +80,7 @@ def execute_QIRO_single_instance(n, p, run, version, output_results=False):
     solution_dict['losses_qtensor'] = QIRO_qtensor.losses_list
     solution_dict['num_nodes_qtensor'] = QIRO_qtensor.num_nodes
     
+    
     if p==1:
         problem = Generator.MIS(G)
         expectation_values_single = SingleLayerQAOAExpectationValues(problem)
@@ -104,7 +105,8 @@ def execute_QIRO_single_instance(n, p, run, version, output_results=False):
     # f.close()
 
     pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_version_{version}.pkl", 'wb'))
-
+    print(solution_qtensor)
+    print(solution_single)
     if output_results:
         print('MIS size qtensor:', size_indep_set_qiro_qtensor)
 
