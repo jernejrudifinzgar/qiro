@@ -13,9 +13,9 @@ def get_change_time(ns, ps, runs, version):
                     readable_time = time.ctime(mod_time)
 
                     if p==1 and run==0:
-                        base_time = readable_time
+                        base_time = mod_time
 
-                    required_time = readable_time-base_time
+                    required_time = mod_time-base_time
 
                     print(f"Run {run}, p {p}: {readable_time}, Required time: {required_time}")
                 else:
