@@ -32,7 +32,7 @@ if __name__ == '__main__':
     #execute_QIRO_parallel(ns, ps, runs, version)
 
     #execute_QIRO_single_instance(30, 1, 0, 5)
-    execute_QIRO_parallel([30], [1], [0, 1], 3)
+    execute_QIRO_parallel([30], [1], [0, 1], 4)
 
     
     

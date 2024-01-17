@@ -254,10 +254,6 @@ def execute_RQAOA_multiple_instances_recalculation(ns, ps, num_runs, recalculati
 
 
 
-
-
-
-
 def execute_RQAOA_multiple_instances_different_n_wo_recalc(ns, p, run, version):
     for n in ns: 
         execute_RQAOA_single_instance(n, p, run, version)
@@ -271,3 +267,4 @@ def execute_RQAOA_parallel(ns, ps, runs, version):
     
     pool = mp.Pool(len(arguments_list))
     pool.starmap(execute_RQAOA_multiple_instances_different_n_wo_recalc, arguments_list)
+    print('Job finished')

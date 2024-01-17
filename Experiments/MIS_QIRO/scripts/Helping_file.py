@@ -52,7 +52,6 @@ def execute_QIRO_single_instance(n, p, run, version, output_results=False):
     elif n in ns_graphs_maxi:
         with open(f'100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
             data = pickle.load(file)
-            print('found graph file')
         G = data[run]
     else: 
         #random.seed()
