@@ -25,14 +25,14 @@ if __name__ == '__main__':
     seed = 666
     ps= [1, 2, 3]
     #num_runs = 10
-    runs=list(range(20, 40, 1))
+    runs=list(range(0, 20, 1))
     version = 1
     #execute_RQAOA_single_instance(ns[0], ps[0], num_runs)
     #execute_RQAOA_multiple_instances(ns, ps, num_runs)
     #execute_QIRO_parallel(ns, ps, runs, version)
 
     #execute_QIRO_single_instance(30, 1, 0, 5)
-    execute_QIRO_parallel([30], [1], [0, 1], 4)
+    execute_QIRO_parallel(ns, ps, runs, version)
 
     
     

@@ -28,7 +28,9 @@ def plot_MIS_size_per_graph(ns, ps, runs, version):
                     with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_version_{version}.pkl", 'rb') as file:
                         data = pickle.load(file)
                     MIS_size_qtensor_list.append(data['size_solution_qtensor'])
-                    
+                    print(p)
+                    print(run)
+                    print(data)
                     print(data['solution_qtensor'])
                             #print(data['solution_single'])
                     if p==1:
@@ -66,7 +68,7 @@ if __name__ == '__main__':
     ns = [30]
     ps = [1, 2, 3]
     runs = list(range(40))
-    version = 5
+    version = 4
 
     plot_MIS_size_per_graph(ns, ps, runs, version)
         
