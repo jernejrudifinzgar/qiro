@@ -271,13 +271,13 @@ def plot_cuts_per_graph(ns, ps, runs, regularity, version):
         ns_graphs_maxi = [30, 50]
 
         fig = plt.figure()
-        plt.title(f'Number of cuts for MAXCUT graphs with {n} nodes for different types of calculations')
+        plt.title(f'Optimal cuts ratio for MAXCUT graphs with {n} nodes for different types of calculations')
 
 
         if n in ns_graphs_rudi:
             with open(my_path + f"/data/regular_graphs_maxcuts.json", 'r') as f:
                 graphs = json.load(f)
-            for run in runs: 
+            for run in range(100): 
                 optimal_cuts = graphs[str(regularity)][str(n)][str(run)]['optimal_cut']
                 list_exact.append(optimal_cuts)
 
@@ -343,8 +343,9 @@ def plot_cuts_per_graph(ns, ps, runs, regularity, version):
         plt.xticks(runs, runs)
         plt.xlabel('Graphs')
         plt.ylabel('Optimal cuts ratio')
-        plt.legend()
-        #fig.savefig(my_path + f'/results/Cuts_different_calculations_per_graph_n_{n}_version_{version}.png')
+        plt.ylim((0.952, 1.002))
+        plt.legend(loc=4)
+        fig.savefig(my_path + f'/results/Cuts_different_calculations_per_graph_n_{n}_version_{version}.png')
         plt.show()
         #plt.close()
 
@@ -450,7 +451,7 @@ if __name__ == '__main__':
     ps= [1, 2, 3]
     recalculations = [3, 6]
     regularity = 3
-    runs = list(range(10))
+    runs = list(range(0, 20))
     version = 1
 
     colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']

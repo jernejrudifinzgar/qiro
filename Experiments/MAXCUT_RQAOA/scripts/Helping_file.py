@@ -58,6 +58,7 @@ def execute_RQAOA_single_instance(n, p, run, version, connectivity_output=False,
 
     problem = Generator.MAXCUT(G)
     expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, initialization='fixed_angles_optimization', opt=torch.optim.SGD, opt_kwargs=dict(lr=0.0001))
+    #expectation_values_qtensor = QtensorQAOAExpectationValuesMAXCUT(problem, p, initialization='fixed_angles_optimization', opt=torch.optim.SGD, opt_kwargs=dict(lr=0.0001))    
     RQAOA_qtensor = RQAOA(expectation_values_qtensor, 5, type_of_problem="MAXCUT", connectivity_output=connectivity_output)
     time_start = time()
     cuts_qtensor, solution_qtensor = RQAOA_qtensor.execute()
@@ -77,16 +78,16 @@ def execute_RQAOA_single_instance(n, p, run, version, connectivity_output=False,
         solution_dict['solution_single']=solution_single
         solution_dict['energies_qtensor'] = RQAOA_qtensor.energies_list
 
-    f = open(my_path + f"/data/results_test_run_{run}_n_{n}_p_{p}_version_{version}.txt", "w+")
-    f.write(f"\nRequired time in seconds for RQAOA: {required_time}")
-    f.write(f"\nRequired time in minutes for RQAOA: {required_time/60}")
-    f.write(f"\nRequired time in hours for RQAOA: {required_time/3600}")
-    f.write(f"\nCalculated number of cuts with tensor networks: {cuts_qtensor}")
-    f.write(f"\nCalculated solution with tensor networks: {solution_qtensor}")
-    if p==1:
-        f.write(f"\nCalculated number of cuts with analytic method:: {cuts_single}")
-        f.write(f"\nCalculated solution with analytic method: {solution_single}")
-    f.close()
+    # f = open(my_path + f"/data/results_test_run_{run}_n_{n}_p_{p}_version_{version}.txt", "w+")
+    # f.write(f"\nRequired time in seconds for RQAOA: {required_time}")
+    # f.write(f"\nRequired time in minutes for RQAOA: {required_time/60}")
+    # f.write(f"\nRequired time in hours for RQAOA: {required_time/3600}")
+    # f.write(f"\nCalculated number of cuts with tensor networks: {cuts_qtensor}")
+    # f.write(f"\nCalculated solution with tensor networks: {solution_qtensor}")
+    # if p==1:
+    #     f.write(f"\nCalculated number of cuts with analytic method:: {cuts_single}")
+    #     f.write(f"\nCalculated solution with analytic method: {solution_single}")
+    # f.close()
 
     pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_wo_recalc_version_{version}.pkl", 'wb'))
 
@@ -94,6 +95,38 @@ def execute_RQAOA_single_instance(n, p, run, version, connectivity_output=False,
         print('Cuts qtensor:', cuts_qtensor)
 
     return cuts_qtensor, solution_qtensor
+
+def execute_RQAOA_single_instance_only_single(n, p, run, version, connectivity_output=False, output_results=False):
+    my_path = os.path.dirname(__file__)
+    my_path = os.path.dirname(my_path)
+    reg = 3
+    seed = 666
+
+    ns_graphs_rudi = list(range(60, 220, 20))
+
+    ns_graphs_maxi = [30, 50]
+
+    if n in ns_graphs_rudi:
+        with open(f'rudis_100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
+            data = pickle.load(file)
+        G = data[run]
+    elif n in ns_graphs_maxi:
+        with open(f'100_regular_graphs_nodes_{n}_reg_3.pkl', 'rb') as file:
+            data = pickle.load(file)
+        G = data[run]
+    else: 
+        #random.seed()
+        G = nx.random_regular_graph(reg, n)
+
+    problem = Generator.MAXCUT(G)
+    solution_dict = {}
+    expectation_values_single = SingleLayerQAOAExpectationValues(problem)
+    RQAOA_single = RQAOA(expectation_values_single, 3, type_of_problem="MAXCUT")
+    cuts_single, solution_single = RQAOA_single.execute()
+    solution_dict['cuts_single']=cuts_single
+    solution_dict['solution_single']=solution_single
+
+    pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_wo_recalc_version_{version}.pkl", 'wb'))
 
 #@profile
 def execute_RQAOA_multiple_instances(ns, ps, num_runs):
