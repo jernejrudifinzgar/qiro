@@ -298,6 +298,7 @@ def plot_cuts_per_graph(ns, ps, runs, regularity, version):
                 list_single_cuts = []
 
             for run in runs:
+                
                 try:
                     with open (my_path + f"/data/results_run_{run}_n_{n}_p_{p}_wo_recalc_version_{version}.pkl", 'rb') as f:
                         data = pickle.load(f)
@@ -324,7 +325,7 @@ def plot_cuts_per_graph(ns, ps, runs, regularity, version):
                     average_list.append(average)
                 plt.scatter(list_graphs_single, list_single_cuts_norm, c=colors[counter], s = 100, marker = markers[counter], label = 'cuts analytic for p=1')
                 plt.plot(list_graphs_single, average_list, color=colors[counter], linestyle=linestyles[counter], label = 'average cut ratio with analytic p=1')
-                counter += 1         
+                counter += 1    
 
             counter_cuts = 0
             average_list = []
@@ -451,7 +452,7 @@ if __name__ == '__main__':
     ps= [1, 2, 3]
     recalculations = [3, 6]
     regularity = 3
-    runs = list(range(0, 20))
+    runs = list(range(0, 10))
     version = 1
 
     colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']
