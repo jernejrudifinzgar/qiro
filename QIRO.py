@@ -84,7 +84,7 @@ class QIRO_MIS(QIRO):
         self.problem = MIS(self.graph, self.problem.alpha)
 
         if self.expectation_values.type == 'QtensorQAOAExpectationValuesQUBO':
-            self.expectation_values = QtensorQAOAExpectationValuesQUBO(self.problem, self.expectation_values.p, pbar=self.expectation_values.pbar)
+            self.expectation_values = QtensorQAOAExpectationValuesQUBO(self.problem, self.expectation_values.p, initialization=self.expectation_values.initialization, pbar=self.expectation_values.pbar)
         elif self.expectation_values.type == 'SingleLayerQAOAExpectationValue':
             self.expectation_values = SingleLayerQAOAExpectationValues(self.problem)
 
@@ -117,7 +117,7 @@ class QIRO_MIS(QIRO):
         self.problem = MIS(self.graph, self.problem.alpha)
 
         if self.expectation_values.type == 'QtensorQAOAExpectationValuesQUBO':
-            self.expectation_values = QtensorQAOAExpectationValuesQUBO(self.problem, self.expectation_values.p, pbar=self.expectation_values.pbar)
+            self.expectation_values = QtensorQAOAExpectationValuesQUBO(self.problem, self.expectation_values.p, initialization=self.expectation_values.initialization, pbar=self.expectation_values.pbar)
         elif self.expectation_values.type == 'SingleLayerQAOAExpectationValue':
             self.expectation_values = SingleLayerQAOAExpectationValues(self.problem)
 
@@ -143,7 +143,7 @@ class QIRO_MIS(QIRO):
         self.problem = MIS(self.graph, self.problem.alpha)
 
         if self.expectation_values.type == 'QtensorQAOAExpectationValuesQUBO':
-            self.expectation_values = QtensorQAOAExpectationValuesQUBO(self.problem, self.expectation_values.p, pbar=self.expectation_values.pbar)
+            self.expectation_values = QtensorQAOAExpectationValuesQUBO(self.problem, self.expectation_values.p, initialization=self.expectation_values.initialization, pbar=self.expectation_values.pbar)
         elif self.expectation_values.type == 'SingleLayerQAOAExpectationValue':
             self.expectation_values = SingleLayerQAOAExpectationValues(self.problem)
 

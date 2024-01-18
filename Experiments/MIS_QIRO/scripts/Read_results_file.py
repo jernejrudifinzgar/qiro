@@ -7,9 +7,16 @@ __plot_height = 9.119
 matplotlib.rcParams['figure.figsize'] = (1.718*__plot_height, __plot_height)
 set_matplotlib_formats('svg')
 import os
+import sys
+sys.path.append("../../../Qtensor")
+sys.path.append("../../../Qtensor/qtree_git")
+sys.path.append("../../../classical_benchmarks")
+from greedy_mis import greedy_mis
 
-def plot_MIS_size_per_graph(ns, ps, runs, version):
-    colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']
+def plot_MIS_size_per_graph(ns, ps, runs, version, regularity):
+    colors=['tab:blue', 'tab:orange', 'tab:pink', 'tab:red', 'tab:cyan', 'tab:green', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:purple']
+    markers = ['s', 'D', 'v', '*', '.']
+    linestyles = ['solid', 'dashed', 'dashdot', 'dotted', (0, (3, 5, 1, 5, 1, 5))]
     my_path = os.path.dirname(__file__)
     my_path = os.path.dirname(my_path)
     counter = 0
@@ -19,8 +26,12 @@ def plot_MIS_size_per_graph(ns, ps, runs, version):
 
         for p in ps:
             MIS_size_qtensor_list = []
+            list_graphs_qtensor = []
+            
             if p==1:
                 MIS_size_single_list = []
+                list_graphs_single = []
+                MIS_size_greedy_list = []
 
 
             for run in runs:
@@ -28,49 +39,134 @@ def plot_MIS_size_per_graph(ns, ps, runs, version):
                     with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_version_{version}.pkl", 'rb') as file:
                         data = pickle.load(file)
                     MIS_size_qtensor_list.append(data['size_solution_qtensor'])
-                    print(p)
-                    print(run)
-                    print(data)
-                    print(data['solution_qtensor'])
-                            #print(data['solution_single'])
+                    list_graphs_qtensor.append(run)
+
                     if p==1:
                         MIS_size_single_list.append(data['size_solution_single'])
+                        list_graphs_single.append(run)
+                        MIS_size_greedy_list.append(data['size_solution_greedy'])
                 except:
                     print(f'file results_run_{run}_n_{n}_p_{p}_version_{version}.pkl not available')
             
             if p==1:
-                plt.scatter(list(range(len(MIS_size_single_list))), MIS_size_single_list, c=colors[counter], label = f'analytic simulation with p=1')
+                counter_size = 0
+                average_list = []
+                for size in MIS_size_single_list:
+                    counter_size += size
+                average = counter_size/len(list_graphs_single)
+                for i in list_graphs_single:
+                    average_list.append(average)
+                plt.scatter(list(range(len(MIS_size_single_list))), MIS_size_single_list, c=colors[counter], s = 100, marker = markers[counter], label = f'analytic simulation with p=1')
+                plt.plot(list_graphs_single, average_list, color=colors[counter], linestyle=linestyles[counter], label = 'average MIS size with analytic p=1')
                 counter +=1
-            plt.scatter(list(range(len(MIS_size_qtensor_list))), MIS_size_qtensor_list, c=colors[counter], label = f'tensor network simulation for p={p}')
+
+                counter_size = 0
+                average_list = []
+                for size in MIS_size_greedy_list:
+                    counter_size += size
+                average = counter_size/len(list_graphs_single)
+                for i in list_graphs_single:
+                    average_list.append(average)
+                plt.scatter(list(range(len(MIS_size_greedy_list))), MIS_size_greedy_list, c=colors[counter], marker = markers[counter], label = f'greedy algorithm')
+                plt.plot(list_graphs_single, average_list, color=colors[counter], linestyle=linestyles[counter], label = 'average MIS size with greedy algorithm')
+                counter +=1
+
+            counter_size = 0
+            average_list = []
+            for size in MIS_size_qtensor_list:
+                counter_size += size
+            average = counter_size/len(list_graphs_qtensor)
+            for i in list_graphs_qtensor:
+                average_list.append(average)
+            plt.scatter(list(range(len(MIS_size_qtensor_list))), MIS_size_qtensor_list, c=colors[counter], marker = markers[counter], label = f'tensor network simulation for p={p}')
+            plt.plot(list_graphs_qtensor, average_list, color=colors[counter], linestyle=linestyles[counter], label = f'average MIS size with tensor network p={p}')
             counter += 1
             
         plt.xticks(runs, list(range(len(MIS_size_qtensor_list))))
         plt.xlabel('Graphs')
-        plt.ylabel('Optimal cuts ratio')
+        plt.ylabel('MIS size')
         plt.legend()    
         plt.show()
+        fig.savefig(my_path + f'/results/MIS_size_reg_{regularity}_n_{n}_runs_{runs[0]}_{runs[9]}_version_{version}.png')
+
+
+def plot_energies(ns, ps, runs, version, regularity, per_node=False):
+    colors=['tab:blue', 'tab:orange', 'tab:pink', 'tab:red', 'tab:cyan', 'tab:green', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:purple']
+    markers = ['s', 'D', 'v', '*', '.']
+    linestyles = ['solid', 'dashed', 'dashdot', 'dotted', (0, (3, 5, 1, 5, 1, 5))]
+    my_path = os.path.dirname(__file__)
+    my_path = os.path.dirname(my_path)
+    for n in ns:
+        fig = plt.figure()
+        fig.suptitle(f"QAOA energies of QIRO steps for graphs with {n} nodes for different types of QAOA calculation")
+        for run, i in zip(runs, range(len(runs))):
+            counter = 0
+            plt.subplot(3, 4, i+1)
+            for p in ps:
+                #try:
+                with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_version_{version}.pkl", 'rb') as file:
+                    data = pickle.load(file)
+                num_nodes_qtensor = data['num_nodes_qtensor']
+                energies_qtensor = [float(j) for j in data['energies_qtensor']]
+                if per_node==True:
+                    energies_qtensor = [energies_qtensor[j]/num_nodes_qtensor[j] for j in range(len(num_nodes_qtensor))]
+                
+                plt.plot(list(range(len(energies_qtensor))), energies_qtensor, color=colors[counter], linestyle=linestyles[counter], label = f'Energies tensor network p={p} simulation')
+                counter += 1
+
+                if p==1:
+                    num_nodes_single = data['num_nodes_qtensor']
+                    energies_single = [float(j) for j in data['energies_single']]
+                    if per_node==True:
+                        energies_single = [energies_single[j]/num_nodes_single[j] for j in range(len(num_nodes_single))]
+                    plt.plot(list(range(len(energies_single))), energies_single, color=colors[counter], linestyle=linestyles[counter], label = f'Energies in analytic calculation')
+                    counter += 1
+                #except:
+                #    print(f'file results_run_{run}_n_{n}_p_{p}_version_{version}.pkl not available')
+
+            if i==0 or i==4 or i==8:
+                plt.ylabel('Energy')
+            if i==6 or i==7 or i==8 or i==9:
+                plt.xlabel('Qiro steps')
+            plt.title(f'Graph {run+1}')
+        plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=0.25)
+        plt.legend(loc='lower left', bbox_to_anchor=(1,0.4))
+        plt.show()
+        fig.savefig(my_path + f'/results/Energies_reg_{regularity}_n_{n}_runs_{runs[0]}_{runs[9]}_version_{version}.png')
 
                 
 
 
 
 
+                
+def solve_greedy():
+    my_path = os.path.dirname(__file__)
+    my_path = os.path.dirname(my_path)
 
+    with open(f'100_regular_graphs_nodes_{30}_reg_{3}.pkl', 'rb') as file:
+        data = pickle.load(file)
+        
+    for run in range(20):
+        G = data[run]
+        size_greedy = greedy_mis(G)
 
-
-
-
-
-
+        with open(my_path + f"/data/results_run_{run}_n_{30}_p_{1}_version_{1}.pkl", 'rb') as file:
+            dictio = pickle.load(file)
+        dictio['size_solution_greedy'] = size_greedy
+        pickle.dump(dictio, open(my_path + f"/data/results_run_{run}_n_{30}_p_{1}_version_{1}.pkl", 'wb'))
 
 if __name__ == '__main__':
 
     ns = [30]
     ps = [1, 2, 3]
-    runs = list(range(40))
-    version = 4
+    runs = list(range(0, 10))
+    regularity = 3
+    version = 1
+    
 
-    plot_MIS_size_per_graph(ns, ps, runs, version)
+    #plot_MIS_size_per_graph(ns, ps, runs, version, regularity)
+    plot_energies(ns, ps, runs, version, regularity, per_node=False)
         
 
 

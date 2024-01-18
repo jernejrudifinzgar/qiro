@@ -6,10 +6,12 @@ import resource
 sys.path.append("../../../Qtensor")
 sys.path.append("../../../Qtensor/qtree_git")
 sys.path.append("../../..")
+sys.path.append("../../../classical_benchmarks")
 
 #print(os.path.abspath(os.curdir))
 #print(os.chdir("../../Qtensor"))
 #print(os.path.abspath(os.curdir))
+from greedy_mis import greedy_mis
 
 from qtensor import ZZQtreeQAOAComposer, ZZQtreeQAOAComposer_MIS, ZZQtreeQAOAComposer_MAXCUT
 from qtensor import QAOAQtreeSimulator, QAOAQtreeSimulator_MIS, QAOAQtreeSimulator_MAXCUT
@@ -35,7 +37,7 @@ import torch.multiprocessing as mp
 from time import time
 
 
-def execute_QIRO_single_instance(n, p, run, version, output_results=False):
+def execute_QIRO_single_instance(n, p, run, version, initialization, output_results=False, gamma=None, beta=None):
     my_path = os.path.dirname(__file__)
     my_path = os.path.dirname(my_path)
     reg = 3
@@ -63,7 +65,7 @@ def execute_QIRO_single_instance(n, p, run, version, output_results=False):
 
     problem = Generator.MIS(G)
 
-    expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, opt=torch.optim.RMSprop, opt_kwargs=dict(lr=0.005))
+    expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, opt=torch.optim.RMSprop, initialization = initialization, opt_kwargs=dict(lr=0.005), gamma=gamma, beta=beta)
     QIRO_qtensor = QIRO_MIS(5, expectation_values_qtensor)
     time_start = time()
     QIRO_qtensor.execute()
@@ -81,6 +83,9 @@ def execute_QIRO_single_instance(n, p, run, version, output_results=False):
     
     
     if p==1:
+        size_greedy = greedy_mis(G)
+        solution_dict['size_solution_greedy'] = size_greedy
+
         problem = Generator.MIS(G)
         expectation_values_single = SingleLayerQAOAExpectationValues(problem)
         QIRO_single = QIRO_MIS(5, expectation_values_single)
@@ -104,8 +109,7 @@ def execute_QIRO_single_instance(n, p, run, version, output_results=False):
     # f.close()
 
     pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_version_{version}.pkl", 'wb'))
-    print('Qtensor:', solution_qtensor)
-    print('Single:', solution_single)
+
     if output_results:
         print('MIS size qtensor:', size_indep_set_qiro_qtensor)
         if p==1: 
@@ -243,16 +247,16 @@ def execute_RQAOA_multiple_instances_recalculation(ns, ps, num_runs, recalculati
 
 
 
-def execute_QIRO_multiple_instances_different_n(ns, p, run, version):
+def execute_QIRO_multiple_instances_different_n(ns, p, run, version, initialization):
     for n in ns: 
-        execute_QIRO_single_instance(n, p, run, version)
+        execute_QIRO_single_instance(n, p, run, version, initialization)
 
 
-def execute_QIRO_parallel(ns, ps, runs, version):
+def execute_QIRO_parallel(ns, ps, runs, version, initialization='random'):
     arguments_list = []
     for p in ps:
         for run in runs:
-            arguments_list.append((ns, p, run, version))
+            arguments_list.append((ns, p, run, version, initialization))
     
     pool = mp.Pool(len(arguments_list))
     pool.starmap(execute_QIRO_multiple_instances_different_n, arguments_list)
