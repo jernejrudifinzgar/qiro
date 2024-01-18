@@ -108,6 +108,8 @@ def execute_QIRO_single_instance(n, p, run, version, output_results=False):
     print('Single:', solution_single)
     if output_results:
         print('MIS size qtensor:', size_indep_set_qiro_qtensor)
+        if p==1: 
+            print('MIS size single:', size_indep_set_qiro_single)
 
     return size_indep_set_qiro_qtensor, solution_qtensor
 

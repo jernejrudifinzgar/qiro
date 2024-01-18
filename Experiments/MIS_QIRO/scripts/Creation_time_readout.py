@@ -12,7 +12,17 @@ def get_change_time(ns, ps, runs, version):
                     mod_time = os.path.getmtime(file_path)
                     readable_time = time.ctime(mod_time)
 
-                    print(f"Run {run}, p {p}: {readable_time}")
+                    if p==1 and run==0:
+                        base_time = mod_time
+
+                    required_time = mod_time-base_time
+                    required_time_hours = required_time/3600
+                    required_time_days = required_time_hours/24
+
+                    print(f"Run {run}, p {p}: {readable_time}, Required time: {required_time_hours} h = {required_time_days} d")
+                else:
+                    print(f"Run {run}, p {p} not available")
+
 
 
 
