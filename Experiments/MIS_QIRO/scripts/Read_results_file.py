@@ -108,21 +108,21 @@ def plot_energies(ns, ps, runs, version, regularity, per_node=False):
                 try:
                     with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_version_{version}.pkl", 'rb') as file:
                         data = pickle.load(file)
-                    num_nodes_qtensor = data['num_nodes_qtensor']
-                    energies_qtensor = [float(j) for j in data['energies_qtensor']]
-                    if per_node==True:
-                        energies_qtensor = [energies_qtensor[j]/num_nodes_qtensor[j] for j in range(len(num_nodes_qtensor))]
                     
-                    plt.plot(list(range(len(energies_qtensor))), energies_qtensor, color=colors[counter], linestyle=linestyles[counter], label = f'Energies tensor network p={p} simulation')
-                    counter += 1
-
                     if p==1:
-                        num_nodes_single = data['num_nodes_qtensor']
+                        num_nodes_single = data['num_nodes_single']
                         energies_single = [float(j) for j in data['energies_single']]
                         if per_node==True:
                             energies_single = [energies_single[j]/num_nodes_single[j] for j in range(len(num_nodes_single))]
                         plt.plot(list(range(len(energies_single))), energies_single, color=colors[counter], linestyle=linestyles[counter], label = f'Energies in analytic calculation')
                         counter += 1
+
+                    num_nodes_qtensor = data['num_nodes_qtensor']
+                    energies_qtensor = [float(j) for j in data['energies_qtensor']]
+                    if per_node==True:
+                        energies_qtensor = [energies_qtensor[j]/num_nodes_qtensor[j] for j in range(len(num_nodes_qtensor))]
+                    plt.plot(list(range(len(energies_qtensor))), energies_qtensor, color=colors[counter], linestyle=linestyles[counter], label = f'Energies tensor network p={p} simulation')
+                    counter += 1
                 except:
                     print(f'file results_run_{run}_n_{n}_p_{p}_version_{version}.pkl not available')
 
@@ -156,9 +156,16 @@ def plot_losses(ns, ps, runs, version, regularity, per_node=False):
                     losses = data['losses_qtensor']
                     if p ==1:
                         energies_single = data['energies_single']
+                        num_nodes_single = data['num_nodes_single']
 
                     for j in range(14):
                         plt.subplot(3, 5, j+1)
+                        if p==1:
+                            energy_single = float(energies_single[j])
+                            if per_node==True:
+                                energy_single = energy_single/num_nodes_single[j]
+                            plt.scatter([49], [energy_single], c=colors[-1], label='Energy of p=1 analytic solution')
+
                         try:
                             losses_per_step = losses[j]
                             if per_node==True:
@@ -172,10 +179,6 @@ def plot_losses(ns, ps, runs, version, regularity, per_node=False):
                                 plt.xlabel('Optimization steps')
                         except:
                             pass
-                        
-                         
-                        if p==1:
-                            plt.scatter([0], [energies_single[j]])
                 except:
                     print(f'file results_run_{run}_n_{n}_p_{p}_version_{version}.pkl not available')
                 counter += 1
@@ -217,7 +220,7 @@ def plot_losses_multiple_versions(ns, ps, runs, versions, regularity, per_node=F
                             if per_node==True:
                                 losses_per_step = [losses_per_step[k]/num_nodes_qtensor[j] for k in range(len(losses_per_step))]
                         
-                            plt.plot(list(range(len(losses_per_step))), losses_per_step, color=colors[counter], linestyle=linestyles[counter], label = f'Losses tensor network p={p} simulation')
+                            plt.plot(list(range(len(losses_per_step))), losses_per_step, color=colors[counter], linestyle=linestyles[counter], label = f'Losses tensor network p={p} simulation verion {version}')
                             plt.title(f'QIRO step {j}')
                             if j==0 or j==5 or j==10:
                                 plt.ylabel('Loss')
@@ -271,9 +274,9 @@ if __name__ == '__main__':
     version = 2
     
 
-    #plot_MIS_size_per_graph(ns, ps, runs, version, regularity)
+    plot_MIS_size_per_graph(ns, ps, runs, version, regularity)
     #plot_energies(ns, ps, runs, version, regularity, per_node=True)
-    plot_losses(ns, ps, runs, version, regularity, per_node=True)
+    #plot_losses(ns, ps, runs, version, regularity, per_node=True)
     #plot_losses_multiple_versions(ns, ps, runs, versions, regularity, per_node=True)
 
         

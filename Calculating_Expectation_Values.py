@@ -676,7 +676,8 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
         self.gamma, self.beta = torch.tensor(gamma, requires_grad=True), torch.tensor(beta, requires_grad=True)
         self.loss = None
         self.ordering_algo = ordering_algo
-        self.peos = self.energy_peo()
+        #Why should peos be calculated already at initialization??:
+        #self.peos = self.energy_peo()
         self.E_nodes = None
 
     #TODO Move to optimization part and check which correlations are necessary  
