@@ -197,8 +197,9 @@ def plot_energy__different_opt_init_n_30(ns, ps, regularity, graphs):
             plt.legend(loc='upper right', bbox_to_anchor=(1,1))
             plt.subplots_adjust(hspace=0.4)
             fig.savefig(my_path + f'/graphs/Energies_reg_{regularity}_n_{n}_graph_{graph}_different_optimized_initializations.png')
-            plt.close()
+            #plt.close()
             #plt.show()
+
 def plot_losses__different_opt_init_n_30(ns, ps, regularity, graphs):
     colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']
     my_path = os.path.dirname(__file__)
@@ -301,7 +302,7 @@ graphs=[i for i in range(5)]
 ns=[30]#, 100, 150, 200]
 regularity=3
 optimizers_list = ['SGD', 'RMSprop', 'Adam']
-ps = [2, 3]
+ps = [1, 2, 3]
 
 learning_rates_SGD = [0.0001, 0.0005, 0.001]
 learning_rates_RMSprop = [0.001, 0.005, 0.01, 0.05]
@@ -319,4 +320,4 @@ if __name__ == '__main__':
     #plot_energy_optimizer_different_lr(ns, regularity, graphs, optimizers_list, initializers_list)
     #plot_losses_optimizer_different_lr(ns, ps, regularity, graphs, optimizers_list, initializers_list)
     plot_energy__different_opt_init_n_30([30], ps, regularity, graphs)
-    plot_losses__different_opt_init_n_30([30], ps, regularity, graphs)
+    #plot_losses__different_opt_init_n_30([30], ps, regularity, graphs)

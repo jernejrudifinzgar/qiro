@@ -94,8 +94,8 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, output_resu
         size_indep_set_qiro_single = np.sum(solution_single >= 0)
         solution_dict['size_solution_single'] = size_indep_set_qiro_single
         solution_dict['solution_single'] = solution_single
-        solution_dict['energies_single'] = QIRO_qtensor.energies_list
-        solution_dict['num_nodes_qtensor'] = QIRO_qtensor.num_nodes
+        solution_dict['energies_single'] = QIRO_single.energies_list
+        solution_dict['num_nodes_single'] = QIRO_single.num_nodes
 
     # f = open(my_path + f"/data/results_test_run_{run}_n_{n}_p_{p}_version_{version}.txt", "w+")
     # f.write(f"\nRequired time in seconds for RQAOA: {required_time}")

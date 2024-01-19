@@ -23,7 +23,7 @@ if __name__ == '__main__':
     reg = 3
     ns = [30]#, 140, 180]
     seed = 666
-    ps= [1, 2, 3]
+    ps= [1]#, 2, 3]
     #num_runs = 10
     runs=list(range(0, 20, 1))
     initialization = 'transition_states'

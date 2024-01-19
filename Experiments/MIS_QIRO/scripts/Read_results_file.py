@@ -49,16 +49,6 @@ def plot_MIS_size_per_graph(ns, ps, runs, version, regularity):
                     print(f'file results_run_{run}_n_{n}_p_{p}_version_{version}.pkl not available')
             
             if p==1:
-                counter_size = 0
-                average_list = []
-                for size in MIS_size_single_list:
-                    counter_size += size
-                average = counter_size/len(list_graphs_single)
-                for i in list_graphs_single:
-                    average_list.append(average)
-                plt.scatter(list(range(len(MIS_size_single_list))), MIS_size_single_list, c=colors[counter], s = 100, marker = markers[counter], label = f'analytic simulation with p=1')
-                plt.plot(list_graphs_single, average_list, color=colors[counter], linestyle=linestyles[counter], label = 'average MIS size with analytic p=1')
-                counter +=1
 
                 counter_size = 0
                 average_list = []
@@ -67,22 +57,34 @@ def plot_MIS_size_per_graph(ns, ps, runs, version, regularity):
                 average = counter_size/len(list_graphs_single)
                 for i in list_graphs_single:
                     average_list.append(average)
-                plt.scatter(list(range(len(MIS_size_greedy_list))), MIS_size_greedy_list, c=colors[counter], marker = markers[counter], label = f'greedy algorithm')
+                plt.scatter(list_graphs_single, MIS_size_greedy_list, c=colors[counter], s=100, marker = markers[counter], label = f'greedy algorithm')
                 plt.plot(list_graphs_single, average_list, color=colors[counter], linestyle=linestyles[counter], label = 'average MIS size with greedy algorithm')
                 counter +=1
+
+                counter_size = 0
+                average_list = []
+                for size in MIS_size_single_list:
+                    counter_size += size
+                average = counter_size/len(list_graphs_single)
+                for i in list_graphs_single:
+                    average_list.append(average)
+                plt.scatter(list_graphs_single, MIS_size_single_list, c=colors[counter], marker = markers[counter], label = f'analytic simulation with p=1')
+                plt.plot(list_graphs_single, average_list, color=colors[counter], linestyle=linestyles[counter], label = 'average MIS size with analytic p=1')
+                counter +=1
+
 
             counter_size = 0
             average_list = []
             for size in MIS_size_qtensor_list:
                 counter_size += size
             average = counter_size/len(list_graphs_qtensor)
-            for i in list_graphs_qtensor:
+            for i in runs:
                 average_list.append(average)
-            plt.scatter(list(range(len(MIS_size_qtensor_list))), MIS_size_qtensor_list, c=colors[counter], marker = markers[counter], label = f'tensor network simulation for p={p}')
-            plt.plot(list_graphs_qtensor, average_list, color=colors[counter], linestyle=linestyles[counter], label = f'average MIS size with tensor network p={p}')
+            plt.scatter(list_graphs_qtensor, MIS_size_qtensor_list, c=colors[counter], marker = markers[counter], label = f'tensor network simulation for p={p}')
+            plt.plot(runs, average_list, color=colors[counter], linestyle=linestyles[counter], label = f'average MIS size with tensor network p={p}')
             counter += 1
             
-        plt.xticks(runs, list(range(len(MIS_size_qtensor_list))))
+        plt.xticks(runs, list(range(len(MIS_size_single_list))))
         plt.xlabel('Graphs')
         plt.ylabel('MIS size')
         plt.legend()    
@@ -103,26 +105,26 @@ def plot_energies(ns, ps, runs, version, regularity, per_node=False):
             counter = 0
             plt.subplot(3, 4, i+1)
             for p in ps:
-                #try:
-                with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_version_{version}.pkl", 'rb') as file:
-                    data = pickle.load(file)
-                num_nodes_qtensor = data['num_nodes_qtensor']
-                energies_qtensor = [float(j) for j in data['energies_qtensor']]
-                if per_node==True:
-                    energies_qtensor = [energies_qtensor[j]/num_nodes_qtensor[j] for j in range(len(num_nodes_qtensor))]
-                
-                plt.plot(list(range(len(energies_qtensor))), energies_qtensor, color=colors[counter], linestyle=linestyles[counter], label = f'Energies tensor network p={p} simulation')
-                counter += 1
-
-                if p==1:
-                    num_nodes_single = data['num_nodes_qtensor']
-                    energies_single = [float(j) for j in data['energies_single']]
+                try:
+                    with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_version_{version}.pkl", 'rb') as file:
+                        data = pickle.load(file)
+                    num_nodes_qtensor = data['num_nodes_qtensor']
+                    energies_qtensor = [float(j) for j in data['energies_qtensor']]
                     if per_node==True:
-                        energies_single = [energies_single[j]/num_nodes_single[j] for j in range(len(num_nodes_single))]
-                    plt.plot(list(range(len(energies_single))), energies_single, color=colors[counter], linestyle=linestyles[counter], label = f'Energies in analytic calculation')
+                        energies_qtensor = [energies_qtensor[j]/num_nodes_qtensor[j] for j in range(len(num_nodes_qtensor))]
+                    
+                    plt.plot(list(range(len(energies_qtensor))), energies_qtensor, color=colors[counter], linestyle=linestyles[counter], label = f'Energies tensor network p={p} simulation')
                     counter += 1
-                #except:
-                #    print(f'file results_run_{run}_n_{n}_p_{p}_version_{version}.pkl not available')
+
+                    if p==1:
+                        num_nodes_single = data['num_nodes_qtensor']
+                        energies_single = [float(j) for j in data['energies_single']]
+                        if per_node==True:
+                            energies_single = [energies_single[j]/num_nodes_single[j] for j in range(len(num_nodes_single))]
+                        plt.plot(list(range(len(energies_single))), energies_single, color=colors[counter], linestyle=linestyles[counter], label = f'Energies in analytic calculation')
+                        counter += 1
+                except:
+                    print(f'file results_run_{run}_n_{n}_p_{p}_version_{version}.pkl not available')
 
             if i==0 or i==4 or i==8:
                 plt.ylabel('Energy')
@@ -133,6 +135,109 @@ def plot_energies(ns, ps, runs, version, regularity, per_node=False):
         plt.legend(loc='lower left', bbox_to_anchor=(1,0.4))
         plt.show()
         fig.savefig(my_path + f'/results/Energies_reg_{regularity}_n_{n}_runs_{runs[0]}_{runs[9]}_version_{version}.png')
+
+
+def plot_losses(ns, ps, runs, version, regularity, per_node=False):
+    colors=['tab:blue', 'tab:orange', 'tab:pink', 'tab:red', 'tab:cyan', 'tab:green', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:purple']
+    markers = ['s', 'D', 'v', '*', '.']
+    linestyles = ['solid', 'dashed', 'dashdot', 'dotted', (0, (3, 5, 1, 5, 1, 5)), (0, (3, 1, 1, 1, 1, 1))]
+    my_path = os.path.dirname(__file__)
+    my_path = os.path.dirname(my_path)
+    for n in ns:
+        for run, i in zip(runs, range(len(runs))):
+            fig = plt.figure()
+            fig.suptitle(f"QAOA optimization losses of QIRO steps for graph number {run} with {n} nodes for different types of QAOA calculation")
+            counter = 0
+            for p in ps:
+                try:
+                    with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_version_{version}.pkl", 'rb') as file:
+                        data = pickle.load(file)
+                    num_nodes_qtensor = data['num_nodes_qtensor']
+                    losses = data['losses_qtensor']
+                    if p ==1:
+                        energies_single = data['energies_single']
+
+                    for j in range(14):
+                        plt.subplot(3, 5, j+1)
+                        try:
+                            losses_per_step = losses[j]
+                            if per_node==True:
+                                losses_per_step = [losses_per_step[k]/num_nodes_qtensor[j] for k in range(len(losses_per_step))]
+                        
+                            plt.plot(list(range(len(losses_per_step))), losses_per_step, color=colors[counter], linestyle=linestyles[counter], label = f'Losses tensor network p={p} simulation')
+                            plt.title(f'QIRO step {j}')
+                            if j==0 or j==5 or j==10:
+                                plt.ylabel('Loss')
+                            if j==9 or j==10 or j==11 or j==12 or j==13:
+                                plt.xlabel('Optimization steps')
+                        except:
+                            pass
+                        
+                         
+                        if p==1:
+                            plt.scatter([0], [energies_single[j]])
+                except:
+                    print(f'file results_run_{run}_n_{n}_p_{p}_version_{version}.pkl not available')
+                counter += 1
+
+            lines = []
+            labels = []
+            
+            line, label = fig.axes[0].get_legend_handles_labels()
+            lines.extend(line)
+            labels.extend(label)
+            plt.subplots_adjust(left=0.1, bottom=None, right=None, top=None, wspace=0.4, hspace=0.35)
+            plt.legend(lines, labels, loc='lower left', bbox_to_anchor=(1,0.2))
+            plt.show()
+            fig.savefig(my_path + f'/results/Losses_reg_{regularity}_n_{n}_run_{run}_version_{version}.png')
+
+def plot_losses_multiple_versions(ns, ps, runs, versions, regularity, per_node=False):
+    colors=['tab:blue', 'tab:orange', 'tab:pink', 'tab:red', 'tab:cyan', 'tab:green', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:purple']
+    markers = ['s', 'D', 'v', '*', '.']
+    linestyles = ['solid', 'dashed', 'dashdot', 'dotted', (0, (3, 5, 1, 5, 1, 5)), (0, (3, 1, 1, 1, 1, 1))]
+    my_path = os.path.dirname(__file__)
+    my_path = os.path.dirname(my_path)
+    for n in ns:
+        for run, i in zip(runs, range(len(runs))):
+            fig = plt.figure()
+            fig.suptitle(f"QAOA optimization losses of QIRO steps for graph number {run} with {n} nodes for different types of QAOA calculation")
+            counter = 0
+            for p in ps:
+
+                for version in versions:
+                    try:
+                        with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_version_{version}.pkl", 'rb') as file:
+                            data = pickle.load(file)
+                        num_nodes_qtensor = data['num_nodes_qtensor']
+                        losses = data['losses_qtensor']
+
+                        for j in range(14):
+                            plt.subplot(3, 5, j+1)
+                            losses_per_step = losses[j]
+                            if per_node==True:
+                                losses_per_step = [losses_per_step[k]/num_nodes_qtensor[j] for k in range(len(losses_per_step))]
+                        
+                            plt.plot(list(range(len(losses_per_step))), losses_per_step, color=colors[counter], linestyle=linestyles[counter], label = f'Losses tensor network p={p} simulation')
+                            plt.title(f'QIRO step {j}')
+                            if j==0 or j==5 or j==10:
+                                plt.ylabel('Loss')
+                            if j==9 or j==10 or j==11 or j==12 or j==13:
+                                plt.xlabel('Optimization steps')
+
+                    except:
+                        print(f'file results_run_{run}_n_{n}_p_{p}_version_{version}.pkl not available')
+                    counter += 1
+
+            lines = []
+            labels = []
+            
+            line, label = fig.axes[0].get_legend_handles_labels()
+            lines.extend(line)
+            labels.extend(label)
+            plt.subplots_adjust(left=0.1, bottom=None, right=None, top=None, wspace=0.4, hspace=0.35)
+            plt.legend(lines, labels, loc='lower left', bbox_to_anchor=(1,0.2))
+            plt.show()
+            fig.savefig(my_path + f'/results/Losses_reg_{regularity}_n_{n}_run_{run}_versions_{versions[0]}_{versions[1]}.png')
 
                 
 
@@ -160,13 +265,17 @@ if __name__ == '__main__':
 
     ns = [30]
     ps = [1, 2, 3]
-    runs = list(range(0, 10))
+    runs = list(range(0, 20))
     regularity = 3
-    version = 1
+    versions = [1, 2]
+    version = 2
     
 
     #plot_MIS_size_per_graph(ns, ps, runs, version, regularity)
-    plot_energies(ns, ps, runs, version, regularity, per_node=False)
+    #plot_energies(ns, ps, runs, version, regularity, per_node=True)
+    plot_losses(ns, ps, runs, version, regularity, per_node=True)
+    #plot_losses_multiple_versions(ns, ps, runs, versions, regularity, per_node=True)
+
         
 
 
