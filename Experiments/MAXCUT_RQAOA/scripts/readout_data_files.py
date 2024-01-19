@@ -346,7 +346,7 @@ def plot_cuts_per_graph(ns, ps, runs, regularity, version):
         plt.ylabel('Optimal cuts ratio')
         plt.ylim((0.952, 1.002))
         plt.legend(loc=4)
-        fig.savefig(my_path + f'/results/Cuts_different_calculations_per_graph_n_{n}_version_{version}.png')
+        #fig.savefig(my_path + f'/results/Cuts_different_calculations_per_graph_n_{n}_version_{version}.png')
         plt.show()
         #plt.close()
 
@@ -448,7 +448,7 @@ def plot_cuts_per_p(ns, ps, runs, regularity, version):
         #fig.savefig(my_path + f'/results/Cuts_different_calculations_per_p_n_{n}_version_{version}.png')
         plt.show()
 if __name__ == '__main__':
-    ns = [50] #[60, 80, 100, 120, 140, 160, 180, 200]
+    ns = [60] #[60, 80, 100, 120, 140, 160, 180, 200]
     ps= [1, 2, 3]
     recalculations = [3, 6]
     regularity = 3
