@@ -27,7 +27,7 @@ def get_change_time(ns, ps, runs, version):
 
 
 if __name__ == '__main__':
-    ns = [30]
+    ns = [50]
     ps = [1, 2, 3]
     runs = list(range(20))
     version = 1
