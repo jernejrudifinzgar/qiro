@@ -57,7 +57,7 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, output_resu
         G = data[run]
     else: 
         #random.seed()
-        G = nx.random_regular_graph(reg, n)
+        G = nx.random_regular_graph(reg, n, seed=seed)
 
         #for Erdos Renyi graphs:
         #prob = reg/(n-1) 
@@ -107,8 +107,8 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, output_resu
     #     f.write(f"\nCalculated number of cuts with analytic method:: {cuts_single}")
     #     f.write(f"\nCalculated solution with analytic method: {solution_single}")
     # f.close()
-
-    pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_version_{version}.pkl", 'wb'))
+    #print(solution_dict)
+    pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_version_{version}.pkl", 'wb'))
 
     if output_results:
         print('MIS size qtensor:', size_indep_set_qiro_qtensor)
@@ -238,7 +238,38 @@ def execute_RQAOA_multiple_instances_recalculation(ns, ps, num_runs, recalculati
 """
 
 
+def give_hessian(n, p, run, version, initialization, output_results=False, gamma=None, beta=None):
+    my_path = os.path.dirname(__file__)
+    my_path = os.path.dirname(my_path)
+    reg = 3
+    seed = 666
 
+    ns_graphs_rudi = list(range(60, 220, 20))
+
+    ns_graphs_maxi = [30, 50]
+
+    if n in ns_graphs_rudi:
+        with open(f'rudis_100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
+            data = pickle.load(file)
+        G = data[run]
+    elif n in ns_graphs_maxi:
+        with open(f'100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
+            data = pickle.load(file)
+        G = data[run]
+    else: 
+        #random.seed()
+        G = nx.random_regular_graph(reg, n)
+
+        #for Erdos Renyi graphs:
+        #prob = reg/(n-1) 
+        #G = nx.erdos_renyi_graph(n, prob)
+
+    problem = Generator.MIS(G)
+
+    expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, opt=torch.optim.RMSprop, initialization = initialization, opt_kwargs=dict(lr=0.005), gamma=gamma, beta=beta)
+    return expectation_values_qtensor.optimize()
+    
+  
 
 
 
