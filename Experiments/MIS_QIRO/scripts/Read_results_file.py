@@ -89,7 +89,7 @@ def plot_MIS_size_per_graph(ns, ps, runs, version, regularity):
         plt.ylabel('MIS size')
         plt.legend()    
         plt.show()
-        fig.savefig(my_path + f'/results/MIS_size_reg_{regularity}_n_{n}_runs_{runs[0]}_{runs[9]}_version_{version}.png')
+        #fig.savefig(my_path + f'/results/MIS_size_reg_{regularity}_n_{n}_runs_{runs[0]}_{runs[-1]}_version_{version}.png')
 
 
 def plot_energies(ns, ps, runs, version, regularity, per_node=False):
@@ -192,7 +192,7 @@ def plot_losses(ns, ps, runs, version, regularity, per_node=False):
             plt.subplots_adjust(left=0.1, bottom=None, right=None, top=None, wspace=0.4, hspace=0.35)
             plt.legend(lines, labels, loc='lower left', bbox_to_anchor=(1,0.2))
             plt.show()
-            fig.savefig(my_path + f'/results/Losses_reg_{regularity}_n_{n}_run_{run}_version_{version}.png')
+            #fig.savefig(my_path + f'/results/Losses_reg_{regularity}_n_{n}_run_{run}_version_{version}.png')
 
 def plot_losses_multiple_versions(ns, ps, runs, versions, regularity, per_node=False):
     colors=['tab:blue', 'tab:orange', 'tab:pink', 'tab:red', 'tab:cyan', 'tab:green', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:purple']
@@ -241,12 +241,6 @@ def plot_losses_multiple_versions(ns, ps, runs, versions, regularity, per_node=F
             plt.legend(lines, labels, loc='lower left', bbox_to_anchor=(1,0.2))
             plt.show()
             fig.savefig(my_path + f'/results/Losses_reg_{regularity}_n_{n}_run_{run}_versions_{versions[0]}_{versions[1]}.png')
-
-                
-
-
-
-
                 
 def solve_greedy():
     my_path = os.path.dirname(__file__)
@@ -266,12 +260,12 @@ def solve_greedy():
 
 if __name__ == '__main__':
 
-    ns = [30]
+    ns = [50]
     ps = [1, 2, 3]
     runs = list(range(0, 20))
     regularity = 3
     versions = [1, 2]
-    version = 2
+    version = 1
     
 
     plot_MIS_size_per_graph(ns, ps, runs, version, regularity)

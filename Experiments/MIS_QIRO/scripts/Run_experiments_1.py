@@ -21,12 +21,12 @@ import matplotlib.pyplot as plt
 if __name__ == '__main__':
 
     reg = 3
-    ns = [50]#, 140, 180]
+    ns = [80]#, 140, 180]
     seed = 666
     ps= [1, 2, 3]
     #num_runs = 10
     runs=list(range(0, 20, 1))
-    initialization = 'transition_states'
+    initialization = 'interpolation'
     version = 1
     #execute_RQAOA_single_instance(ns[0], ps[0], num_runs)
     #execute_RQAOA_multiple_instances(ns, ps, num_runs)
@@ -34,6 +34,31 @@ if __name__ == '__main__':
 
     #execute_QIRO_single_instance(30, 1, 0, 5)
     execute_QIRO_parallel(ns, ps, runs, version, initialization=initialization)
+    
+    
+    
+    execute_QIRO_parallel(ns, ps, runs, version, initialization='transition_states')
+    # start_time = time()
+    # give_hessian(30, 3, 0, 4, 'transition_states_try')
+    # end_time = time()
+
+    # time_try = end_time-start_time
+
+    # start_time = time()
+    # give_hessian(30, 3, 0, 5, 'transition_states_new')
+    # end_time = time()
+
+    # time_conventional = end_time-start_time
+
+    #start_time = time()
+    #give_hessian(30, 3, 0, 6, 'interpolation')
+    #end_time = time()
+
+    #time_interpolation = end_time-start_time
+
+    #print('try time in hours:', time_try/3600)
+    #print('conventional time in hours:', time_conventional/3600)
+    #print('interpolation time:', time_interpolation)
  
 
     
