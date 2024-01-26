@@ -48,11 +48,11 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, output_resu
     ns_graphs_maxi = [30, 50]
 
     if n in ns_graphs_rudi:
-        with open(f'rudis_100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
+        with open(my_path + f'/graphs/rudis_100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
             data = pickle.load(file)
         G = data[run]
     elif n in ns_graphs_maxi:
-        with open(f'100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
+        with open(my_path + f'/graphs/100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
             data = pickle.load(file)
         G = data[run]
     else: 
