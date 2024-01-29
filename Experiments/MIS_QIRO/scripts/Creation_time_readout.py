@@ -1,13 +1,13 @@
 import os
 import time 
 
-def get_change_time(ns, ps, runs, version):
+def get_change_time(ns, ps, runs, initialization, version):
     my_path = os.path.dirname(__file__)
     my_path = os.path.dirname(my_path)
     for n in ns:
         for run in runs:
             for p in ps:
-                file_path = my_path + f"/data/results_run_{run}_n_{n}_p_{p}_version_{version}.pkl"
+                file_path = my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_version_{version}.pkl"
                 if os.path.exists(file_path):
                     mod_time = os.path.getmtime(file_path)
                     readable_time = time.ctime(mod_time)
@@ -27,9 +27,10 @@ def get_change_time(ns, ps, runs, version):
 
 
 if __name__ == '__main__':
-    ns = [50]
+    ns = [80]
     ps = [1, 2, 3]
     runs = list(range(20))
     version = 1
-
-    get_change_time(ns, ps, runs, version)
+    for init in ['interpolation', 'transition_states']:
+        print(init)
+        get_change_time(ns, ps, runs, init, version)
