@@ -142,6 +142,62 @@ def transition_states(problem, ps, opt, **kwargs):
     return dictionary_transition_states
 
 
+def interpolation(problem, ps, opt, **kwargs):
+    if opt=='SGD':
+        optimizer=torch.optim.SGD
+    elif opt=='RMSprop':
+        optimizer=torch.optim.RMSprop
+    elif opt=='Adam':
+        optimizer=torch.optim.Adam
+    dictionary_interpolation={}
+    for step in ps: 
+        dictionary_interpolation_sub={}
+
+        if step==1:
+            expectation_values_single_transition = SingleLayerQAOAExpectationValues(problem)
+            expectation_values_single_transition.optimize()
+            gamma_old = [expectation_values_single_transition.gamma/np.pi]
+            beta_old = [expectation_values_single_transition.beta/np.pi]
+            energy_single_transition = expectation_values_single_transition.energy
+            dictionary_interpolation_sub['energy'] = energy_single_transition
+            dictionary_interpolation_sub['correlations'] = expectation_values_single_transition.expect_val_dict.copy()
+
+        else:
+            gamma_new = []
+            beta_new = []
+            for i in range(step):
+                
+                if i==0:
+                    gamma_new.append((step-1-(i+1)+1)/(step-1)*gamma_old[i])
+                    beta_new.append((step-1-(i+1)+1)/(step-1)*beta_old[i])
+                elif i!=0 and i!=(step-1):
+                    gamma_new.append((i+1-1)/(step-1)*gamma_old[i-1]+(step-1-(i+1)+1)/(step-1)*gamma_old[i])
+                    beta_new.append((i+1-1)/(step-1)*beta_old[i-1]+(step-1-(i+1)+1)/(step-1)*beta_old[i])
+                elif i==(step-1):
+                    gamma_new.append((i+1-1)/(step-1)*gamma_old[i-1])
+                    beta_new.append((i+1-1)/(step-1)*beta_old[i-1])
+                
+            expectation_values_qtensor_transition = QtensorQAOAExpectationValuesQUBO(problem, step, gamma=gamma_new, beta=beta_new, pbar=True, opt = optimizer, opt_kwargs=dict(**kwargs))
+            expectation_values_qtensor_transition.optimize()
+            energy_qtensor_transition = float(expectation_values_qtensor_transition.energy)
+
+            energy_min = energy_qtensor_transition
+            gamma_min = [float(i) for i in expectation_values_qtensor_transition.gamma]
+            beta_min = [float(i) for i in expectation_values_qtensor_transition.beta]
+            correlations_min = expectation_values_qtensor_transition.expect_val_dict.copy()
+            losses_min = expectation_values_qtensor_transition.losses.copy()
+
+
+            dictionary_interpolation_sub['energy'] = energy_min
+            dictionary_interpolation_sub['correlations'] = correlations_min.copy()
+            dictionary_interpolation_sub['losses'] = losses_min.copy()
+            gamma_old=gamma_min.copy()
+            beta_old=beta_min.copy()
+
+        dictionary_interpolation[f'p={step}'] = dictionary_interpolation_sub
+    return dictionary_interpolation
+
+
 def individual_MIS_QAOA_optimization_single_initialization(G_num, n, regularity, max_p, initialization, opt, learning_rate):
     ps = list(range(1, max_p+1))
     with open(f'100_regular_graphs_nodes_{n}_reg_{regularity}.pkl', 'rb') as file:
@@ -178,15 +234,22 @@ def individual_MIS_QAOA_optimization_all_initializations(G_num, n, regularity, m
 
     G = data[G_num]
     problem = Generator.MIS(G)
-    dictionary_single = analytic(problem)
-    dictionary_random = random_init(problem, ps, opt, lr=learning_rate)
-    dictionary_transition_states = transition_states(problem, ps, opt, lr=learning_rate)
-    dictionary['graph']=G_num
-    dictionary['analytic_single_p']=dictionary_single
-    dictionary['transition_states']=dictionary_transition_states
-    dictionary['random_init']=dictionary_random
+    #dictionary_single = analytic(problem)
+    #dictionary_random = random_init(problem, ps, opt, lr=learning_rate)
+    #dictionary_transition_states = transition_states(problem, ps, opt, lr=learning_rate)
+    dictionary_interpolation = interpolation(problem, ps, opt, lr=learning_rate)
 
-    print(dictionary)
+    try:
+        with open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_opt_{opt}_lr_{learning_rate}_version_{1}.pkl", 'rb') as file:
+            data = pickle.load(file)
+        dictionary['graph']=G_num
+        dictionary['analytic_single_p']=data['analytic_single_p']
+        dictionary['transition_states']=data['transition_states']
+        dictionary['random_init']=data['random_init']
+    except:
+        pass
+    dictionary['interpolation']=dictionary_interpolation
+
     pickle.dump(dictionary, open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_opt_{opt}_lr_{learning_rate}_version_{version}.pkl", 'wb'))
 
 

@@ -91,6 +91,129 @@ def plot_MIS_size_per_graph(ns, ps, runs, version, regularity):
         plt.show()
         #fig.savefig(my_path + f'/results/MIS_size_reg_{regularity}_n_{n}_runs_{runs[0]}_{runs[-1]}_version_{version}.png')
 
+def plot_MIS_size_per_graph_initialization(ns, ps, runs, version, initialization, regularity):
+    colors=['tab:blue', 'tab:orange', 'tab:pink', 'tab:red', 'tab:cyan', 'tab:green', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:purple']
+    markers = ['s', 'D', 'v', '*', '.', 's', 'D', 'v', '*', '.']
+    linestyles = ['solid', 'dashed', 'dashdot', 'dotted', (0, (3, 5, 1, 5, 1, 5)), 'solid', 'dashed', 'dashdot', 'dotted', (0, (3, 5, 1, 5, 1, 5))]
+    my_path = os.path.dirname(__file__)
+    my_path = os.path.dirname(my_path)
+    counter = 0
+    for n in ns:
+        fig = plt.figure()
+        plt.title(f"MIS size of graphs with {n} nodes for different types of calculation")
+
+        for p in ps:
+            MIS_size_qtensor_list = []
+            list_graphs_qtensor = []
+            
+            if p==1:
+                MIS_size_single_list = []
+                list_graphs_single = []
+                MIS_size_greedy_list = []
+
+
+            for run in runs:
+                try:
+                    with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_version_{version}.pkl", 'rb') as file:
+                        data = pickle.load(file)
+                    MIS_size_qtensor_list.append(data['size_solution_qtensor'])
+                    list_graphs_qtensor.append(run)
+
+                    if p==1:
+                        MIS_size_single_list.append(data['size_solution_single'])
+                        list_graphs_single.append(run)
+                        MIS_size_greedy_list.append(data['size_solution_greedy'])
+                except:
+                    print(f'file results_run_{run}_n_{n}_p_{p}_version_{version}.pkl not available')
+            
+            if p==1:
+
+                counter_size = 0
+                average_list = []
+                for size in MIS_size_greedy_list:
+                    counter_size += size
+                average = counter_size/len(list_graphs_single)
+                for i in list_graphs_single:
+                    average_list.append(average)
+                plt.scatter(list_graphs_single, MIS_size_greedy_list, c=colors[counter], s=100, marker = markers[counter], label = f'greedy algorithm')
+                plt.plot(list_graphs_single, average_list, color=colors[counter], linestyle=linestyles[counter], label = 'average MIS size with greedy algorithm')
+                counter +=1
+
+                counter_size = 0
+                average_list = []
+                for size in MIS_size_single_list:
+                    counter_size += size
+                average = counter_size/len(list_graphs_single)
+                for i in list_graphs_single:
+                    average_list.append(average)
+                plt.scatter(list_graphs_single, MIS_size_single_list, c=colors[counter], marker = markers[counter], label = f'analytic simulation with p=1')
+                plt.plot(list_graphs_single, average_list, color=colors[counter], linestyle=linestyles[counter], label = 'average MIS size with analytic p=1')
+                counter +=1
+
+
+            counter_size = 0
+            average_list = []
+            for size in MIS_size_qtensor_list:
+                counter_size += size
+            print(p)
+            print(counter_size)
+            average = counter_size/len(list_graphs_qtensor)
+            for i in runs:
+                average_list.append(average)
+            plt.scatter(list_graphs_qtensor, MIS_size_qtensor_list, c=colors[counter], marker = markers[counter], label = f'tensor network simulation for p={p}')
+            plt.plot(runs, average_list, color=colors[counter], linestyle=linestyles[counter], label = f'average MIS size with tensor network p={p}')
+            counter += 1
+
+
+
+
+
+
+
+
+
+            if p!=4:
+                MIS_size_qtensor_list = []
+                list_graphs_qtensor = []
+                
+                if p==1:
+                    MIS_size_single_list = []
+                    list_graphs_single = []
+                    MIS_size_greedy_list = []
+
+
+                for run in runs:
+                    try:
+                        with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_transition_states_version_{version}.pkl", 'rb') as file:
+                            data = pickle.load(file)
+                        MIS_size_qtensor_list.append(data['size_solution_qtensor'])
+                        list_graphs_qtensor.append(run)
+
+                        if p==1:
+                            MIS_size_single_list.append(data['size_solution_single'])
+                            list_graphs_single.append(run)
+                            MIS_size_greedy_list.append(data['size_solution_greedy'])
+                    except:
+                        print(f'file results_run_{run}_n_{n}_p_{p}_version_{version}.pkl not available')
+
+                counter_size = 0
+                average_list = []
+                for size in MIS_size_qtensor_list:
+                    counter_size += size
+                average = counter_size/len(list_graphs_qtensor)
+                for i in runs:
+                    average_list.append(average)
+                plt.scatter(list_graphs_qtensor, MIS_size_qtensor_list, c=colors[counter], marker = markers[counter], label = f'tensor network simulation for p={p} transition')
+                plt.plot(runs, average_list, color=colors[counter], linestyle=linestyles[counter], label = f'average MIS size with tensor network p={p} transition')
+                counter += 1
+            
+        plt.xticks(runs, list(range(len(MIS_size_single_list))))
+        plt.xlabel('Graphs')
+        plt.ylabel('MIS size')
+        plt.legend()    
+        plt.show()
+        #fig.savefig(my_path + f'/results/MIS_size_reg_{regularity}_n_{n}_initialization_{initialization}_runs_{runs[0]}_{runs[-1]}_version_{version}.png')
+
 
 def plot_energies(ns, ps, runs, version, regularity, per_node=False):
     colors=['tab:blue', 'tab:orange', 'tab:pink', 'tab:red', 'tab:cyan', 'tab:green', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:purple']
@@ -135,6 +258,76 @@ def plot_energies(ns, ps, runs, version, regularity, per_node=False):
         plt.legend(loc='lower left', bbox_to_anchor=(1,0.4))
         plt.show()
         fig.savefig(my_path + f'/results/Energies_reg_{regularity}_n_{n}_runs_{runs[0]}_{runs[9]}_version_{version}.png')
+
+def plot_energies_initialization(ns, ps, runs, version, initialization, regularity, per_node=False):
+    colors=['tab:blue', 'tab:orange', 'tab:pink', 'tab:red', 'tab:cyan', 'tab:green', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:purple']
+    markers = ['s', 'D', 'v', '*', '.', 's', 'D', 'v', '*', '.']
+    linestyles = ['solid', 'dashed', 'dashdot', 'dotted', (0, (3, 5, 1, 5, 1, 5)), 'solid', 'dashed', 'dashdot', 'dotted', (0, (3, 5, 1, 5, 1, 5))]
+    my_path = os.path.dirname(__file__)
+    my_path = os.path.dirname(my_path)
+    for n in ns:
+        fig = plt.figure()
+        fig.suptitle(f"QAOA energies of QIRO steps for graphs with {n} nodes for different types of QAOA calculation")
+        for run, i in zip(runs, range(len(runs))):
+            counter = 0
+            plt.subplot(3, 4, i+1)
+            for p in ps:
+                try:
+                    with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_version_{version}.pkl", 'rb') as file:
+                        data = pickle.load(file)
+                    
+                    if p==1:
+                        num_nodes_single = data['num_nodes_single']
+                        energies_single = [float(j) for j in data['energies_single']]
+                        if per_node==True:
+                            energies_single = [energies_single[j]/num_nodes_single[j] for j in range(len(num_nodes_single))]
+                        plt.plot(list(range(len(energies_single))), energies_single, color=colors[counter], linestyle=linestyles[counter], label = f'Energies in analytic calculation')
+                        counter += 1
+
+                    num_nodes_qtensor = data['num_nodes_qtensor']
+                    energies_qtensor = [float(j) for j in data['energies_qtensor']]
+                    if per_node==True:
+                        energies_qtensor = [energies_qtensor[j]/num_nodes_qtensor[j] for j in range(len(num_nodes_qtensor))]
+                    plt.plot(list(range(len(energies_qtensor))), energies_qtensor, color=colors[counter], linestyle=linestyles[counter], label = f'Energies tensor network p={p} simulation')
+                    counter += 1
+                except:
+                    print(f'file results_run_{run}_n_{n}_p_{p}_version_{version}.pkl not available')
+
+                
+
+
+
+
+
+                try:
+                    with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{'transition_states'}_version_{version}.pkl", 'rb') as file:
+                        data = pickle.load(file)
+
+                    num_nodes_qtensor = data['num_nodes_qtensor']
+                    energies_qtensor = [float(j) for j in data['energies_qtensor']]
+                    if per_node==True:
+                        energies_qtensor = [energies_qtensor[j]/num_nodes_qtensor[j] for j in range(len(num_nodes_qtensor))]
+                    plt.plot(list(range(len(energies_qtensor))), energies_qtensor, color=colors[counter], linestyle=linestyles[counter], label = f'Energies tensor network p={p} simulation transition')
+                    counter += 1
+                except:
+                    print(f'file results_run_{run}_n_{n}_p_{p}_version_{version}.pkl not available')
+
+
+
+
+
+
+
+
+            if i==0 or i==4 or i==8:
+                plt.ylabel('Energy')
+            if i==6 or i==7 or i==8 or i==9:
+                plt.xlabel('Qiro steps')
+            plt.title(f'Graph {run+1}')
+        plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=0.25)
+        plt.legend(loc='lower left', bbox_to_anchor=(1,0.4))
+        plt.show()
+        #fig.savefig(my_path + f'/results/Energies_reg_{regularity}_n_{n}_initialization_{initialization}_runs_{runs[0]}_{runs[9]}_version_{version}.png')
 
 
 def plot_losses(ns, ps, runs, version, regularity, per_node=False):
@@ -260,21 +453,23 @@ def solve_greedy():
 
 if __name__ == '__main__':
 
-    ns = [50]
+    ns = [80]
     ps = [1, 2, 3]
     runs = list(range(0, 20))
     regularity = 3
     versions = [1, 2]
     version = 1
+    initialization = 'interpolation'
     
 
-    plot_MIS_size_per_graph(ns, ps, runs, version, regularity)
+    #plot_MIS_size_per_graph(ns, ps, runs, version, regularity)
     #plot_energies(ns, ps, runs, version, regularity, per_node=True)
     #plot_losses(ns, ps, runs, version, regularity, per_node=True)
     #plot_losses_multiple_versions(ns, ps, runs, versions, regularity, per_node=True)
 
         
-
+    plot_MIS_size_per_graph_initialization(ns, ps, runs, version, initialization, regularity)
+    #plot_energies_initialization(ns, ps, runs, version, initialization, regularity, per_node=True)
 
 
 
