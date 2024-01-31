@@ -43,9 +43,9 @@ if __name__ == '__main__':
     #num_runs = 10
     runs=list(range(4, 6, 1))
     version = 1
-    #execute_RQAOA_single_instance(ns[0], ps[0], num_runs)
+    execute_RQAOA_single_instance(30, 1, 1, 1, output_results=True)
     #execute_RQAOA_multiple_instances(ns, ps, num_runs)
-    execute_RQAOA_parallel(ns, ps, runs, version)
+    #execute_RQAOA_parallel(ns, ps, runs, version)
  
     # list_wo=[]
     # list_w=[]

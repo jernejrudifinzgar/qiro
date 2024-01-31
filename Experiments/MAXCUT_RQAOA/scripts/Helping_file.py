@@ -30,7 +30,7 @@ import random
 import json
 import pickle
 import matplotlib.pyplot as plt
-from RQAOA import RQAOA, RQAOA_recalculate
+from RQAOA import RQAOA, RQAOA_recalculate, RQAOA_recalculate_v2
 import torch.multiprocessing as mp
 from time import time
 
@@ -59,7 +59,8 @@ def execute_RQAOA_single_instance(n, p, run, version, connectivity_output=False,
     problem = Generator.MAXCUT(G)
     expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, initialization='fixed_angles_optimization', opt=torch.optim.SGD, opt_kwargs=dict(lr=0.0001))
     #expectation_values_qtensor = QtensorQAOAExpectationValuesMAXCUT(problem, p, initialization='fixed_angles_optimization', opt=torch.optim.SGD, opt_kwargs=dict(lr=0.0001))    
-    RQAOA_qtensor = RQAOA(expectation_values_qtensor, 5, type_of_problem="MAXCUT", connectivity_output=connectivity_output)
+    #RQAOA_qtensor = RQAOA(expectation_values_qtensor, 5, type_of_problem="MAXCUT")
+    RQAOA_qtensor = RQAOA_recalculate(expectation_values_qtensor, 1, recalculations=20, type_of_problem="MAXCUT")
     time_start = time()
     cuts_qtensor, solution_qtensor = RQAOA_qtensor.execute()
     time_end = time()
@@ -72,7 +73,7 @@ def execute_RQAOA_single_instance(n, p, run, version, connectivity_output=False,
     if p==1:
         problem = Generator.MAXCUT(G)
         expectation_values_single = SingleLayerQAOAExpectationValues(problem)
-        RQAOA_single = RQAOA(expectation_values_single, 3, type_of_problem="MAXCUT")
+        RQAOA_single = RQAOA(expectation_values_single, 1, type_of_problem="MAXCUT")
         cuts_single, solution_single = RQAOA_single.execute()
         solution_dict['cuts_single']=cuts_single
         solution_dict['solution_single']=solution_single
@@ -89,10 +90,11 @@ def execute_RQAOA_single_instance(n, p, run, version, connectivity_output=False,
     #     f.write(f"\nCalculated solution with analytic method: {solution_single}")
     # f.close()
 
-    pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_wo_recalc_version_{version}.pkl", 'wb'))
+    #pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_wo_recalc_version_{version}.pkl", 'wb'))
 
     if output_results:
         print('Cuts qtensor:', cuts_qtensor)
+        print('Cuts single:', cuts_single)
 
     return cuts_qtensor, solution_qtensor
 
@@ -121,12 +123,13 @@ def execute_RQAOA_single_instance_only_single(n, p, run, version, connectivity_o
     problem = Generator.MAXCUT(G)
     solution_dict = {}
     expectation_values_single = SingleLayerQAOAExpectationValues(problem)
-    RQAOA_single = RQAOA(expectation_values_single, 3, type_of_problem="MAXCUT")
+    RQAOA_single = RQAOA(expectation_values_single, 0, type_of_problem="MAXCUT")
     cuts_single, solution_single = RQAOA_single.execute()
     solution_dict['cuts_single']=cuts_single
     solution_dict['solution_single']=solution_single
+    print(cuts_single)
 
-    pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_wo_recalc_version_{version}.pkl", 'wb'))
+    #pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_wo_recalc_version_{version}.pkl", 'wb'))
 
 #@profile
 def execute_RQAOA_multiple_instances(ns, ps, num_runs):
@@ -146,7 +149,7 @@ def execute_RQAOA_multiple_instances(ns, ps, num_runs):
 ##########################################
 
 
-def execute_RQAOA_single_instance_recalculation(n, p, run, recalculation, version, output_results=False):
+def execute_RQAOA_single_instance_recalculation(n, p, run, iteration, recalculation, version, output_results=False):
     my_path = os.path.dirname(__file__)
     my_path = os.path.dirname(my_path)
     reg = 3
@@ -154,7 +157,7 @@ def execute_RQAOA_single_instance_recalculation(n, p, run, recalculation, versio
 
     ns_graphs_rudi = list(range(60, 220, 20))
 
-    ns_graphs_maxi = [30]
+    ns_graphs_maxi = [30, 50]
 
     if n in ns_graphs_rudi:
         with open(f'rudis_100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
@@ -170,7 +173,7 @@ def execute_RQAOA_single_instance_recalculation(n, p, run, recalculation, versio
 
     problem = Generator.MAXCUT(G)
     expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, initialization='fixed_angles_optimization', opt=torch.optim.SGD, opt_kwargs=dict(lr=0.0001))
-    RQAOA_qtensor = RQAOA_recalculate(expectation_values_qtensor, 5, recalculations=recalculation, type_of_problem="MAXCUT")
+    RQAOA_qtensor = RQAOA_recalculate(expectation_values_qtensor, 1, iteration, recalculations=recalculation, type_of_problem="MAXCUT")
     time_start = time()
     cuts_qtensor, solution_qtensor = RQAOA_qtensor.execute()
     time_end = time()
@@ -178,29 +181,39 @@ def execute_RQAOA_single_instance_recalculation(n, p, run, recalculation, versio
     solution_dict = {}
     solution_dict['cuts_qtensor']=cuts_qtensor
     solution_dict['solution_qtensor']= solution_qtensor
+    solution_dict['energies_qtensor'] = RQAOA_qtensor.energies_list
+    solution_dict['losses'] = RQAOA_qtensor.losses_list
+    solution_dict['num_nodes'] = RQAOA_qtensor.num_nodes_list
+    solution_dict['connectivity'] = RQAOA_qtensor.connectivity
     
     if p==1:
         problem = Generator.MAXCUT(G)
         expectation_values_single = SingleLayerQAOAExpectationValues(problem)
-        RQAOA_single = RQAOA(expectation_values_single, 5, type_of_problem="MAXCUT")
+        RQAOA_single = RQAOA_recalculate(expectation_values_single, 1, iteration, recalculations=recalculation, type_of_problem="MAXCUT")
         cuts_single, solution_single = RQAOA_single.execute()
         solution_dict['cuts_single']=cuts_single
         solution_dict['solution_single']=solution_single
-    f = open(my_path + f"/data/results_test_run_{run}_n_{n}_p_{p}_recalc_{recalculation}_version_{version}.txt", "w+")
-    f.write(f"\nRequired time in seconds for RQAOA: {required_time}")
-    f.write(f"\nRequired time in minutes for RQAOA: {required_time/60}")
-    f.write(f"\nRequired time in hours for RQAOA: {required_time/3600}")
-    f.write(f"\nCalculated number of cuts with tensor networks: {cuts_qtensor}")
-    f.write(f"\nCalculated solution with tensor networks: {solution_qtensor}")
-    if p==1:
-        f.write(f"\nCalculated number of cuts with analytic method:: {cuts_single}")
-        f.write(f"\nCalculated solution with analytic method: {solution_single}")
-    f.close()
+        solution_dict['energies_single'] = RQAOA_single.energies_list
+        solution_dict['num_nodes'] = RQAOA_single.num_nodes_list
+        solution_dict['connectivity'] = RQAOA_single.connectivity
+    # f = open(my_path + f"/data/results_test_run_{run}_n_{n}_p_{p}_recalc_{recalculation}_version_{version}.txt", "w+")
+    # f.write(f"\nRequired time in seconds for RQAOA: {required_time}")
+    # f.write(f"\nRequired time in minutes for RQAOA: {required_time/60}")
+    # f.write(f"\nRequired time in hours for RQAOA: {required_time/3600}")
+    # f.write(f"\nCalculated number of cuts with tensor networks: {cuts_qtensor}")
+    # f.write(f"\nCalculated solution with tensor networks: {solution_qtensor}")
+    # if p==1:
+    #     f.write(f"\nCalculated number of cuts with analytic method:: {cuts_single}")
+    #     f.write(f"\nCalculated solution with analytic method: {solution_single}")
+    # f.close()
 
     if output_results:
         print('Cuts:', cuts_qtensor)
 
-    pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_recalc_{recalculation}_version_{version}.pkl", 'wb'))
+    print('Cuts qtensor:', cuts_qtensor)
+    print('Cuts single:', cuts_single)
+
+    pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_iteration_{iteration}_n_{n}_p_{p}_recalc_{recalculation}_initialization_fixed_angles_optimization_version_{version}.pkl", 'wb'))
 
     return cuts_qtensor, solution_qtensor
 
@@ -218,16 +231,17 @@ def execute_RQAOA_multiple_instances_recalculation(ns, ps, num_runs, recalculati
     return results
 
 
-def execute_RQAOA_multiple_instances_different_n(ns, p, run, recalculation, version):
+def execute_RQAOA_multiple_instances_different_n(ns, p, run, iteration, recalculation, version):
     for n in ns: 
-        execute_RQAOA_single_instance_recalculation(n, p, run, recalculation, version)
+        execute_RQAOA_single_instance_recalculation(n, p, run, iteration, recalculation, version)
 
 
-def execute_RQAOA_parallel_recalculation(ns, ps, runs, recalculation, version):
+def execute_RQAOA_parallel_recalculation(ns, ps, runs, iterations, recalculation, version):
     arguments_list = []
     for p in ps:
         for run in runs:
-            arguments_list.append((ns, p, run, recalculation, version))
+            for iteration in list(range(iterations)):
+                arguments_list.append((ns, p, run, iteration, recalculation, version))
     
     pool = mp.Pool(len(arguments_list))
     pool.starmap(execute_RQAOA_multiple_instances_different_n, arguments_list)

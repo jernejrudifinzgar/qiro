@@ -54,6 +54,35 @@ def solve_max_cut(G, id=None, timeout=1, nthr=1, verbose=True, return_optimality
     else:
         return int(m._cur_obj) if not return_optimality else [obj, 0]
     
+def solve_MIS(G, id=None, timeout=1, nthr=1, verbose=True, return_optimality=False):
+    """Function to solve Maximum Cut problem using Gurobi"""
+    # Create a new Gurobi model
+    m = gp.Model("MIS")
+    m.setParam(GRB.Param.Threads, nthr)
+    # Add binary variables for each node in the graph
+    x = m.addVars(sorted(G.nodes()), vtype=GRB.BINARY, name="x")
+
+    # Objective function: maximize the sum of edge weights crossing the cut
+    obj = gp.quicksum(G[u][v].get('weight', 1) * (x[u] - x[v]) * (x[u] - x[v]) for u, v in G.edges())
+    m.setObjective(obj, GRB.MAXIMIZE)
+    m.setParam("OutputFlag", int(verbose))
+    m._cur_obj = float('inf')
+    m._time = time.time()   
+    # Optimize the model
+    callback = lambda model, where: cb(model, where, threshold_time=timeout)
+    m.optimize(callback=callback)
+
+    if m.status == GRB.OPTIMAL:
+        print("Found optimal cut.")
+        obj = 0
+        for e1, e2 in G.edges:
+            if m.x[e1] != m.x[e2]:
+                obj += G[e1][e2].get("weight", 1)
+        # return m
+        return obj if not return_optimality else [obj, 1]
+    else:
+        return int(m._cur_obj) if not return_optimality else [obj, 0]
+    
 if __name__ == '__main__':
 
     n = 50

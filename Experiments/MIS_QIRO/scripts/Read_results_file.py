@@ -469,7 +469,7 @@ if __name__ == '__main__':
 
         
     plot_MIS_size_per_graph_initialization(ns, ps, runs, version, initialization, regularity)
-    #plot_energies_initialization(ns, ps, runs, version, initialization, regularity, per_node=True)
+    plot_energies_initialization(ns, ps, runs, version, initialization, regularity, per_node=True)
 
 
 

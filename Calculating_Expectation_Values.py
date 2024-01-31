@@ -156,24 +156,29 @@ class SingleLayerQAOAExpectationValues(ExpectationValues):
     def calc_expect_val(self):
         """Calculate all one- and two-point correlation expectation values and return the one with highest absolute value."""
         self.expect_val_dict = {}
-        Z = np.sin(2 * self.beta) * self.calc_single_terms(gamma=self.gamma, index=1)
-        if np.abs(Z) > 0:
-            rounding_list = [[[self.problem.position_translater[1]], np.sign(Z), np.abs(Z)]]
-            max_expect_val = np.abs(Z)
-        else:
-            rounding_list = [[[self.problem.position_translater[1]], 1, 0]]
-            max_expect_val = 0
-        
-        self.expect_val_dict[frozenset({1})] = Z
+        max_expect_val = 0
 
-        for index in range(2, len(self.problem.matrix)):
-            Z = np.sin(2 * self.beta) * self.calc_single_terms(gamma=self.gamma, index=index)
-            self.expect_val_dict[frozenset({index})] = Z
-            if np.abs(Z) > max_expect_val:
-                rounding_list = [[[self.problem.position_translater[index]], np.sign(Z), np.abs(Z)]]
+        if self.problem.matrix[1, 1] != 0:
+            Z = np.sin(2 * self.beta) * self.calc_single_terms(gamma=self.gamma, index=1)
+            if np.abs(Z) > 0:
+                rounding_list = [[[self.problem.position_translater[1]], np.sign(Z), np.abs(Z)]]
                 max_expect_val = np.abs(Z)
-            elif np.abs(Z) == max_expect_val:
-                rounding_list.append([[self.problem.position_translater[index]], np.sign(Z), np.abs(Z)])
+            else:
+                rounding_list = [[[self.problem.position_translater[1]], 1, 0]]
+                max_expect_val = 0
+            
+            self.expect_val_dict[frozenset({1})] = Z
+
+        
+        for index in range(2, len(self.problem.matrix)):
+            if self.problem.matrix[index, index] != 0:
+                Z = np.sin(2 * self.beta) * self.calc_single_terms(gamma=self.gamma, index=index)
+                self.expect_val_dict[frozenset({index})] = Z
+                if np.abs(Z) > max_expect_val:
+                    rounding_list = [[[self.problem.position_translater[index]], np.sign(Z), np.abs(Z)]]
+                    max_expect_val = np.abs(Z)
+                elif np.abs(Z) == max_expect_val:
+                    rounding_list.append([[self.problem.position_translater[index]], np.sign(Z), np.abs(Z)])
 
         for index_large in range(1, len(self.problem.matrix)):
             for index_small in range(1, index_large):
@@ -772,8 +777,11 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
                     energy = float(self.E_nodes[(i, j)])
                     if i == j:
                         self.expect_val_dict[frozenset({i})] = energy
+                        #self.expect_val_dict[i] = energy
+
                     else:
                         self.expect_val_dict[frozenset({j, i})] = energy
+                        #self.expect_val_dict[(i, j)] = energy
                         
                 
                     if abs(energy) > max_expect_val:
@@ -975,6 +983,7 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
 
             if i>1:
                 if abs((self.losses[-1]-self.losses[-2])/self.losses[-1]) < 0.0000001:
+                #if abs((self.losses[-1]-self.losses[-2])/self.losses[-1]) < 0.00025:
                     counter += 1
                     if counter == 5:
                         break
