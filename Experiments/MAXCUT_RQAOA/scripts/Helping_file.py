@@ -210,8 +210,8 @@ def execute_RQAOA_single_instance_recalculation(n, p, run, iteration, recalculat
     if output_results:
         print('Cuts:', cuts_qtensor)
 
-    print('Cuts qtensor:', cuts_qtensor)
-    print('Cuts single:', cuts_single)
+    #print('Cuts qtensor:', cuts_qtensor)
+    #print('Cuts single:', cuts_single)
 
     pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_iteration_{iteration}_n_{n}_p_{p}_recalc_{recalculation}_initialization_fixed_angles_optimization_version_{version}.pkl", 'wb'))
 
