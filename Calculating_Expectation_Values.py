@@ -729,6 +729,11 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
                     matrix_entry = self.problem.matrix[i, j]
                     self.loss += E * matrix_entry
                     self.E_nodes [(i, j)] = E
+        
+        if self.loss ==0:
+            return False
+        else:
+            return True
 
     def return_loss_func(self, *args):
         l=self.p
@@ -982,8 +987,8 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
                 _pbar.update(1)
 
             if i>1:
-                if abs((self.losses[-1]-self.losses[-2])/self.losses[-1]) < 0.0000001:
-                #if abs((self.losses[-1]-self.losses[-2])/self.losses[-1]) < 0.00025:
+                #if abs((self.losses[-1]-self.losses[-2])/self.losses[-1]) < 0.0000001:
+                if abs((self.losses[-1]-self.losses[-2])/self.losses[-1]) < 0.00025:
                     counter += 1
                     if counter == 5:
                         break

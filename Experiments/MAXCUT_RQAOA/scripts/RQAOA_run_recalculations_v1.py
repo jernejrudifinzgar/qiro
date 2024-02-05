@@ -43,8 +43,8 @@ if __name__ == '__main__':
     #num_runs = 10
     runs=list(range(5, 10, 1))
     iterations = 5
-    version = 1
-    recalculation = 5
+    version = 3
+    recalculation = 10
 
     #execute_RQAOA_single_instance(ns[0], ps[0], num_runs)
     #execute_RQAOA_multiple_instances(ns, ps, num_runs)

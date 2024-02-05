@@ -67,6 +67,7 @@ def plot_cuts_recalculation_per_graph(ns, ps, runs, regularity, version):
                 try:
                     #with open (my_path + f"/data/results_run_{run}_n_{n}_p_{p}.pkl", 'rb') as f:
                     with open (my_path + f"/data/results_run_{run}_n_{n}_p_{p}_wo_recalc_version_{version}.pkl", 'rb') as f:
+                    #with open (my_path + f"/data/results_run_{run}_iteration_{0}_n_{n}_p_{p}_recalc_5_initialization_fixed_angles_optimization_version_{version}.pkl", 'rb') as f:
                         data = pickle.load(f)
                     cuts_qtensor = data['cuts_qtensor']
                     list_qtensor_cuts.append(cuts_qtensor)
@@ -447,20 +448,122 @@ def plot_cuts_per_p(ns, ps, runs, regularity, version):
         plt.legend()
         #fig.savefig(my_path + f'/results/Cuts_different_calculations_per_p_n_{n}_version_{version}.png')
         plt.show()
+
+
+
+def plot_cuts_per_graph_recalculation(ns, ps, runs, regularity, recalculation, iteration, version):
+    colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']
+    markers = ['s', 'D', 'v', '.']
+    linestyles = ['solid', 'dashed', 'dashdot', 'dotted']
+    for n in ns:
+        list_exact = []
+        list_x = []
+        counter = 0
+        ns_graphs_rudi = list(range(60, 220, 20))
+        ns_graphs_maxi = [30, 50]
+
+        fig = plt.figure()
+        plt.title(f'Optimal cuts ratio for MAXCUT graphs with {n} nodes for different types of calculations')
+
+
+        if n in ns_graphs_rudi:
+            with open(my_path + f"/data/regular_graphs_maxcuts.json", 'r') as f:
+                graphs = json.load(f)
+            for run in range(100): 
+                optimal_cuts = graphs[str(regularity)][str(n)][str(run)]['optimal_cut']
+                list_exact.append(optimal_cuts)
+
+        elif n in ns_graphs_maxi:
+            with open(f'100_regular_graphs_nodes_{n}_reg_3_solutions.pkl', 'rb') as file:
+                data = pickle.load(file)
+            list_exact = data.copy()
+        
+        for p in ps:
+
+            list_qtensor_cuts = []
+            list_qtensor_cuts_norm = []
+            list_graphs_qtensor = []
+
+            if p == 1:
+                list_graphs_single = []
+                list_single_cuts_norm = []
+                list_single_cuts = []
+
+            for run in runs:
+                
+                try:
+                    with open (my_path + f"/data/results_run_{run}_iteration_{iteration}_n_{n}_p_{p}_recalc_{recalculation}_initialization_fixed_angles_optimization_version_{version}.pkl", 'rb') as f:
+                        data = pickle.load(f)
+                    cuts_qtensor = data['cuts_qtensor']
+                    list_qtensor_cuts.append(cuts_qtensor)
+                    list_qtensor_cuts_norm.append(cuts_qtensor/list_exact[run])
+                    list_graphs_qtensor.append(run)
+                    print(data['connectivity'])
+                    if p == 1:
+                        cuts_single = data['cuts_single']
+                        list_single_cuts.append(cuts_single)
+                        list_single_cuts_norm.append(cuts_single/list_exact[run])
+                        list_graphs_single.append(run)
+
+                except:
+                    print(f'file for {n} nodes, p={p} and run {run} is not available')
+
+            if p==1: 
+                counter_cuts = 0
+                average_list = []
+                for cut in list_single_cuts_norm:
+                    counter_cuts += cut
+                average = counter_cuts/len(list_graphs_single)
+                for i in list_graphs_single:
+                    average_list.append(average)
+                plt.scatter(list_graphs_single, list_single_cuts_norm, c=colors[counter], s = 100, marker = markers[counter], label = 'cuts analytic for p=1')
+                plt.plot(list_graphs_single, average_list, color=colors[counter], linestyle=linestyles[counter], label = 'average cut ratio with analytic p=1')
+                counter += 1    
+
+            counter_cuts = 0
+            average_list = []
+            for cut in list_qtensor_cuts_norm:
+                counter_cuts += cut
+            average = counter_cuts/len(list_graphs_qtensor)
+            for i in list_graphs_qtensor:
+                average_list.append(average)
+
+            plt.scatter(list_graphs_qtensor, list_qtensor_cuts_norm, c=colors[counter], marker = markers[counter], label = f'tensor network cuts for p={p} with 1-recalc')   
+            plt.plot(list_graphs_qtensor, average_list, color=colors[counter], linestyle=linestyles[counter], label = f'average cut ratio with tensor network p={p}')
+            counter += 1
+
+
+
+        plt.xticks(runs, runs)
+        plt.xlabel('Graphs')
+        plt.ylabel('Optimal cuts ratio')
+        plt.ylim((0.952, 1.002))
+        plt.legend(loc=4)
+        #fig.savefig(my_path + f'/results/Cuts_different_calculations_per_graph_n_{n}_version_{version}.png')
+        plt.show()
+        #plt.close()
+
+
+
 if __name__ == '__main__':
     ns = [50] #[60, 80, 100, 120, 140, 160, 180, 200]
     ps= [1, 2, 3]
-    recalculations = [3, 6]
+    recalculations = [5]
     regularity = 3
-    runs = list(range(0, 10))
+    runs = list(range(5, 10))
+    recalculation = 5
     version = 1
+    iterations = list(range(5))
 
     colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']
 
     my_path = os.path.dirname(__file__)
     my_path = os.path.dirname(my_path)
 
-    plot_cuts_per_graph(ns, ps, runs, regularity, version)
+    #plot_cuts_per_graph(ns, ps, runs, regularity, version)
     #plot_cuts_recalculation_per_p(ns, ps, runs, regularity, version)
+
+    for iteration in iterations:
+        plot_cuts_per_graph_recalculation(ns, ps, runs, regularity, recalculation, iteration, version)
 
     

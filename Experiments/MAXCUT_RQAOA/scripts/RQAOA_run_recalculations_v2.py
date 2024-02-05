@@ -37,13 +37,13 @@ from Helping_file import *
         
 if __name__ == '__main__':
     reg = 3
-    ns = [60]#, 140, 180]
+    ns = [50]#, 140, 180]
     seed = 666
-    ps= [3]
+    ps= [1]
     #num_runs = 10
-    runs=list(range(4, 6, 1))
+    runs=list(range(9, 10, 1))
     version = 1
-    execute_RQAOA_single_instance(30, 1, 1, 1, output_results=True)
+    execute_RQAOA_single_instance_recalculation(50, 1, 7, 0, 5, 1, output_results=True)
     #execute_RQAOA_multiple_instances(ns, ps, num_runs)
     #execute_RQAOA_parallel(ns, ps, runs, version)
  

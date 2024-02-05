@@ -19,10 +19,20 @@ def plot_MIS_size_per_graph(ns, ps, runs, version, regularity):
     linestyles = ['solid', 'dashed', 'dashdot', 'dotted', (0, (3, 5, 1, 5, 1, 5))]
     my_path = os.path.dirname(__file__)
     my_path = os.path.dirname(my_path)
+    ns_graphs_rudi = list(range(60, 220, 20))
+    ns_graphs_maxi = [30, 50]
     counter = 0
     for n in ns:
         fig = plt.figure()
         plt.title(f"MIS size of graphs with {n} nodes for different types of calculation")
+
+        if n in ns_graphs_rudi:
+            with open(my_path + f"/graphs/rudis_100_regular_graphs_nodes_{n}_reg_3_MIS_solutions.pkl", 'rb') as file:
+                MIS_size_exact = pickle.load(file)
+
+        elif n in ns_graphs_maxi:
+            with open(my_path + f"/graphs/100_regular_graphs_nodes_{n}_reg_3_MIS_solutions.pkl", 'rb') as file:
+                MIS_size_exact = pickle.load(file)
 
         for p in ps:
             MIS_size_qtensor_list = []
@@ -32,20 +42,21 @@ def plot_MIS_size_per_graph(ns, ps, runs, version, regularity):
                 MIS_size_single_list = []
                 list_graphs_single = []
                 MIS_size_greedy_list = []
-
-
+                
             for run in runs:
                 try:
                     with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_version_{version}.pkl", 'rb') as file:
                         data = pickle.load(file)
-                    MIS_size_qtensor_list.append(data['size_solution_qtensor'])
+                    MIS_size_qtensor_list.append(data['size_solution_qtensor']/MIS_size_exact[run])
                     list_graphs_qtensor.append(run)
 
                     if p==1:
-                        MIS_size_single_list.append(data['size_solution_single'])
+                        MIS_size_single_list.append(data['size_solution_single']/MIS_size_exact[run])
                         list_graphs_single.append(run)
-                        MIS_size_greedy_list.append(data['size_solution_greedy'])
-                except:
+                        MIS_size_greedy_list.append(data['size_solution_greedy']/MIS_size_exact[run])
+
+                except Exception as error:
+                    print(error)
                     print(f'file results_run_{run}_n_{n}_p_{p}_version_{version}.pkl not available')
             
             if p==1:
@@ -71,7 +82,6 @@ def plot_MIS_size_per_graph(ns, ps, runs, version, regularity):
                 plt.scatter(list_graphs_single, MIS_size_single_list, c=colors[counter], marker = markers[counter], label = f'analytic simulation with p=1')
                 plt.plot(list_graphs_single, average_list, color=colors[counter], linestyle=linestyles[counter], label = 'average MIS size with analytic p=1')
                 counter +=1
-
 
             counter_size = 0
             average_list = []
@@ -97,11 +107,21 @@ def plot_MIS_size_per_graph_initialization(ns, ps, runs, version, initialization
     linestyles = ['solid', 'dashed', 'dashdot', 'dotted', (0, (3, 5, 1, 5, 1, 5)), 'solid', 'dashed', 'dashdot', 'dotted', (0, (3, 5, 1, 5, 1, 5))]
     my_path = os.path.dirname(__file__)
     my_path = os.path.dirname(my_path)
+    ns_graphs_rudi = list(range(60, 220, 20))
+    ns_graphs_maxi = [30, 50]
     counter = 0
     for n in ns:
         fig = plt.figure()
         plt.title(f"MIS size of graphs with {n} nodes for different types of calculation")
 
+        if n in ns_graphs_rudi:
+            with open(my_path + f"/graphs/rudis_100_regular_graphs_nodes_{n}_reg_3_MIS_solutions.pkl", 'rb') as file:
+                MIS_size_exact = pickle.load(file)
+
+        elif n in ns_graphs_maxi:
+            with open(my_path + f"/graphs/100_regular_graphs_nodes_{n}_reg_3_MIS_solutions.pkl", 'rb') as file:
+                MIS_size_exact = pickle.load(file)
+                                
         for p in ps:
             MIS_size_qtensor_list = []
             list_graphs_qtensor = []
@@ -116,14 +136,17 @@ def plot_MIS_size_per_graph_initialization(ns, ps, runs, version, initialization
                 try:
                     with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_version_{version}.pkl", 'rb') as file:
                         data = pickle.load(file)
-                    MIS_size_qtensor_list.append(data['size_solution_qtensor'])
+                    MIS_size_qtensor_list.append(data['size_solution_qtensor']/MIS_size_exact[run])
                     list_graphs_qtensor.append(run)
 
                     if p==1:
-                        MIS_size_single_list.append(data['size_solution_single'])
+                        MIS_size_single_list.append(data['size_solution_single']/MIS_size_exact[run])
                         list_graphs_single.append(run)
-                        MIS_size_greedy_list.append(data['size_solution_greedy'])
-                except:
+                        MIS_size_greedy_list.append(data['size_solution_greedy']/MIS_size_exact[run])
+
+                        
+                except Exception as error:
+                    print(error)
                     print(f'file results_run_{run}_n_{n}_p_{p}_version_{version}.pkl not available')
             
             if p==1:
@@ -150,7 +173,6 @@ def plot_MIS_size_per_graph_initialization(ns, ps, runs, version, initialization
                 plt.plot(list_graphs_single, average_list, color=colors[counter], linestyle=linestyles[counter], label = 'average MIS size with analytic p=1')
                 counter +=1
 
-
             counter_size = 0
             average_list = []
             for size in MIS_size_qtensor_list:
@@ -163,13 +185,6 @@ def plot_MIS_size_per_graph_initialization(ns, ps, runs, version, initialization
             plt.scatter(list_graphs_qtensor, MIS_size_qtensor_list, c=colors[counter], marker = markers[counter], label = f'tensor network simulation for p={p}')
             plt.plot(runs, average_list, color=colors[counter], linestyle=linestyles[counter], label = f'average MIS size with tensor network p={p}')
             counter += 1
-
-
-
-
-
-
-
 
 
             if p!=4:
@@ -186,13 +201,13 @@ def plot_MIS_size_per_graph_initialization(ns, ps, runs, version, initialization
                     try:
                         with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_transition_states_version_{version}.pkl", 'rb') as file:
                             data = pickle.load(file)
-                        MIS_size_qtensor_list.append(data['size_solution_qtensor'])
+                        MIS_size_qtensor_list.append(data['size_solution_qtensor']/MIS_size_exact[run])
                         list_graphs_qtensor.append(run)
 
                         if p==1:
-                            MIS_size_single_list.append(data['size_solution_single'])
+                            MIS_size_single_list.append(data['size_solution_single']/MIS_size_exact[run])
                             list_graphs_single.append(run)
-                            MIS_size_greedy_list.append(data['size_solution_greedy'])
+                            MIS_size_greedy_list.append(data['size_solution_greedy']/MIS_size_exact[run])
                     except:
                         print(f'file results_run_{run}_n_{n}_p_{p}_version_{version}.pkl not available')
 
@@ -453,7 +468,7 @@ def solve_greedy():
 
 if __name__ == '__main__':
 
-    ns = [80]
+    ns = [50]
     ps = [1, 2, 3]
     runs = list(range(0, 20))
     regularity = 3
@@ -462,14 +477,14 @@ if __name__ == '__main__':
     initialization = 'interpolation'
     
 
-    #plot_MIS_size_per_graph(ns, ps, runs, version, regularity)
+    plot_MIS_size_per_graph(ns, ps, runs, version, regularity)
     #plot_energies(ns, ps, runs, version, regularity, per_node=True)
     #plot_losses(ns, ps, runs, version, regularity, per_node=True)
     #plot_losses_multiple_versions(ns, ps, runs, versions, regularity, per_node=True)
 
         
-    plot_MIS_size_per_graph_initialization(ns, ps, runs, version, initialization, regularity)
-    plot_energies_initialization(ns, ps, runs, version, initialization, regularity, per_node=True)
+    #plot_MIS_size_per_graph_initialization(ns, ps, runs, version, initialization, regularity)
+    #plot_energies_initialization(ns, ps, runs, version, initialization, regularity, per_node=True)
 
 
 

@@ -173,7 +173,7 @@ def execute_RQAOA_single_instance_recalculation(n, p, run, iteration, recalculat
 
     problem = Generator.MAXCUT(G)
     expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, initialization='fixed_angles_optimization', opt=torch.optim.SGD, opt_kwargs=dict(lr=0.0001))
-    RQAOA_qtensor = RQAOA_recalculate(expectation_values_qtensor, 1, iteration, recalculations=recalculation, type_of_problem="MAXCUT")
+    RQAOA_qtensor = RQAOA_recalculate(expectation_values_qtensor, 4, iteration, recalculations=recalculation, type_of_problem="MAXCUT")
     time_start = time()
     cuts_qtensor, solution_qtensor = RQAOA_qtensor.execute()
     time_end = time()
@@ -183,19 +183,21 @@ def execute_RQAOA_single_instance_recalculation(n, p, run, iteration, recalculat
     solution_dict['solution_qtensor']= solution_qtensor
     solution_dict['energies_qtensor'] = RQAOA_qtensor.energies_list
     solution_dict['losses'] = RQAOA_qtensor.losses_list
-    solution_dict['num_nodes'] = RQAOA_qtensor.num_nodes_list
-    solution_dict['connectivity'] = RQAOA_qtensor.connectivity
+    solution_dict['num_nodes_qtensor'] = RQAOA_qtensor.num_nodes_list
+    solution_dict['connectivity_qtensor'] = RQAOA_qtensor.connectivity
+    solution_dict['correlations_qtensor'] = RQAOA_qtensor.correlations
     
     if p==1:
         problem = Generator.MAXCUT(G)
         expectation_values_single = SingleLayerQAOAExpectationValues(problem)
-        RQAOA_single = RQAOA_recalculate(expectation_values_single, 1, iteration, recalculations=recalculation, type_of_problem="MAXCUT")
+        RQAOA_single = RQAOA_recalculate(expectation_values_single, 4, iteration, recalculations=recalculation, type_of_problem="MAXCUT")
         cuts_single, solution_single = RQAOA_single.execute()
         solution_dict['cuts_single']=cuts_single
         solution_dict['solution_single']=solution_single
         solution_dict['energies_single'] = RQAOA_single.energies_list
-        solution_dict['num_nodes'] = RQAOA_single.num_nodes_list
-        solution_dict['connectivity'] = RQAOA_single.connectivity
+        solution_dict['num_nodes_single'] = RQAOA_single.num_nodes_list
+        solution_dict['connectivity_single'] = RQAOA_single.connectivity
+        solution_dict['correlations_single'] = RQAOA_single.correlations
     # f = open(my_path + f"/data/results_test_run_{run}_n_{n}_p_{p}_recalc_{recalculation}_version_{version}.txt", "w+")
     # f.write(f"\nRequired time in seconds for RQAOA: {required_time}")
     # f.write(f"\nRequired time in minutes for RQAOA: {required_time/60}")

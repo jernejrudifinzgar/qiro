@@ -281,8 +281,12 @@ class RQAOA_recalculate(QIRO):
         #for step in range(self.nq):
         random.seed(self.iteration)
         step = -1
+        start = True
+        expect_val_dict = {}
 
         while self.problem.graph.number_of_nodes()>self.nc:
+        #while len(expect_val_dict)>self.nc or start==True:
+            start = False
             step += 1
             print(f"RQAOA Step: {step + 1}")
 
@@ -299,9 +303,16 @@ class RQAOA_recalculate(QIRO):
                 mem = {i: [i, 1] for i in range(1, N+1)}
                 translater_copy = self.problem.position_translater.copy()
                 Corkeys = [(i, j) for i, j in expect_val_dict.keys()]
-                Corkeys.sort(key=lambda x: np.abs(expect_val_dict[frozenset(x)]))
+                Corkeys.sort(key=lambda x: (np.abs(expect_val_dict[frozenset(x)]), random.random()))
             
-            ntc1, ntc2 = Corkeys.pop()
+            print(self.problem.graph.nodes())
+            print(self.problem.graph.edges())
+            print(expect_val_dict)
+            print(Corkeys)
+            if len(Corkeys)!=0:
+                ntc1, ntc2 = Corkeys.pop()
+            else:
+                break
             exp_value_coeff = (ntc1, ntc2)
             sign = np.sign(expect_val_dict[frozenset(exp_value_coeff)])
             max_exp_value = abs(expect_val_dict[frozenset(exp_value_coeff)])
