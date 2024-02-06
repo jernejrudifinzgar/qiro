@@ -310,15 +310,15 @@ class RQAOA_recalculate(QIRO):
                 Corkeys.sort(key=lambda x: (np.abs(expect_val_dict[frozenset(x)]), random.random()))
                 end_time = time()
 
-                self.dic_time[f'{step}_time']=end_time-start_time
-                self.dic_time[f'{step}_nodes']=self.problem.graph.number_of_nodes()
-                max_connectivity = 0
-                list_connectivity = []
-                for node in self.problem.graph.nodes():
-                    neighbors = self.problem.graph.neighbors(node)
-                    connectivity = len(list(neighbors))
-                    list_connectivity.append(connectivity)
-                self.dic_time[f'{step}_connectivity']=list_connectivity
+                # self.dic_time[f'{step}_time']=end_time-start_time
+                # self.dic_time[f'{step}_nodes']=self.problem.graph.number_of_nodes()
+                # max_connectivity = 0
+                # list_connectivity = []
+                # for node in self.problem.graph.nodes():
+                #     neighbors = self.problem.graph.neighbors(node)
+                #     connectivity = len(list(neighbors))
+                #     list_connectivity.append(connectivity)
+                # self.dic_time[f'{step}_connectivity']=list_connectivity
             
             print(self.problem.graph.nodes())
             print(self.problem.graph.edges())

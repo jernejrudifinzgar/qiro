@@ -186,7 +186,7 @@ def execute_RQAOA_single_instance_recalculation(n, p, run, iteration, recalculat
     solution_dict['num_nodes_qtensor'] = RQAOA_qtensor.num_nodes_list
     solution_dict['connectivity_qtensor'] = RQAOA_qtensor.connectivity
     solution_dict['correlations_qtensor'] = RQAOA_qtensor.correlations
-    dict_time = RQAOA_qtensor.dic_time
+    #dict_time = RQAOA_qtensor.dic_time
     
     if p==1:
         problem = Generator.MAXCUT(G)
@@ -217,7 +217,7 @@ def execute_RQAOA_single_instance_recalculation(n, p, run, iteration, recalculat
     #print('Cuts single:', cuts_single)
 
     pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_iteration_{iteration}_n_{n}_p_{p}_recalc_{recalculation}_initialization_fixed_angles_optimization_version_{version}.pkl", 'wb'))
-    pickle.dump(dict_time, open(my_path + f"/data/time_results_run_{run}_iteration_{iteration}_n_{n}_p_{p}_recalc_{recalculation}_initialization_fixed_angles_optimization_version_{version}.pkl", 'wb'))
+    #pickle.dump(dict_time, open(my_path + f"/data/time_results_run_{run}_iteration_{iteration}_n_{n}_p_{p}_recalc_{recalculation}_initialization_fixed_angles_optimization_version_{version}.pkl", 'wb'))
 
     return cuts_qtensor, solution_qtensor
 
@@ -244,7 +244,7 @@ def execute_RQAOA_parallel_recalculation(ns, ps, runs, iterations, recalculation
     arguments_list = []
     for p in ps:
         for run in runs:
-            for iteration in list(range(iterations)):
+            for iteration in iterations:
                 arguments_list.append((ns, p, run, iteration, recalculation, version))
     
     pool = mp.Pool(len(arguments_list))

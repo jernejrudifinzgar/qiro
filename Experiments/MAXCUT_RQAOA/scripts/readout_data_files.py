@@ -543,6 +543,79 @@ def plot_cuts_per_graph_recalculation(ns, ps, runs, regularity, recalculation, i
         plt.show()
         #plt.close()
 
+def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, version):
+    colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']
+    data_dic = {f'p={p}': [] for p in ps}
+    error_dic = {f'p={p}': [[], []] for p in ps}
+    #error_dic = {f'p={p}': [] for p in ps}
+
+    list_exact = []
+    counter = 0
+
+    ns_graphs_rudi = list(range(60, 220, 20))
+    ns_graphs_maxi = [30, 50]
+
+    for n in ns: 
+        if n in ns_graphs_rudi:
+            with open(my_path + f"/data/regular_graphs_maxcuts.json", 'r') as f:
+                graphs = json.load(f)
+            for run in range(100): 
+                optimal_cuts = graphs[str(regularity)][str(n)][str(run)]['optimal_cut']
+                list_exact.append(optimal_cuts)
+
+        elif n in ns_graphs_maxi:
+            with open(f'100_regular_graphs_nodes_{n}_reg_3_solutions.pkl', 'rb') as file:
+                data = pickle.load(file)
+            list_exact = data.copy()
+
+        for p in ps:
+            for run in runs:
+                list_cuts = []
+                for iteration in iterations:
+                    try:
+                        with open (my_path + f"/data/results_run_{run}_iteration_{iteration}_n_{n}_p_{p}_recalc_{recalculation}_initialization_fixed_angles_optimization_version_{version}.pkl", 'rb') as f:
+                            data = pickle.load(f)
+                        cuts_qtensor = data['cuts_qtensor']
+                        list_cuts.append(cuts_qtensor/list_exact[run])
+                    except Exception as error:
+                        print(error)
+
+                average = sum(list_cuts)/len(list_cuts)
+                data_dic[f'p={p}'].append(average)
+                error_dic[f'p={p}'][0].append(average-min(list_cuts))
+                error_dic[f'p={p}'][1].append(max(list_cuts)-average)
+                #error_dic[f'p={p}'].append(np.std(list_cuts))
+
+            
+    x = np.arange(len(runs))  # the label locations
+    width = 0.25  # the width of the bars
+    multiplier = 0
+
+    fig, ax = plt.subplots(figsize=(14, 8), layout='constrained')
+
+    
+    for attribute, measurement in data_dic.items():
+        print(error_dic[attribute])
+        offset = width * multiplier
+        rects = ax.bar(x + offset, measurement, width, yerr = error_dic[attribute], capsize=20, color=colors[6+multiplier] , label=attribute)
+        ax.bar_label(rects, padding=3)
+        multiplier += 1
+
+    # Add some text for labels, title and custom x-axis tick labels, etc.
+    ax.set_ylabel('Ratio of optimal number of cuts', fontsize=15)
+    ax.set_xlabel('Graph problems', fontsize=15)
+    ax.set_title('RQAOA with recalculation every 10th iteration: MAXCUT number of cuts by QAOA depth p for different graph problems', fontsize=15)
+    x_labels = [f'Graph number {i-4}' for i in runs]
+    ax.set_xticks(x + width, x_labels)
+    ax.set_yticks([0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0], [0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0])
+    ax.legend(loc='upper left', ncols=3)
+    ax.set_ylim(0.94, 1.01)
+    ax.tick_params(bottom=False)
+
+    plt.show()
+
+
+
 
 
 if __name__ == '__main__':
@@ -563,7 +636,9 @@ if __name__ == '__main__':
     #plot_cuts_per_graph(ns, ps, runs, regularity, version)
     #plot_cuts_recalculation_per_p(ns, ps, runs, regularity, version)
 
-    for iteration in iterations:
-        plot_cuts_per_graph_recalculation(ns, ps, runs, regularity, recalculation, iteration, version)
+    #for iteration in iterations:
+    #    plot_cuts_per_graph_recalculation(ns, ps, runs, regularity, recalculation, iteration, version)
+
+    grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, version)
 
     
