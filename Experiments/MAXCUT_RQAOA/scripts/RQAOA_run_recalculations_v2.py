@@ -39,11 +39,16 @@ if __name__ == '__main__':
     reg = 3
     ns = [50]#, 140, 180]
     seed = 666
-    ps= [1]
+    ps= [3]
     #num_runs = 10
-    runs=list(range(9, 10, 1))
-    version = 1
-    execute_RQAOA_single_instance_recalculation(50, 1, 7, 0, 5, 1, output_results=True)
+    runs=list(range(5, 10, 1))
+    version = 2
+    iterations = 2
+    recalculation = 1
+    #execute_RQAOA_single_instance_recalculation(50, 1, 7, 0, 5, 1, output_results=True)
+        
+    execute_RQAOA_parallel_recalculation(ns, ps, runs, iterations, recalculation, version)
+
     #execute_RQAOA_multiple_instances(ns, ps, num_runs)
     #execute_RQAOA_parallel(ns, ps, runs, version)
  

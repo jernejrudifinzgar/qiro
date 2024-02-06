@@ -5,6 +5,8 @@ import networkx as nx
 from operator import itemgetter
 import os
 import random
+from time import time
+import pickle
 
 class RQAOA(QIRO):
     """
@@ -267,6 +269,7 @@ class RQAOA_recalculate(QIRO):
         self.connectivity_output = connectivity_output
         self.connectivity = []
         self.correlations = []
+        self.dic_time = {}
     
     def execute(self):
         """
@@ -289,9 +292,10 @@ class RQAOA_recalculate(QIRO):
             start = False
             step += 1
             print(f"RQAOA Step: {step + 1}")
+            
 
             if step%self.recalculations==0:
-
+                start_time = time()
                 # Optimize to find the expectation values, and determine which correlation to fix
                 exp_value_coeff, exp_value_sign, max_exp_value = self.expectation_values.optimize()
                 self.correlations.append(self.expectation_values.expect_val_dict.copy())
@@ -304,6 +308,17 @@ class RQAOA_recalculate(QIRO):
                 translater_copy = self.problem.position_translater.copy()
                 Corkeys = [(i, j) for i, j in expect_val_dict.keys()]
                 Corkeys.sort(key=lambda x: (np.abs(expect_val_dict[frozenset(x)]), random.random()))
+                end_time = time()
+
+                self.dic_time[f'{step}_time']=end_time-start_time
+                self.dic_time[f'{step}_nodes']=self.problem.graph.number_of_nodes()
+                max_connectivity = 0
+                list_connectivity = []
+                for node in self.problem.graph.nodes():
+                    neighbors = self.problem.graph.neighbors(node)
+                    connectivity = len(list(neighbors))
+                    list_connectivity.append(connectivity)
+                self.dic_time[f'{step}_connectivity']=list_connectivity
             
             print(self.problem.graph.nodes())
             print(self.problem.graph.edges())

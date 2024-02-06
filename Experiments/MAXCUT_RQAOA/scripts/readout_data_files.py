@@ -498,7 +498,7 @@ def plot_cuts_per_graph_recalculation(ns, ps, runs, regularity, recalculation, i
                     list_qtensor_cuts.append(cuts_qtensor)
                     list_qtensor_cuts_norm.append(cuts_qtensor/list_exact[run])
                     list_graphs_qtensor.append(run)
-                    print(data['connectivity'])
+                    #print(data['connectivity'])
                     if p == 1:
                         cuts_single = data['cuts_single']
                         list_single_cuts.append(cuts_single)
@@ -551,8 +551,8 @@ if __name__ == '__main__':
     recalculations = [5]
     regularity = 3
     runs = list(range(5, 10))
-    recalculation = 5
-    version = 1
+    recalculation = 10
+    version = 3
     iterations = list(range(5))
 
     colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']
