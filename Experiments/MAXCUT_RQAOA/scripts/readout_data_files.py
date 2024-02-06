@@ -545,6 +545,8 @@ def plot_cuts_per_graph_recalculation(ns, ps, runs, regularity, recalculation, i
 
 def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, version):
     colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']
+    linestyles = ['solid', 'dashed', 'dashdot', 'dotted']
+
     data_dic = {f'p={p}': [] for p in ps}
     error_dic = {f'p={p}': [[], []] for p in ps}
     #error_dic = {f'p={p}': [] for p in ps}
@@ -587,7 +589,9 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
                 #error_dic[f'p={p}'].append(np.std(list_cuts))
 
             
-    x = np.arange(len(runs))  # the label locations
+    x = np.arange(len(runs))
+    x2 = np.arange(len(runs)+1)
+    x2 = np.insert(x2, 0, -1) # the label locations
     width = 0.25  # the width of the bars
     multiplier = 0
 
@@ -595,11 +599,17 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
 
     
     for attribute, measurement in data_dic.items():
-        print(error_dic[attribute])
+        average = np.mean(measurement)
         offset = width * multiplier
-        rects = ax.bar(x + offset, measurement, width, yerr = error_dic[attribute], capsize=20, color=colors[6+multiplier] , label=attribute)
-        ax.bar_label(rects, padding=3)
+        ax.bar(x + offset, measurement, width, edgecolor = 'black', linewidth=1.5, yerr = error_dic[attribute], capsize=20, color=colors[6+multiplier] , label=attribute)
+        #ax.bar_label(rects, padding=3)
+        plt.plot(x2, [average for i in x2], color=colors[6+multiplier], linestyle=linestyles[1], label = f'Average optimal cuts ratio of QAOA with {attribute}')
+
         multiplier += 1
+
+    handles, labels = ax.get_legend_handles_labels()
+    order = [3, 4, 5, 0, 1, 2]
+    labels, handles = zip(*sorted(zip(labels, handles), key=lambda t: t[0]))
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
     ax.set_ylabel('Ratio of optimal number of cuts', fontsize=15)
@@ -608,8 +618,9 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
     x_labels = [f'Graph number {i-4}' for i in runs]
     ax.set_xticks(x + width, x_labels)
     ax.set_yticks([0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0], [0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0])
-    ax.legend(loc='upper left', ncols=3)
+    ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper left', ncols = 2)
     ax.set_ylim(0.94, 1.01)
+    ax.set_xlim(-0.5, 5)
     ax.tick_params(bottom=False)
 
     plt.show()
