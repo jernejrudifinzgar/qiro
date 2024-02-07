@@ -601,7 +601,7 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
     for attribute, measurement in data_dic.items():
         average = np.mean(measurement)
         offset = width * multiplier
-        ax.bar(x + offset, measurement, width, edgecolor = 'black', linewidth=1.5, yerr = error_dic[attribute], capsize=20, color=colors[6+multiplier] , label=attribute)
+        rects = ax.bar(x + offset, measurement, width, edgecolor = 'black', linewidth=1.5, yerr = error_dic[attribute], capsize=20, color=colors[6+multiplier] , label=attribute)
         #ax.bar_label(rects, padding=3)
         plt.plot(x2, [average for i in x2], color=colors[6+multiplier], linestyle=linestyles[1], label = f'Average optimal cuts ratio of QAOA with {attribute}')
 
@@ -624,6 +624,7 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
     ax.set_xlim(-0.5, 5)
     ax.tick_params(bottom=False)
 
+    #fig.savefig(my_path + f'/results/Cuts_ratio_per_graph_per_p_iterations_{iteration}_n_{n}_version_{version}.png')
     plt.show()
 
 def plot_time(ns, ps, runs, regularity, recalculation, iterations, version):
@@ -633,14 +634,15 @@ def plot_time(ns, ps, runs, regularity, recalculation, iterations, version):
     for n in ns: 
         for p in ps: 
             for run in runs: 
-                fig, ax1 = plt.subplots()
-                plt.title(f'Time analysis of RQAOA steps of graph {run}')
-
-                ax2 = ax1.twinx()
-                ax3 = ax1.twinx()
-                ax4 = ax1.twinx()
-                counter = 0
                 for iteration in iterations:
+                    fig, ax1 = plt.subplots()
+                    plt.title(f'Time analysis of RQAOA steps of iteration {iteration} of graph {run} ')
+
+                    ax2 = ax1.twinx()
+                    ax3 = ax1.twinx()
+                    ax4 = ax1.twinx()
+                    counter = 0
+                    
                     steps=[]
                     times=[]
                     max_connectivity=[]
@@ -659,24 +661,24 @@ def plot_time(ns, ps, runs, regularity, recalculation, iterations, version):
                     except Exception as error:
                         print(error)
 
-                    a1 = ax1.plot(steps, times, color=colors[counter], linestyle = linestyles[counter], label=f'Required time per RQAOA step')
+                    a1 = ax1.plot(steps, times, color=colors[counter], linestyle = linestyles[0], label=f'Required time per RQAOA step')
                     ax1.set_xlabel('Steps')
                     ax1.set_ylabel('Time (s)')  
                     ax1.yaxis.label.set_color(colors[counter])    
                     counter += 1
 
-                    a2 = ax2.plot(steps, max_connectivity, color=colors[counter], linestyle = linestyles[counter], label=f'Maximum connectivity of graph')
+                    a2 = ax2.plot(steps, max_connectivity, color=colors[counter], linestyle = linestyles[0], label=f'Maximum connectivity of graph')
                     ax2.set_ylabel('Maximum connectivity') 
                     ax2.yaxis.label.set_color(colors[counter])    
                     counter += 1
 
-                    a3 = ax3.plot(steps, average_connectivity, color=colors[counter], linestyle = linestyles[counter], label=f'Average connectivity of graph')
+                    a3 = ax3.plot(steps, average_connectivity, color=colors[counter], linestyle = linestyles[0], label=f'Average connectivity of graph')
                     ax3.set_ylabel('Average connectivity') 
                     ax3.spines['right'].set_position(('outward', 60))
                     ax3.yaxis.label.set_color(colors[counter])    
                     counter += 1
                     
-                    a4 = ax4.plot(steps, num_nodes, color=colors[counter], linestyle = linestyles[counter], label=f'Number of nodes in graph')
+                    a4 = ax4.plot(steps, num_nodes, color=colors[counter], linestyle = linestyles[0], label=f'Number of nodes in graph')
                     ax4.set_ylabel('Number of nodes')    
                     ax4.spines['right'].set_position(('outward', 120))
                     ax4.yaxis.label.set_color(colors[counter])  
@@ -684,8 +686,10 @@ def plot_time(ns, ps, runs, regularity, recalculation, iterations, version):
 
                     ax1.legend(handles=a1+a2+a3+a4, loc = 'lower center')
 
-                fig.tight_layout()
-                plt.show()
+                    fig.tight_layout()
+                    fig.savefig(my_path + f'/results/Time_per_step_graph_{run}_p_{p}_iterations_{iteration}_n_{n}_regularity_{regularity}_version_{version}.png')
+
+                    plt.show()
 
                     
 
@@ -706,8 +710,8 @@ if __name__ == '__main__':
     ps= [1, 2]
     recalculations = [5]
     regularity = 3
-    runs = [5, 6] #list(range(7, 8))
-    recalculation = 25
+    runs = [5, 6, 7, 8, 9] #list(range(7, 8))
+    recalculation = 30
     version = 1
     iterations = list(range(5))
 

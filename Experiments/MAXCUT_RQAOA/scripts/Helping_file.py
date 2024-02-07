@@ -240,6 +240,12 @@ def execute_RQAOA_multiple_instances_different_n(ns, p, run, iteration, recalcul
         execute_RQAOA_single_instance_recalculation(n, p, run, iteration, recalculation, version)
 
 
+def execute_RQAOA_multiple_instances_different_instance(ns, p, run, iterations, recalculation, version):
+    for n in ns:
+        for iteration in iterations: 
+            execute_RQAOA_single_instance_recalculation(n, p, run, iteration, recalculation, version)
+
+
 def execute_RQAOA_parallel_recalculation(ns, ps, runs, iterations, recalculation, version):
     arguments_list = []
     for p in ps:
@@ -250,7 +256,14 @@ def execute_RQAOA_parallel_recalculation(ns, ps, runs, iterations, recalculation
     pool = mp.Pool(len(arguments_list))
     pool.starmap(execute_RQAOA_multiple_instances_different_n, arguments_list)
 
-
+def execute_RQAOA_parallel_recalculation_nonsynchronous_iterations(ns, ps, runs, iterations, recalculation, version):
+    arguments_list = []
+    for p in ps:
+        for run in runs:
+            arguments_list.append((ns, p, run, iterations, recalculation, version))
+    
+    pool = mp.Pool(len(arguments_list))
+    pool.starmap(execute_RQAOA_multiple_instances_different_instance, arguments_list)
 
 def execute_RQAOA_multiple_instances_recalculation(ns, ps, num_runs, recalculation):
     arguments_list = []
