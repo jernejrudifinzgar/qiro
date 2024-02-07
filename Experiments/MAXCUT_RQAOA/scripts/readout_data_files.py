@@ -5,7 +5,7 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib
 from IPython.display import set_matplotlib_formats
-__plot_height = 9.119
+__plot_height = 8.7
 matplotlib.rcParams['figure.figsize'] = (1.718*__plot_height, __plot_height)
 set_matplotlib_formats('svg')
 import numpy as np
@@ -614,16 +614,88 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
     # Add some text for labels, title and custom x-axis tick labels, etc.
     ax.set_ylabel('Ratio of optimal number of cuts', fontsize=15)
     ax.set_xlabel('Graph problems', fontsize=15)
-    ax.set_title('RQAOA with recalculation every 10th iteration: MAXCUT number of cuts by QAOA depth p for different graph problems', fontsize=15)
+    ax.set_title(f'RQAOA with recalculation every {recalculation}th iteration: MAXCUT number of cuts by QAOA depth p for different graph problems', fontsize=15)
     x_labels = [f'Graph number {i-4}' for i in runs]
     ax.set_xticks(x + width, x_labels)
     ax.set_yticks([0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0], [0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0])
-    ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper left', ncols = 2)
+    #ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper left', ncols = 2)
+    ax.legend(loc='upper left', ncols = 2)
     ax.set_ylim(0.94, 1.01)
     ax.set_xlim(-0.5, 5)
     ax.tick_params(bottom=False)
 
     plt.show()
+
+def plot_time(ns, ps, runs, regularity, recalculation, iterations, version):
+    colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']
+    linestyles = ['solid', 'dashed', 'dashdot', 'dotted']
+
+    for n in ns: 
+        for p in ps: 
+            for run in runs: 
+                fig, ax1 = plt.subplots()
+                plt.title(f'Time analysis of RQAOA steps of graph {run}')
+
+                ax2 = ax1.twinx()
+                ax3 = ax1.twinx()
+                ax4 = ax1.twinx()
+                counter = 0
+                for iteration in iterations:
+                    steps=[]
+                    times=[]
+                    max_connectivity=[]
+                    average_connectivity=[]
+                    num_nodes=[]
+                    try:
+                        with open (my_path + f"/data/time_results_run_{run}_iteration_{iteration}_n_{n}_p_{p}_recalc_{recalculation}_initialization_fixed_angles_optimization_version_{version}.pkl", 'rb') as f:
+                            data = pickle.load(f)
+
+                        steps = list(range(int(len(data.keys())/3)))
+                        for step in steps:
+                            times.append(data[f'{step}_time'])
+                            max_connectivity.append(max(data[f'{step}_connectivity']))
+                            average_connectivity.append(np.mean(data[f'{step}_connectivity']))
+                            num_nodes.append(data[f'{step}_nodes'])
+                    except Exception as error:
+                        print(error)
+
+                    a1 = ax1.plot(steps, times, color=colors[counter], linestyle = linestyles[counter], label=f'Required time per RQAOA step')
+                    ax1.set_xlabel('Steps')
+                    ax1.set_ylabel('Time (s)')  
+                    ax1.yaxis.label.set_color(colors[counter])    
+                    counter += 1
+
+                    a2 = ax2.plot(steps, max_connectivity, color=colors[counter], linestyle = linestyles[counter], label=f'Maximum connectivity of graph')
+                    ax2.set_ylabel('Maximum connectivity') 
+                    ax2.yaxis.label.set_color(colors[counter])    
+                    counter += 1
+
+                    a3 = ax3.plot(steps, average_connectivity, color=colors[counter], linestyle = linestyles[counter], label=f'Average connectivity of graph')
+                    ax3.set_ylabel('Average connectivity') 
+                    ax3.spines['right'].set_position(('outward', 60))
+                    ax3.yaxis.label.set_color(colors[counter])    
+                    counter += 1
+                    
+                    a4 = ax4.plot(steps, num_nodes, color=colors[counter], linestyle = linestyles[counter], label=f'Number of nodes in graph')
+                    ax4.set_ylabel('Number of nodes')    
+                    ax4.spines['right'].set_position(('outward', 120))
+                    ax4.yaxis.label.set_color(colors[counter])  
+                    counter += 1
+
+                    ax1.legend(handles=a1+a2+a3+a4, loc = 'lower center')
+
+                fig.tight_layout()
+                plt.show()
+
+                    
+
+                    
+
+
+
+
+
+
 
 
 
@@ -631,12 +703,12 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
 
 if __name__ == '__main__':
     ns = [50] #[60, 80, 100, 120, 140, 160, 180, 200]
-    ps= [1, 2, 3]
+    ps= [1, 2]
     recalculations = [5]
     regularity = 3
-    runs = list(range(5, 10))
-    recalculation = 10
-    version = 3
+    runs = [5, 6] #list(range(7, 8))
+    recalculation = 25
+    version = 1
     iterations = list(range(5))
 
     colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']
@@ -651,5 +723,7 @@ if __name__ == '__main__':
     #    plot_cuts_per_graph_recalculation(ns, ps, runs, regularity, recalculation, iteration, version)
 
     grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, version)
+
+    #plot_time(ns, ps, runs, regularity, recalculation, iterations, version)
 
     
