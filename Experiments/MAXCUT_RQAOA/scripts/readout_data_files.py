@@ -707,12 +707,12 @@ def plot_time(ns, ps, runs, regularity, recalculation, iterations, version):
 
 if __name__ == '__main__':
     ns = [50] #[60, 80, 100, 120, 140, 160, 180, 200]
-    ps= [1, 2]
+    ps= [1, 2, 3]
     recalculations = [5]
     regularity = 3
     runs = [5, 6, 7, 8, 9] #list(range(7, 8))
-    recalculation = 30
-    version = 1
+    recalculation = 10
+    version = 3
     iterations = list(range(5))
 
     colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']
