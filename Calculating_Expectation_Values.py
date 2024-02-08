@@ -1187,7 +1187,7 @@ class QtensorQAOAExpectationValuesQUBO_GPU(ExpectationValues):
         self.type = 'QtensorQAOAExpectationValuesQUBO'
         #if self.backend == qtensor.contraction_backends.TorchBackend():
     
-        self.gamma, self.beta = torch.tensor(gamma, requires_grad=True), torch.tensor(beta, requires_grad=True)
+        self.gamma, self.beta = torch.tensor(gamma, requires_grad=True).cuda(), torch.tensor(beta, requires_grad=True).cuda()
 
         self.loss = None
         self.ordering_algo = ordering_algo
