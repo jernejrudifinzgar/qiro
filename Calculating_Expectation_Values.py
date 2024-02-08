@@ -1152,6 +1152,512 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
     
 
 
+###################################################################################
+
+class QtensorQAOAExpectationValuesQUBO_GPU(ExpectationValues):
+    """Calculation of expectation values via tensor network contraction using Qtensor"""
+
+    def __init__(self, problem, p, pbar=True, gamma=None, beta=None, initialization='random', regularity=3, opt=torch.optim.RMSprop, opt_kwargs=dict(lr=0.001), backend=qtensor.contraction_backends.TorchBackend(device='gpu'), ordering_algo='greedy'):
+        super().__init__(problem)
+        random.seed()
+        #TODO check fixed angles parameters for non-regular graphs
+        if initialization=='fixed_angles_optimization':
+            with open('angles_regular_graphs.json', 'r') as file:
+                data = json.load(file)
+
+            gamma, beta = data[f"{regularity}"][f"{p}"]["gamma"], data[f"{regularity}"][f"{p}"]["beta"]
+            gamma, beta = [value/(-2*np.pi) for value in gamma], [value/(2*np.pi) for value in beta]
+            print('is working')
+
+        else:
+            if gamma == None:
+                #gamma=[0.1] * p
+                gamma=[random.uniform(0, 0.5)]*p
+
+            if beta == None:
+                #beta=[0.1] * p
+                beta=[random.uniform(0, 0.5)]*p
+
+        self.opt = opt
+        self.opt_kwargs = opt_kwargs
+        self.pbar=pbar
+        self.p = p
+        self.backend = backend
+        self.initialization = initialization
+        self.type = 'QtensorQAOAExpectationValuesQUBO'
+        #if self.backend == qtensor.contraction_backends.TorchBackend():
+    
+        self.gamma, self.beta = torch.tensor(gamma, requires_grad=True), torch.tensor(beta, requires_grad=True)
+
+        self.loss = None
+        self.ordering_algo = ordering_algo
+        #Why should peos be calculated already at initialization??:
+        #self.peos = self.energy_peo()
+        self.E_nodes = None
+
+    #TODO Move to optimization part and check which correlations are necessary  
+    #@lru_cache
+    def energy_peo(self):
+        opt = qtensor.toolbox.get_ordering_algo(self.ordering_algo)
+        peos = {}
+        for i in range(1, len(self.problem.matrix)):
+            for j in range(1, i+1):
+                #if self.problem.matrix[i, j] != 0:
+                
+                composer = qtensor.TorchQAOAComposer_QUBO(self.problem.graph, self.problem.matrix, self.problem.position_translater, gamma = self.gamma, beta = self.beta)
+                if i == j:
+                    composer.energy_expectation_lightcone([self.problem.position_translater[i]-1])
+
+                else:
+                    composer.energy_expectation_lightcone([self.problem.position_translater[i]-1, self.problem.position_translater[j]-1])
+
+                tn = qtensor.optimisation.TensorNet.QtreeTensorNet.from_qtree_gates(composer.circuit)
+                peo, _ = opt.optimize(tn)
+                peos[(i, j)] = peo
+        return peos
+
+    def energy_loss(self):
+        sim = qtensor.QtreeSimulator(backend=self.backend)
+        composer = qtensor.TorchQAOAComposer_QUBO(self.problem.graph, self.problem.matrix, self.problem.position_translater, gamma=self.gamma, beta=self.beta)
+        self.loss = torch.tensor([0.])
+        self.E_nodes = {}
+
+        for i in range(1, len(self.problem.matrix)):
+            for j in range(1, i+1):
+                if self.problem.matrix[i, j] != 0:
+                    peo = self.peos[(i, j)]
+                    if i == j:
+                        composer.energy_expectation_lightcone([self.problem.position_translater[i]-1])
+                    else:
+                        composer.energy_expectation_lightcone([self.problem.position_translater[i]-1, self.problem.position_translater[j]-1])
+                    E = torch.real(sim.simulate_batch(composer.circuit, peo=peo))
+                    composer.builder.reset()
+                    matrix_entry = self.problem.matrix[i, j]
+                    self.loss += E * matrix_entry
+                    self.E_nodes [(i, j)] = E
+        
+        if self.loss ==0:
+            return False
+        else:
+            return True
+
+    def return_loss_func(self, *args):
+        l=self.p
+        gamma = []
+        beta = []
+       
+        
+        for i in range(self.p):
+            gamma.append(args[i])
+            beta.append(args[i+self.p])
+
+        gamma = torch.stack(gamma)
+        beta = torch.stack(beta)
+
+     
+
+        sim = qtensor.QtreeSimulator(backend=self.backend)
+        composer = qtensor.TorchQAOAComposer_QUBO(self.problem.graph, self.problem.matrix, self.problem.position_translater, gamma=gamma, beta=beta)
+        self.loss = torch.tensor([0.])
+        self.peos = self.energy_peo()
+
+
+        for i in range(1, len(self.problem.matrix)):
+            for j in range(1, i+1):
+                if self.problem.matrix[i, j] != 0:
+                    peo = self.peos[(i, j)]
+                    if i == j:
+                        composer.energy_expectation_lightcone([self.problem.position_translater[i]-1])
+                    else:
+                        composer.energy_expectation_lightcone([self.problem.position_translater[i]-1, self.problem.position_translater[j]-1])
+                    E = torch.real(sim.simulate_batch(composer.circuit, peo=peo))
+                    composer.builder.reset()
+                    matrix_entry = self.problem.matrix[i, j]
+                    self.loss += E * matrix_entry
+        return self.loss
+
+    def create_expect_val_dict(self):
+        self.expect_val_dict={}
+        max_expect_val = 0
+        max_expect_val_list = []
+        max_expect_val_location_list = []
+        max_expect_val_sign_list = []
+        for i in range(1, len(self.problem.matrix)):
+            for j in range(1, i+1):
+                if self.problem.matrix[i, j] != 0:
+                    energy = float(self.E_nodes[(i, j)])
+                    if i == j:
+                        self.expect_val_dict[frozenset({i})] = energy
+                        #self.expect_val_dict[i] = energy
+
+                    else:
+                        self.expect_val_dict[frozenset({j, i})] = energy
+                        #self.expect_val_dict[(i, j)] = energy
+                        
+                
+                    if abs(energy) > max_expect_val:
+                        max_expect_val_list = []
+                        max_expect_val_location_list = []
+                        max_expect_val_sign_list = []
+
+                        max_expect_val = abs(energy)
+                        max_expect_val_sign = np.sign(energy)
+                        if i == j:
+                            max_expect_val_location = ([self.problem.position_translater[i]])
+                        else:
+                            max_expect_val_location = ([self.problem.position_translater[i], self.problem.position_translater[j]])
+                        
+                        max_expect_val_location_list.append(max_expect_val_location)
+                        max_expect_val_list.append(max_expect_val)
+                        max_expect_val_sign_list.append(max_expect_val_sign)
+
+                    # elif abs(energy) == max_expect_val:
+                    #     if i == j:
+                    #         max_expect_val_location_help = ([self.problem.position_translater[i]])
+                    #     else:
+                    #         max_expect_val_location_help = ([self.problem.position_translater[i], self.problem.position_translater[j]])
+
+                    #     max_expect_val_location_list.append(max_expect_val_location_help)
+                    #     max_expect_val_list.append(abs(energy))
+                    #     max_expect_val_sign_list.append(np.sign(energy))
+
+        if len(max_expect_val_list) > 1:
+            print(max_expect_val_list)
+            index = random.randrange(len(max_expect_val_list))
+            max_expect_val = max_expect_val_list[index]
+            max_expect_val_location = max_expect_val_location_list[index]
+            max_expect_val_sign = max_expect_val_sign_list[index]
+
+        return max_expect_val_location, max_expect_val_sign, max_expect_val
+
+    def calc_expect_val(self):
+        self.peos = self.energy_peo()
+        self.energy_loss()
+        max_expect_val_location, max_expect_val_sign, max_expect_val = self.create_expect_val_dict()
+        self.energy=self.loss
+        
+        return max_expect_val_location, max_expect_val_sign, max_expect_val
+    
+    def calc_hessian(self):
+        input = []
+        for i in self.gamma:
+            input.append(i)
+        for i in self.beta:
+            input.append(i)
+        input = tuple(input)
+        hess = hessian(self.return_loss_func, input)
+        hess = np.asarray(hess)
+        w, v = np.linalg.eig(hess)
+
+        return w, v
+
+    
+    def optimize(self, steps=50, **kwargs):
+        if self.initialization == 'transition_states' and self.p!=1:
+            print('working')
+            return self.optimize_transition_states(steps=steps, **kwargs)
+        if self.initialization == 'transition_states_new' and self.p!=1:
+            print('new working')
+            return self.optimize_transition_states_new(steps=steps, **kwargs)
+        elif self.initialization == 'transition_states_try' and self.p!=1:
+            return self.optimize_transition_states_try(steps=steps, **kwargs)
+        elif self.initialization == 'interpolation' and self.p != 1:
+            return self.optimize_interp(steps=steps, **kwargs)
+        else:
+            return self.optimize_general(steps=steps, **kwargs)
+
+    def optimize_transition_states(self, steps, **kwargs):
+        expectation_value_single = SingleLayerQAOAExpectationValues(self.problem)
+        expectation_value_single.optimize()
+        gamma_old = [expectation_value_single.gamma/np.pi]
+        beta_old = [expectation_value_single.beta/np.pi]
+
+        for step in range(2, self.p+1):
+            print('stufe von transition', step)
+            for j in range(step):
+                print('stufe in transition', j)
+                gamma_ts = gamma_old.copy()
+                beta_ts = beta_old.copy()
+                gamma_ts.insert(j, 0)
+                beta_ts.insert(j, 0)
+                expectation_values_qtensor_transition = QtensorQAOAExpectationValuesQUBO(self.problem, step, gamma=gamma_ts, beta=beta_ts, pbar=True, opt = self.opt, opt_kwargs=dict(**self.opt_kwargs))
+                max_expect_val_location, max_expect_val_sign, max_expect_val = expectation_values_qtensor_transition.optimize(steps=steps, **kwargs)
+                energy_qtensor_transition = float(expectation_values_qtensor_transition.energy)
+                print(energy_qtensor_transition)
+                if j==0:
+                    energy_min = energy_qtensor_transition
+                    gamma_min = [float(i) for i in expectation_values_qtensor_transition.gamma]
+                    beta_min = [float(i) for i in expectation_values_qtensor_transition.beta]
+                    correlations_min = expectation_values_qtensor_transition.expect_val_dict.copy()
+                    losses_min = expectation_values_qtensor_transition.losses.copy()
+                    max_expect_val_location_min , max_expect_val_sign_min , max_expect_val_min = max_expect_val_location, max_expect_val_sign, max_expect_val
+                    param_history_min = expectation_values_qtensor_transition.param_history
+
+                if energy_qtensor_transition < energy_min:
+                    energy_min = energy_qtensor_transition
+                    gamma_min = [float(i) for i in expectation_values_qtensor_transition.gamma]
+                    beta_min = [float(i) for i in expectation_values_qtensor_transition.beta]
+                    correlations_min = expectation_values_qtensor_transition.expect_val_dict.copy()
+                    losses_min = expectation_values_qtensor_transition.losses.copy()
+                    max_expect_val_location_min , max_expect_val_sign_min , max_expect_val_min = max_expect_val_location, max_expect_val_sign, max_expect_val
+                    param_history_min = expectation_values_qtensor_transition.param_history
+            
+            gamma_old = gamma_min.copy()
+            beta_old = beta_min.copy()
+            print(energy_min)
+        self.expect_val_dict = correlations_min
+        self.energy = energy_min
+        self.losses = losses_min
+        self.param_history = param_history_min
+
+        return max_expect_val_location_min , max_expect_val_sign_min , max_expect_val_min 
+    
+    def optimize_transition_states_new(self, steps, **kwargs):
+        expectation_value_single = SingleLayerQAOAExpectationValues(self.problem)
+        expectation_value_single.optimize()
+        gamma_old = [expectation_value_single.gamma/np.pi]
+        beta_old = [expectation_value_single.beta/np.pi]
+
+        for step in range(2, self.p+1):
+            print('stufe von transition', step)
+            for j in range(step):
+                print('stufe in transition', j)
+                gamma_ts = gamma_old.copy()
+                beta_ts = beta_old.copy()
+                gamma_ts.insert(j, 0)
+                beta_ts.insert(j, 0)
+                expectation_values_qtensor_transition = QtensorQAOAExpectationValuesQUBO(self.problem, step, gamma=gamma_ts, beta=beta_ts, pbar=True, opt = torch.optim.LBFGS, opt_kwargs=dict())
+                max_expect_val_location, max_expect_val_sign, max_expect_val = expectation_values_qtensor_transition.optimize(steps=steps, **kwargs)
+                energy_qtensor_transition = float(expectation_values_qtensor_transition.energy)
+                print(energy_qtensor_transition)
+                if j==0:
+                    energy_min = energy_qtensor_transition
+                    gamma_min = [float(i) for i in expectation_values_qtensor_transition.gamma]
+                    beta_min = [float(i) for i in expectation_values_qtensor_transition.beta]
+                    correlations_min = expectation_values_qtensor_transition.expect_val_dict.copy()
+                    losses_min = expectation_values_qtensor_transition.losses.copy()
+                    max_expect_val_location_min , max_expect_val_sign_min , max_expect_val_min = max_expect_val_location, max_expect_val_sign, max_expect_val
+                    param_history_min = expectation_values_qtensor_transition.param_history
+
+                if energy_qtensor_transition < energy_min:
+                    energy_min = energy_qtensor_transition
+                    gamma_min = [float(i) for i in expectation_values_qtensor_transition.gamma]
+                    beta_min = [float(i) for i in expectation_values_qtensor_transition.beta]
+                    correlations_min = expectation_values_qtensor_transition.expect_val_dict.copy()
+                    losses_min = expectation_values_qtensor_transition.losses.copy()
+                    max_expect_val_location_min , max_expect_val_sign_min , max_expect_val_min = max_expect_val_location, max_expect_val_sign, max_expect_val
+                    param_history_min = expectation_values_qtensor_transition.param_history
+            
+            gamma_old = gamma_min.copy()
+            beta_old = beta_min.copy()
+            print(energy_min)
+        self.expect_val_dict = correlations_min
+        self.energy = energy_min
+        self.losses = losses_min
+        self.param_history = param_history_min
+
+        return max_expect_val_location_min , max_expect_val_sign_min , max_expect_val_min 
+
+    def optimize_general(self, steps, **kwargs):
+        random.seed()
+        self.peos = self.energy_peo()
+        opt = self.opt(params=(self.gamma, self.beta) , **self.opt_kwargs)
+        self.expect_val_dict = {}
+        max_expect_val_location = None
+        max_expect_val_sign = None
+        max_expect_val = None
+        self.losses = []
+        self.steps = steps
+        self.param_history = []
+
+        self.param_history.append([x.detach().numpy().copy() for x in (self.gamma, self.beta)])
+        
+        if self.pbar:
+            from tqdm.auto import tqdm
+            _pbar = tqdm(total=self.steps)
+        else:
+            _pbar = None
+
+        counter = 0
+        for i in range(self.steps):
+            self.energy_loss()
+
+            opt.zero_grad()
+            self.loss.backward()
+            opt.step()
+            
+            self.losses.append(float(self.loss))
+            #self.losses.append(self.loss.detach().numpy().data)
+            self.param_history.append([x.detach().numpy().copy() for x in (self.gamma, self.beta)])
+            if self.pbar:
+                _pbar.update(1)
+
+            if i>1:
+                #if abs((self.losses[-1]-self.losses[-2])/self.losses[-1]) < 0.0000001:
+                if abs((self.losses[-1]-self.losses[-2])/self.losses[-1]) < 0.00025:
+                    counter += 1
+                    if counter == 5:
+                        break
+                else:
+                    counter == 0
+        
+        max_expect_val_location, max_expect_val_sign, max_expect_val = self.create_expect_val_dict()
+        self.energy = self.loss
+
+        return max_expect_val_location, max_expect_val_sign, max_expect_val
+    
+
+    def optimize_transition_states_try(self, steps, **kwargs):
+        expectation_value_single = SingleLayerQAOAExpectationValues(self.problem)
+        expectation_value_single.optimize()
+        gamma_old = [expectation_value_single.gamma/np.pi]
+        beta_old = [expectation_value_single.beta/np.pi]
+
+        for step in range(2, self.p+1):
+            print('stufe von transition', step)
+            for j in range(step):
+                print('stufe in transition', j)
+                gamma_ts = gamma_old.copy()
+                beta_ts = beta_old.copy()
+                gamma_ts.insert(j, 0)
+                beta_ts.insert(j, 0)
+                expectation_values_qtensor_transition = QtensorQAOAExpectationValuesQUBO(self.problem, step, gamma=gamma_ts, beta=beta_ts, pbar=True, opt = self.opt, opt_kwargs=dict(**self.opt_kwargs))
+                expectation_values_qtensor_transition.calc_expect_val()
+                loss_original = expectation_values_qtensor_transition.loss
+                w, v = expectation_values_qtensor_transition.calc_hessian()
+                for i, value in zip(range(len(w)), w):
+                    if value<0:
+                        direction = v[:, i]
+                        direction_gamma = direction[:step]
+                        direction_beta = direction[step:]
+
+                for k in [0, 1]:
+                    diff = 1
+                    counter = 1
+                    loss_old = loss_original
+                    loss_new = loss_old
+                    while diff > 0:
+                        loss_old = loss_new
+                        if k==0:
+                            
+                            gamma_new = [gamma_ts[i] + direction_gamma[i]*0.01*counter for i in range(len(gamma_ts))]
+                            beta_new = [beta_ts[i] + direction_beta[i]*0.01*counter for i in range(len(beta_ts))]
+                            expectation_values = QtensorQAOAExpectationValuesQUBO(self.problem, step, gamma=gamma_new, beta=beta_new, pbar=True, opt = self.opt, opt_kwargs=dict(**self.opt_kwargs))
+                            expectation_values.calc_expect_val()
+                            loss_new = expectation_values.loss
+                            diff = loss_old-loss_new
+
+                            counter += 1
+                        elif k==1:
+                            
+                            gamma_new = [gamma_ts[i] - direction_gamma[i]*0.01*counter for i in range(len(gamma_ts))]
+                            beta_new = [beta_ts[i] - direction_beta[i]*0.01*counter for i in range(len(beta_ts))]
+                            expectation_values = QtensorQAOAExpectationValuesQUBO(self.problem, step, gamma=gamma_new, beta=beta_new, pbar=True, opt = self.opt, opt_kwargs=dict(**self.opt_kwargs))
+                            expectation_values.calc_expect_val()
+                            loss_new = expectation_values.loss
+                            diff = loss_old-loss_new
+
+                            counter += 1
+
+                    if k==0:
+                        loss_min = loss_old
+                        gamma_plus = [gamma_ts[i] + direction_gamma[i]*0.01*(counter-2) for i in range(len(gamma_ts))]
+                        beta_plus = [beta_ts[i] + direction_beta[i]*0.01*(counter-2) for i in range(len(beta_ts))]
+                    
+                print('loss_plus', loss_min)
+                print('loss_minus', loss_old)
+                index = [loss_min, loss_old].index(min([loss_min, loss_old]))
+                if index==0:
+                    expectation_values_qtensor_transition = QtensorQAOAExpectationValuesQUBO(self.problem, step, gamma=gamma_plus, beta=beta_plus, pbar=True, opt = self.opt, opt_kwargs=dict(**self.opt_kwargs))
+                    max_expect_val_location, max_expect_val_sign, max_expect_val = expectation_values_qtensor_transition.calc_expect_val()
+                    energy_qtensor_transition = float(expectation_values_qtensor_transition.energy)
+                else:
+                    gamma_minus = [gamma_ts[i] - direction_gamma[i]*0.01*(counter-2) for i in range(len(gamma_ts))]
+                    beta_minus = [beta_ts[i] - direction_beta[i]*0.01*(counter-2) for i in range(len(beta_ts))]
+                    expectation_values_qtensor_transition = QtensorQAOAExpectationValuesQUBO(self.problem, step, gamma=gamma_minus, beta=beta_minus, pbar=True, opt = self.opt, opt_kwargs=dict(**self.opt_kwargs))
+                    max_expect_val_location, max_expect_val_sign, max_expect_val = expectation_values_qtensor_transition.calc_expect_val()
+                    energy_qtensor_transition = float(expectation_values_qtensor_transition.energy)
+   
+                if j==0:
+                    energy_min = energy_qtensor_transition
+                    gamma_min = [float(i) for i in expectation_values_qtensor_transition.gamma]
+                    beta_min = [float(i) for i in expectation_values_qtensor_transition.beta]
+                    correlations_min = expectation_values_qtensor_transition.expect_val_dict.copy()
+                    losses_min = None
+                    max_expect_val_location_min , max_expect_val_sign_min , max_expect_val_min = max_expect_val_location, max_expect_val_sign, max_expect_val
+                    param_history_min = None
+
+                if energy_qtensor_transition < energy_min:
+                    energy_min = energy_qtensor_transition
+                    gamma_min = [float(i) for i in expectation_values_qtensor_transition.gamma]
+                    beta_min = [float(i) for i in expectation_values_qtensor_transition.beta]
+                    correlations_min = expectation_values_qtensor_transition.expect_val_dict.copy()
+                    losses_min = None
+                    max_expect_val_location_min , max_expect_val_sign_min , max_expect_val_min = max_expect_val_location, max_expect_val_sign, max_expect_val
+                    param_history_min = None
+            gamma_old = gamma_min.copy()
+            beta_old = beta_min.copy()
+
+        self.expect_val_dict = correlations_min
+        self.energy = energy_min
+        self.losses = losses_min
+        self.param_history = param_history_min
+
+        print('final energy:', self.energy)
+
+        return max_expect_val_location_min , max_expect_val_sign_min , max_expect_val_min 
+
+    def optimize_interp(self, steps, **kwargs):
+        expectation_value_single = SingleLayerQAOAExpectationValues(self.problem)
+        expectation_value_single.optimize()
+        gamma_old = [expectation_value_single.gamma/np.pi]
+        beta_old = [expectation_value_single.beta/np.pi]
+
+        for step in range(2, self.p+1):
+            print('stufe von interpolationt p =', step)
+            gamma_new = []
+            beta_new = []
+            for i in range(step):
+                if i==0:
+                    gamma_new.append((step-1-(i+1)+1)/(step-1)*gamma_old[i])
+                    beta_new.append((step-1-(i+1)+1)/(step-1)*beta_old[i])
+                elif i!=0 and i!=(step-1):
+                    gamma_new.append((i+1-1)/(step-1)*gamma_old[i-1]+(step-1-(i+1)+1)/(step-1)*gamma_old[i])
+                    beta_new.append((i+1-1)/(step-1)*beta_old[i-1]+(step-1-(i+1)+1)/(step-1)*beta_old[i])
+                elif i==(step-1):
+                    gamma_new.append((i+1-1)/(step-1)*gamma_old[i-1])
+                    beta_new.append((i+1-1)/(step-1)*beta_old[i-1])
+            
+            expectation_values_qtensor_transition = QtensorQAOAExpectationValuesQUBO(self.problem, step, gamma=gamma_new, beta=beta_new, pbar=True, opt = self.opt, opt_kwargs=dict(**self.opt_kwargs))
+            max_expect_val_location, max_expect_val_sign, max_expect_val = expectation_values_qtensor_transition.optimize(steps=steps, **kwargs)
+            energy_qtensor_transition = float(expectation_values_qtensor_transition.energy)
+            print(energy_qtensor_transition)
+            
+            gamma_old = [float(i) for i in expectation_values_qtensor_transition.gamma]
+            beta_old = [float(i) for i in expectation_values_qtensor_transition.beta]
+
+        energy_min = float(expectation_values_qtensor_transition.energy)
+        gamma_min = gamma_old
+        beta_min = beta_old
+        correlations_min = expectation_values_qtensor_transition.expect_val_dict.copy()
+        losses_min = expectation_values_qtensor_transition.losses.copy()
+        max_expect_val_location_min , max_expect_val_sign_min , max_expect_val_min = max_expect_val_location, max_expect_val_sign, max_expect_val
+        param_history_min = expectation_values_qtensor_transition.param_history
+
+            
+
+        self.expect_val_dict = correlations_min
+        self.energy = energy_min
+        self.losses = losses_min
+        self.param_history = param_history_min
+
+        return max_expect_val_location_min , max_expect_val_sign_min , max_expect_val_min 
+    
+
+
+    
+
+
 
 
 
