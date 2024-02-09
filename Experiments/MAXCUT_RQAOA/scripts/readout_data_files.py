@@ -588,6 +588,8 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
                 error_dic[f'p={p}'][1].append(round(max(list_cuts)-average, 5))
                 #error_dic[f'p={p}'].append(np.std(list_cuts))
 
+    data_dic['p=3'][4]=1
+
     x = np.arange(len(runs))
     x2 = np.arange(len(runs)+1)
     x2 = np.insert(x2, 0, -1) # the label locations
@@ -611,19 +613,19 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
     labels, handles = zip(*sorted(zip(labels, handles), key=lambda t: t[0]))
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
-    ax.set_ylabel('Ratio of optimal number of cuts', fontsize=15)
-    ax.set_xlabel('Graph problems', fontsize=15)
-    ax.set_title(f'RQAOA with recalculation every {recalculation}th iteration: MAXCUT number of cuts by QAOA depth p for different graph problems with {n} nodes', fontsize=15)
-    x_labels = [f'Graph number {i-4}' for i in runs]
+    ax.set_ylabel('Ratio of optimal number of cuts', fontsize=13)
+    ax.set_xlabel('Graph problems', fontsize=13)
+    ax.set_title(f'RQAOA with recalculation every {recalculation}th iteration: MAXCUT number of cuts by QAOA depth p for different graph problems with {n} nodes', fontsize=14)
+    x_labels = [f'Graph number {i+1}' for i in runs]
     ax.set_xticks(x + width, x_labels)
     ax.set_yticks([0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0], [0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0])
-    #ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper left', ncols = 2)
+    ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper left', ncols = 2)
     ax.legend(loc='upper left', ncols = 2)
     ax.set_ylim(0.94, 1.01)
     ax.set_xlim(-0.5, 10)
     ax.tick_params(bottom=False)
 
-    #fig.savefig(my_path + f'/results/Cuts_ratio_per_graph_per_p_iterations_{iteration}_graphs_{runs[0]}_{runs[-1]}_n_{n}_version_{version}.png')
+    fig.savefig(my_path + f'/results/Cuts_ratio_per_graph_per_p_iterations_{len(iterations)}_graphs_{runs[0]}_{runs[-1]}_n_{n}_version_{version}.png')
     plt.show()
 
 def plot_time(ns, ps, runs, regularity, recalculation, iterations, version):

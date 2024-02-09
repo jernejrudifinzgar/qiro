@@ -41,12 +41,12 @@ if __name__ == '__main__':
     seed = 666
     ps= [1, 2, 3]
     #num_runs = 10
-    runs=list(range(0, 5, 1))
+    runs=list(range(5, 10, 1))
     # for i in range(10, 20, 1):
     #     runs.append(i)
     iterations = [0, 1, 2, 3, 4]
-    version = 3
-    recalculation = 10
+    version = 1
+    recalculation = 30
 
     #execute_RQAOA_single_instance(ns[0], ps[0], num_runs)
     #execute_RQAOA_multiple_instances(ns, ps, num_runs)
