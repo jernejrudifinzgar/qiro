@@ -588,8 +588,6 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
                 error_dic[f'p={p}'][1].append(round(max(list_cuts)-average, 5))
                 #error_dic[f'p={p}'].append(np.std(list_cuts))
 
-    data_dic['p=3'][4]=1
-
     x = np.arange(len(runs))
     x2 = np.arange(len(runs)+1)
     x2 = np.insert(x2, 0, -1) # the label locations
@@ -625,7 +623,7 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
     ax.set_xlim(-0.5, 10)
     ax.tick_params(bottom=False)
 
-    fig.savefig(my_path + f'/results/Cuts_ratio_per_graph_per_p_iterations_{len(iterations)}_graphs_{runs[0]}_{runs[-1]}_n_{n}_version_{version}.png')
+    #fig.savefig(my_path + f'/results/Cuts_ratio_per_graph_per_p_iterations_{len(iterations)}_graphs_{runs[0]}_{runs[-1]}_n_{n}_version_{version}.png')
     plt.show()
 
 def plot_time(ns, ps, runs, regularity, recalculation, iterations, version):
@@ -711,10 +709,10 @@ if __name__ == '__main__':
     ps= [1, 2, 3]
     recalculations = [5]
     regularity = 3
-    #runs = [5, 6, 7, 8, 9]
-    runs = list(range(0, 10))
-    recalculation = 10
-    version = 3
+    runs = [5, 7, 9]
+    #runs = list(range(5, 10))
+    recalculation = 25
+    version = 1
     iterations = list(range(5))
 
     colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']
