@@ -41,7 +41,7 @@ if __name__ == '__main__':
     seed = 666
     ps= [1, 2, 3]
     #num_runs = 10
-    runs=list(range(10, 20, 1))
+    runs=list(range(10, 15, 1))
     version = 3
     iterations = [0, 1, 2, 3, 4]
     recalculation = 10
