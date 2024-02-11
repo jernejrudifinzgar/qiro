@@ -39,9 +39,9 @@ if __name__ == '__main__':
     reg = 3
     ns = [50]#, 140, 180]
     seed = 666
-    ps= [1, 2, 3]
+    ps= [3]
     #num_runs = 10
-    runs=list(range(10, 15, 1))
+    runs=[12, 14]#list(range(10, 15, 1))
     version = 3
     iterations = [0, 1, 2, 3, 4]
     recalculation = 10
@@ -49,6 +49,7 @@ if __name__ == '__main__':
     #execute_RQAOA_single_instance_recalculation_GPU(12, 2, 0, 0, 1, 1, output_results=True)
         
     execute_RQAOA_parallel_recalculation_nonsynchronous_iterations(ns, ps, runs, iterations, recalculation, version)
+    #execute_RQAOA_parallel_recalculation(ns, ps, runs, iterations, recalculation, version)
 
     #execute_RQAOA_multiple_instances(ns, ps, num_runs)
     #execute_RQAOA_parallel(ns, ps, runs, version)
