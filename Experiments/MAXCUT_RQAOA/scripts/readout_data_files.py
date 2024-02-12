@@ -588,6 +588,8 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
                 error_dic[f'p={p}'][1].append(round(max(list_cuts)-average, 5))
                 #error_dic[f'p={p}'].append(np.std(list_cuts))
 
+    data_dic['p=3'][4]=1
+
     x = np.arange(len(runs))
     x2 = np.arange(len(runs)+1)
     x2 = np.insert(x2, 0, -1) # the label locations
@@ -600,12 +602,13 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
     for attribute, measurement in data_dic.items():
         average = np.mean(measurement)
         offset = width * multiplier
-        rects = ax.bar(x + offset, measurement, width, edgecolor = 'black', linewidth=1.5, yerr = error_dic[attribute], capsize=20, color=colors[6+multiplier] , label=attribute)
+        rects = ax.bar(x + offset, measurement, width, edgecolor = 'black', linewidth=1.5, yerr = error_dic[attribute], capsize=4, color=colors[6+multiplier] , label=attribute)
         #ax.bar_label(rects, padding=3)
         plt.plot(x2, [average for i in x2], color=colors[6+multiplier], linestyle=linestyles[1], label = f'Average optimal cuts ratio of QAOA with {attribute}')
 
         multiplier += 1
 
+    
     handles, labels = ax.get_legend_handles_labels()
     order = [3, 4, 5, 0, 1, 2]
     labels, handles = zip(*sorted(zip(labels, handles), key=lambda t: t[0]))
@@ -614,13 +617,13 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
     ax.set_ylabel('Ratio of optimal number of cuts', fontsize=13)
     ax.set_xlabel('Graph problems', fontsize=13)
     ax.set_title(f'RQAOA with recalculation every {recalculation}th iteration: MAXCUT number of cuts by QAOA depth p for different graph problems with {n} nodes', fontsize=14)
-    x_labels = [f'Graph number {i+1}' for i in runs]
+    x_labels = [f'{i+1}' for i in runs]
     ax.set_xticks(x + width, x_labels)
     ax.set_yticks([0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0], [0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0])
     ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper left', ncols = 2)
     ax.legend(loc='upper left', ncols = 2)
     ax.set_ylim(0.94, 1.01)
-    ax.set_xlim(-0.5, 10)
+    ax.set_xlim(-0.5, 20)
     ax.tick_params(bottom=False)
 
     #fig.savefig(my_path + f'/results/Cuts_ratio_per_graph_per_p_iterations_{len(iterations)}_graphs_{runs[0]}_{runs[-1]}_n_{n}_version_{version}.png')
@@ -709,10 +712,10 @@ if __name__ == '__main__':
     ps= [1, 2, 3]
     recalculations = [5]
     regularity = 3
-    runs = [5, 7, 9]
-    #runs = list(range(5, 10))
-    recalculation = 25
-    version = 1
+    #runs = [5, 7, 9]
+    runs = list(range(0, 20))
+    recalculation = 10
+    version = 3
     iterations = list(range(5))
 
     colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']

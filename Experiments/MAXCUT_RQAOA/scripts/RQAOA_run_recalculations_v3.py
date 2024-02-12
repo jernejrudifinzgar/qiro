@@ -41,9 +41,9 @@ if __name__ == '__main__':
     seed = 666
     ps= [1, 2, 3]
     #num_runs = 10
-    runs=list(range(15, 20, 1))
+    runs=list(range(20, 25, 1))
     version = 3
-    iterations = [0, 1, 2, 3, 4, 5]
+    iterations = [0, 1, 2, 3, 4]
     recalculation = 10
     #execute_RQAOA_single_instance_recalculation(50, 1, 7, 0, 5, 1, output_results=True)
         
