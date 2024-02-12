@@ -621,12 +621,12 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
     ax.set_xticks(x + width, x_labels)
     ax.set_yticks([0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0], [0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0])
     ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper left', ncols = 2)
-    ax.legend(loc='upper left', ncols = 2)
+    #ax.legend(loc='upper left', ncols = 2)
     ax.set_ylim(0.94, 1.01)
-    ax.set_xlim(-0.5, 20)
+    ax.set_xlim(-0.5, len(runs))
     ax.tick_params(bottom=False)
 
-    #fig.savefig(my_path + f'/results/Cuts_ratio_per_graph_per_p_iterations_{len(iterations)}_graphs_{runs[0]}_{runs[-1]}_n_{n}_version_{version}.png')
+    fig.savefig(my_path + f'/results/Cuts_ratio_per_graph_per_p_iterations_{len(iterations)}_graphs_{runs[0]}_{runs[-1]}_n_{n}_version_{version}.png')
     plt.show()
 
 def plot_time(ns, ps, runs, regularity, recalculation, iterations, version):
@@ -713,7 +713,7 @@ if __name__ == '__main__':
     recalculations = [5]
     regularity = 3
     #runs = [5, 7, 9]
-    runs = list(range(0, 20))
+    runs = list(range(0, 10))
     recalculation = 10
     version = 3
     iterations = list(range(5))
