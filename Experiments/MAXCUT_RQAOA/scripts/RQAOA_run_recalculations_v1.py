@@ -41,10 +41,10 @@ if __name__ == '__main__':
     seed = 666
     ps= [3]
     #num_runs = 10
-    runs=[6, 8]#list(range(5, 10, 1))
+    runs=[6]#list(range(5, 10, 1))
     # for i in range(10, 20, 1):
     #     runs.append(i)
-    iterations = [0, 1, 2, 3, 4]
+    iterations = [0]
     version = 1
     recalculation = 25
 
