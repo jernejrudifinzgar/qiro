@@ -1,14 +1,46 @@
 import networkx as nx
 import pickle
 import json
+import sys
+sys.path.append("./../../../../miniconda3/envs/qiro/lib/python3.9/site-packages/")
 import os
 import matplotlib.pyplot as plt
 import matplotlib
+import matplotlib.patheffects as pe
 from IPython.display import set_matplotlib_formats
-__plot_height = 8.7
-matplotlib.rcParams['figure.figsize'] = (1.718*__plot_height, __plot_height)
-set_matplotlib_formats('svg')
+#__plot_height = 8.7
+#matplotlib.rcParams['figure.figsize'] = (1.718*__plot_height, __plot_height)
+#set_matplotlib_formats('svg')
 import numpy as np
+import matplotlib
+matplotlib.rcParams.update(matplotlib.rcParamsDefault)
+ 
+os.environ['PATH'] = os.environ['PATH'] + ':/Library/TeX/texbin/' # for latex, you might need to change this
+
+#print(os.environ['PATH'])# = os.environ['PATH'] + 'c:/Library/TeX/texbin/' # for latex, you might need to change this
+label_size = 8
+# plt.style.use('fivethirtyeight')
+plt.rc("text", usetex=True)
+plt.rc("text.latex", preamble=r'\usepackage{dsfont}\usepackage{amsmath}\usepackage{physics}')
+#matplotlib.rcParams['text.latex.preamble']=[r'/usepackage{dsfont}/usepackage{amsmath}/usepackage{physics}']
+ 
+pr ={"axes.labelsize": 8,               # LaTeX default is 10pt font.
+    "font.size": 8,
+    "legend.fontsize": 8,               # Make the legend/label fonts
+    "xtick.labelsize": 8,               # a little smaller
+    "ytick.labelsize": 8,
+    'figure.figsize': (2.0476 * 3.35, 1.* 9 * 3.35 / 16),
+    "errorbar.capsize": 1.5,
+    "font.family": "serif",
+    "font.serif": [],                   # blank entries should cause plots
+    "font.sans-serif": [],    
+    }
+for k, v in pr.items():
+    matplotlib.rcParams[k] = v
+   
+matplotlib.rcParams["font.family"] = "serif"
+# mpl.rcParams["font.serif"] = ["STIX"]
+matplotlib.rcParams["mathtext.fontset"] = "stix"
 
 
 def plot_cuts_recalculation_per_graph(ns, ps, runs, regularity, version):
@@ -587,8 +619,10 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
                 error_dic[f'p={p}'][0].append(round(average-min(list_cuts), 5))
                 error_dic[f'p={p}'][1].append(round(max(list_cuts)-average, 5))
                 #error_dic[f'p={p}'].append(np.std(list_cuts))
-
-    data_dic['p=3'][4]=1
+    try:
+        data_dic['p=3'][4]=1
+    except Exception as error:
+        print(error)
 
     x = np.arange(len(runs))
     x2 = np.arange(len(runs)+1)
@@ -596,37 +630,48 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
     width = 0.25  # the width of the bars
     multiplier = 0
 
-    fig, ax = plt.subplots(figsize=(14, 8), layout='constrained')
+    fig, ax = plt.subplots(layout='constrained')
 
     
     for attribute, measurement in data_dic.items():
-        average = np.mean(measurement)
         offset = width * multiplier
-        rects = ax.bar(x + offset, measurement, width, edgecolor = 'black', linewidth=1.5, yerr = error_dic[attribute], capsize=4, color=colors[6+multiplier] , label=attribute)
+        rects = ax.bar(x + offset, measurement, width, edgecolor = 'black', linewidth=0.5, yerr = error_dic[attribute], error_kw=dict(lw=1, ecolor='gray', capthick=1), color=colors[6+multiplier], alpha=0.6, label=f'${attribute}$')
         #ax.bar_label(rects, padding=3)
-        plt.plot(x2, [average for i in x2], color=colors[6+multiplier], linestyle=linestyles[1], label = f'Average optimal cuts ratio of QAOA with {attribute}')
+        multiplier += 1
 
+    multiplier = 0
+    for attribute, measurement in data_dic.items():
+        average = np.mean(measurement)
+        plt.plot(x2, [average for i in x2], color=colors[6+multiplier], linestyle='dashed', linewidth=1.3, path_effects=[pe.Stroke(linewidth=1.8, foreground='black'), pe.Normal()], label = f'${attribute}$ mean')    
+        #plt.plot(x2, [average for i in x2], color=colors[6+multiplier], linestyle=(5, (10, 3)), linewidth=2, label = f'Average optimal cuts ratio of QAOA with {attribute}')    
         multiplier += 1
 
     
     handles, labels = ax.get_legend_handles_labels()
     order = [3, 4, 5, 0, 1, 2]
+    order = [0, 1, 2, 3, 4, 5]
     labels, handles = zip(*sorted(zip(labels, handles), key=lambda t: t[0]))
 
     # Add some text for labels, title and custom x-axis tick labels, etc.
-    ax.set_ylabel('Ratio of optimal number of cuts', fontsize=13)
-    ax.set_xlabel('Graph problems', fontsize=13)
-    ax.set_title(f'RQAOA with recalculation every {recalculation}th iteration: MAXCUT number of cuts by QAOA depth p for different graph problems with {n} nodes', fontsize=14)
+    ax.set_ylabel('Approximation ratio')
+    ax.set_xlabel('Problem instance')
+    #ax.set_title(f'MAXCUT RQAOA approximation ratio with recalculation every {recalculation}''$^\\text{th}$ shrinking step')
     x_labels = [f'{i+1}' for i in runs]
     ax.set_xticks(x + width, x_labels)
     ax.set_yticks([0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0], [0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0])
-    ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper left', ncols = 2)
+    #ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper right', ncols = 1, bbox_to_anchor=(1.26, 1.047)) #1.028
+    #ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper left', ncols = 6, columnspacing=1.394, bbox_to_anchor=(-0.01, 1.28))
     #ax.legend(loc='upper left', ncols = 2)
-    ax.set_ylim(0.94, 1.01)
+    ax.set_ylim(0.94, 1.002)
     ax.set_xlim(-0.5, len(runs))
     ax.tick_params(bottom=False)
+    box = ax.get_position()
+    #ax.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.85])
+    
+    ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper center', handletextpad=0.5, ncols = 6, columnspacing=1, bbox_to_anchor=(0.5, 1.24))
 
-    fig.savefig(my_path + f'/results/Cuts_ratio_per_graph_per_p_iterations_{len(iterations)}_graphs_{runs[0]}_{runs[-1]}_n_{n}_version_{version}.png')
+
+    fig.savefig(my_path + f'/results/Cuts_ratio_per_graph_per_p_iterations_{len(iterations)}_graphs_{runs[0]}_{runs[-1]}_n_{n}_version_{version}.pdf', format="pdf", dpi=2000)
     plt.show()
 
 def plot_time(ns, ps, runs, regularity, recalculation, iterations, version):
@@ -712,10 +757,10 @@ if __name__ == '__main__':
     ps= [1, 2, 3]
     recalculations = [5]
     regularity = 3
-    #runs = [5, 7, 9]
-    runs = list(range(0, 10))
-    recalculation = 10
-    version = 3
+    runs = [5, 7, 8, 9]
+    #runs = list(range(5, 10))
+    recalculation = 25
+    version = 1
     iterations = list(range(5))
 
     colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']

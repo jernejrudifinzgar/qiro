@@ -182,8 +182,8 @@ def plot_MIS_size_per_graph_initialization(ns, ps, runs, version, initialization
             average = counter_size/len(list_graphs_qtensor)
             for i in runs:
                 average_list.append(average)
-            plt.scatter(list_graphs_qtensor, MIS_size_qtensor_list, c=colors[counter], marker = markers[counter], label = f'tensor network simulation for p={p}')
-            plt.plot(runs, average_list, color=colors[counter], linestyle=linestyles[counter], label = f'average MIS size with tensor network p={p}')
+            plt.scatter(list_graphs_qtensor, MIS_size_qtensor_list, c=colors[counter], marker = markers[counter], label = f'tensor network simulation for p={p} with {initialization} initialization')
+            plt.plot(runs, average_list, color=colors[counter], linestyle=linestyles[counter], label = f'average MIS size with tensor network p={p} with {initialization} initialization')
             counter += 1
 
 
@@ -227,7 +227,7 @@ def plot_MIS_size_per_graph_initialization(ns, ps, runs, version, initialization
         plt.ylabel('MIS size')
         plt.legend()    
         plt.show()
-        #fig.savefig(my_path + f'/results/MIS_size_reg_{regularity}_n_{n}_initialization_{initialization}_runs_{runs[0]}_{runs[-1]}_version_{version}.png')
+        fig.savefig(my_path + f'/results/MIS_size_reg_{regularity}_n_{n}_initialization_{initialization}_runs_{runs[0]}_{runs[-1]}_version_{version}.png')
 
 
 def plot_energies(ns, ps, runs, version, regularity, per_node=False):
@@ -468,7 +468,7 @@ def solve_greedy():
 
 if __name__ == '__main__':
 
-    ns = [50]
+    ns = [80]
     ps = [1, 2, 3]
     runs = list(range(0, 20))
     regularity = 3
@@ -477,13 +477,13 @@ if __name__ == '__main__':
     initialization = 'interpolation'
     
 
-    plot_MIS_size_per_graph(ns, ps, runs, version, regularity)
+    #plot_MIS_size_per_graph(ns, ps, runs, version, regularity)
     #plot_energies(ns, ps, runs, version, regularity, per_node=True)
     #plot_losses(ns, ps, runs, version, regularity, per_node=True)
     #plot_losses_multiple_versions(ns, ps, runs, versions, regularity, per_node=True)
 
         
-    #plot_MIS_size_per_graph_initialization(ns, ps, runs, version, initialization, regularity)
+    plot_MIS_size_per_graph_initialization(ns, ps, runs, version, initialization, regularity)
     #plot_energies_initialization(ns, ps, runs, version, initialization, regularity, per_node=True)
 
 
