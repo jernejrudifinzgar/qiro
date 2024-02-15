@@ -173,7 +173,7 @@ def execute_RQAOA_single_instance_recalculation(n, p, run, iteration, recalculat
         G = nx.random_regular_graph(reg, n)
 
     problem = Generator.MAXCUT(G)
-    expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, initialization='fixed_angles_optimization', opt=torch.optim.SGD, opt_kwargs=dict(lr=0.0001), ordering_algo='tamaki_30')
+    expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, initialization='fixed_angles_optimization', opt=torch.optim.SGD, opt_kwargs=dict(lr=0.0001))#, ordering_algo='tamaki_30')
     RQAOA_qtensor = RQAOA_recalculate(expectation_values_qtensor, 4, iteration, recalculations=recalculation, type_of_problem="MAXCUT")
     time_start = time()
     cuts_qtensor, solution_qtensor = RQAOA_qtensor.execute()
