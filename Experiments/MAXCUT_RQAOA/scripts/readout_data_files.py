@@ -16,6 +16,9 @@ import matplotlib
 matplotlib.rcParams.update(matplotlib.rcParamsDefault)
  
 os.environ['PATH'] = os.environ['PATH'] + ':/Library/TeX/texbin/' # for latex, you might need to change this
+#os.environ['PATH'] = os.environ['PATH'] + ':/usr/bin/java/' # for latex, you might need to change this
+
+print(os.environ['PATH'])
 
 #print(os.environ['PATH'])# = os.environ['PATH'] + 'c:/Library/TeX/texbin/' # for latex, you might need to change this
 label_size = 8
@@ -774,7 +777,7 @@ if __name__ == '__main__':
     #for iteration in iterations:
     #    plot_cuts_per_graph_recalculation(ns, ps, runs, regularity, recalculation, iteration, version)
 
-    grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, version)
+    #grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, version)
 
     #plot_time(ns, ps, runs, regularity, recalculation, iterations, version)
 
