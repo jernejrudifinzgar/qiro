@@ -1157,7 +1157,9 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
 class QtensorQAOAExpectationValuesQUBO_GPU(ExpectationValues):
     """Calculation of expectation values via tensor network contraction using Qtensor"""
 
-    def __init__(self, problem, p, pbar=True, gamma=None, beta=None, initialization='random', regularity=3, opt=torch.optim.RMSprop, opt_kwargs=dict(lr=0.001), backend=qtensor.contraction_backends.TorchBackend(device='gpu'), ordering_algo='greedy'):
+    #def __init__(self, problem, p, pbar=True, gamma=None, beta=None, initialization='random', regularity=3, opt=torch.optim.RMSprop, opt_kwargs=dict(lr=0.001), backend=qtensor.contraction_backends.TorchBackend(device='gpu'), ordering_algo='greedy'):
+    def __init__(self, problem, p, pbar=True, gamma=None, beta=None, initialization='random', regularity=3, opt=torch.optim.RMSprop, opt_kwargs=dict(lr=0.001), backend=qtensor.contraction_backends.CuPyBackend(), ordering_algo='greedy'):
+ 
         super().__init__(problem)
         random.seed()
         #TODO check fixed angles parameters for non-regular graphs

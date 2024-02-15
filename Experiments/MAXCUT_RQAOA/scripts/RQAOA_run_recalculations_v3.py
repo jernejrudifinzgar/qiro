@@ -45,7 +45,9 @@ if __name__ == '__main__':
     version = 3
     iterations = [0, 1, 2, 3, 4]
     recalculation = 10
-    execute_RQAOA_single_instance_recalculation(20, 2, 0, 0, 1, 1, output_results=True)
+    #execute_RQAOA_single_instance_recalculation(20, 2, 0, 0, 1, 1, output_results=True)
+    execute_RQAOA_single_instance_recalculation_GPU(12, 2, 0, 0, 1, 1, output_results=True)
+
         
     #execute_RQAOA_parallel_recalculation(ns, ps, runs, iterations, recalculation, version)
     #execute_RQAOA_parallel_recalculation_nonsynchronous_iterations(ns, ps, runs, iterations, recalculation, version)
