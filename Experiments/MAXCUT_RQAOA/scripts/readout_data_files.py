@@ -663,14 +663,14 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
     ax.set_yticks([0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0], [0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0])
     #ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper right', ncols = 1, bbox_to_anchor=(1.26, 1.047)) #1.028
     #ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper left', ncols = 6, columnspacing=1.394, bbox_to_anchor=(-0.01, 1.28))
-    #ax.legend(loc='upper left', ncols = 2)
+    ax.legend(loc='upper left', ncols = 2)
     ax.set_ylim(0.94, 1.002)
     ax.set_xlim(-0.5, len(runs))
     ax.tick_params(bottom=False)
     box = ax.get_position()
     #ax.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.85])
     
-    ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper center', handletextpad=0.5, ncols = 6, columnspacing=1, bbox_to_anchor=(0.5, 1.24))
+    #ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper center', handletextpad=0.5, ncols = 6, columnspacing=1, bbox_to_anchor=(0.5, 1.24))
 
 
     fig.savefig(my_path + f'/results/Cuts_ratio_per_graph_per_p_iterations_{len(iterations)}_graphs_{runs[0]}_{runs[-1]}_n_{n}_version_{version}.pdf', format="pdf", dpi=2000)
@@ -760,7 +760,7 @@ if __name__ == '__main__':
     recalculations = [5]
     regularity = 3
     runs = [0, 1, 2, 3, 5, 6, 7, 9]
-    #runs = list(range(5, 10))
+    #runs = list(range(0, 10))
     recalculation = 5
     version = 1
     iterations = list(range(1))

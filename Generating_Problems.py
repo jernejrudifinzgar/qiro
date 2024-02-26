@@ -258,5 +258,50 @@ class MAXCUT(Problem):
         return number_of_cuts
 
     
+class SetCover(Problem):
+    """Set cover problem generator."""
+    def __init__(self, set, subsets):
+        Problem.__init__(self)
+        self.var_list = None
+        self.position_translater=None
+        self.type = "SetCover"
+
+        self.set_size = len(set)
+        self.num_alphas = []
+
+        for element in set:
+            num_included_elements = 0
+            for subset in subsets:
+                if element in subset:
+                    num_included_elements += 1
+            self.num_alphas.append(num_included_elements)
+
+        size_matrix = self.set_size
+        for num_alpha in self.num_alphas:
+            size_matrix += num_alpha
+
+        self.matrixClass = Matrix(size_matrix+1)
+        self.matrix = self.matrixClass.matrix
+
+        for i in range(self.set_size):
+            for j in range(i):
+                self.matrix[i+1, j+1] = 0
+
+            for alpha in range(self.num_alphas[i]):
+                for j in range(alpha):
+                    self.matrix[self.num_alphas[i], j] = 0
+                    self.set_size[self.num_alphas[j]]
+
+        for i in range(self.set_size):
+            for j in range(i):
+                self.matrix[i+1, j+1] = 0
 
 
+        for i 
+
+            
+
+                
+            
+
+   

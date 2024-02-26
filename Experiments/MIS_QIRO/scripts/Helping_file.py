@@ -18,7 +18,7 @@ from qtensor import QAOAQtreeSimulator, QAOAQtreeSimulator_MIS, QAOAQtreeSimulat
 from qtensor.contraction_backends import TorchBackend
 import Generating_Problems as Generator
 from Calculating_Expectation_Values import SingleLayerQAOAExpectationValues, QtensorQAOAExpectationValuesMIS,QtensorQAOAExpectationValuesMAXCUT, QtensorQAOAExpectationValuesQUBO
-from QIRO import QIRO_MIS
+from QIRO import QIRO_MIS, QIRO_MIS_QMIN
 import torch
 import qtensor
 import networkx as nx
@@ -37,7 +37,7 @@ import torch.multiprocessing as mp
 from time import time
 
 
-def execute_QIRO_single_instance(n, p, run, version, initialization, output_results=False, gamma=None, beta=None):
+def execute_QIRO_single_instance(n, p, run, version, initialization, variation='standard', output_results=False, gamma=None, beta=None):
     my_path = os.path.dirname(__file__)
     my_path = os.path.dirname(my_path)
     reg = 3
@@ -66,7 +66,8 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, output_resu
     problem = Generator.MIS(G)
 
     expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, opt=torch.optim.RMSprop, initialization = initialization, opt_kwargs=dict(lr=0.005), gamma=gamma, beta=beta)
-    QIRO_qtensor = QIRO_MIS(5, expectation_values_qtensor)
+    QIRO_qtensor = QIRO_MIS(5, expectation_values_qtensor, variation=variation)
+
     time_start = time()
     QIRO_qtensor.execute()
     time_end = time()
@@ -108,7 +109,7 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, output_resu
     #     f.write(f"\nCalculated solution with analytic method: {solution_single}")
     # f.close()
     #print(solution_dict)
-    pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_version_{version}.pkl", 'wb'))
+    pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl", 'wb'))
 
     if output_results:
         print('MIS size qtensor:', size_indep_set_qiro_qtensor)
@@ -278,16 +279,17 @@ def give_hessian(n, p, run, version, initialization, output_results=False, gamma
 
 
 
-def execute_QIRO_multiple_instances_different_n(ns, p, run, version, initialization):
+def execute_QIRO_multiple_instances_different_n(ns, ps, run, version, initialization, variation):
     for n in ns: 
-        execute_QIRO_single_instance(n, p, run, version, initialization)
+        for p in ps:
+            execute_QIRO_single_instance(n, p, run, version, initialization, variation=variation)
 
 
-def execute_QIRO_parallel(ns, ps, runs, version, initialization='random'):
+def execute_QIRO_parallel(ns, ps, runs, version, initialization='random', variations=['standard']):
     arguments_list = []
-    for p in ps:
+    for variation in variations:
         for run in runs:
-            arguments_list.append((ns, p, run, version, initialization))
+            arguments_list.append((ns, ps, run, version, initialization, variation))
     
     pool = mp.Pool(len(arguments_list))
     pool.starmap(execute_QIRO_multiple_instances_different_n, arguments_list)

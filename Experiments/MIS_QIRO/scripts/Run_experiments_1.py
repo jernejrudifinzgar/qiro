@@ -21,23 +21,28 @@ import matplotlib.pyplot as plt
 if __name__ == '__main__':
 
     reg = 3
-    ns = [80]#, 140, 180]
+    ns = [60, 80, 100]#, 140, 180]
     seed = 666
     ps= [1, 2, 3]
     #num_runs = 10
     runs=list(range(0, 20, 1))
     initialization = 'interpolation'
+    variations=['standard', 'MINQ', 'MAXQ', 'MMQ']
     version = 1
-    #execute_RQAOA_single_instance(ns[0], ps[0], num_runs)
-    #execute_RQAOA_multiple_instances(ns, ps, num_runs)
-    #execute_QIRO_parallel(ns, ps, runs, version)
+    results_list=[]
 
-    #execute_QIRO_single_instance(30, 1, 0, 5)
-    execute_QIRO_parallel(ns, ps, runs, version, initialization=initialization)
+    #execute_QIRO_parallel([12], [1, 2], [0, 1], version, initialization=initialization, variations=variations)
+
+
+
+    execute_QIRO_parallel(ns, ps, runs, version, initialization=initialization, variations=variations)
     
     
     
-    execute_QIRO_parallel(ns, ps, runs, version, initialization='transition_states')
+    
+    #execute_QIRO_parallel(ns, ps, runs, version, initialization='transition_states')
+    
+    
     # start_time = time()
     # give_hessian(30, 3, 0, 4, 'transition_states_try')
     # end_time = time()
