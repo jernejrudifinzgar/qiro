@@ -297,9 +297,6 @@ class SetCover(Problem):
                 self.matrix[i+1, j+1] = 0
 
 
-        for i 
-
-            
 
                 
             
