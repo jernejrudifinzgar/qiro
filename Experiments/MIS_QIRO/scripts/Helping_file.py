@@ -36,6 +36,67 @@ from RQAOA import RQAOA, RQAOA_recalculate
 import torch.multiprocessing as mp
 from time import time
 
+def execute_QIRO_single_instance_137_nodes(p, run, version, initialization, variation='standard', output_results=False, gamma=None, beta=None):
+    my_path = os.path.dirname(__file__)
+    my_path = os.path.dirname(my_path)
+    reg = 3
+    seed = 666
+
+    G = nx.read_adjlist(my_path + f'/graphs/{run}-graph.adjlist', nodetype=int)
+    problem = Generator.MIS(G)
+
+    expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, opt=torch.optim.RMSprop, initialization = initialization, opt_kwargs=dict(lr=0.005), gamma=gamma, beta=beta)
+    QIRO_qtensor = QIRO_MIS(5, expectation_values_qtensor, variation=variation)
+
+    time_start = time()
+    QIRO_qtensor.execute()
+    time_end = time()
+    required_time = time_end-time_start
+
+    solution_qtensor = QIRO_qtensor.solution
+    size_indep_set_qiro_qtensor = np.sum(solution_qtensor >= 0)  
+    solution_dict = {}
+    solution_dict['size_solution_qtensor'] = size_indep_set_qiro_qtensor
+    solution_dict['solution_qtensor'] = solution_qtensor
+    solution_dict['energies_qtensor'] = QIRO_qtensor.energies_list
+    solution_dict['losses_qtensor'] = QIRO_qtensor.losses_list
+    solution_dict['num_nodes_qtensor'] = QIRO_qtensor.num_nodes
+    
+    
+    if p==1:
+        size_greedy = greedy_mis(G)
+        solution_dict['size_solution_greedy'] = size_greedy
+
+        problem = Generator.MIS(G)
+        expectation_values_single = SingleLayerQAOAExpectationValues(problem)
+        QIRO_single = QIRO_MIS(5, expectation_values_single)
+        QIRO_single.execute()
+        solution_single = QIRO_single.solution
+        size_indep_set_qiro_single = np.sum(solution_single >= 0)
+        solution_dict['size_solution_single'] = size_indep_set_qiro_single
+        solution_dict['solution_single'] = solution_single
+        solution_dict['energies_single'] = QIRO_single.energies_list
+        solution_dict['num_nodes_single'] = QIRO_single.num_nodes
+
+    # f = open(my_path + f"/data/results_test_run_{run}_n_{n}_p_{p}_version_{version}.txt", "w+")
+    # f.write(f"\nRequired time in seconds for RQAOA: {required_time}")
+    # f.write(f"\nRequired time in minutes for RQAOA: {required_time/60}")
+    # f.write(f"\nRequired time in hours for RQAOA: {required_time/3600}")
+    # f.write(f"\nCalculated number of cuts with tensor networks: {cuts_qtensor}")
+    # f.write(f"\nCalculated solution with tensor networks: {solution_qtensor}")
+    # if p==1:
+    #     f.write(f"\nCalculated number of cuts with analytic method:: {cuts_single}")
+    #     f.write(f"\nCalculated solution with analytic method: {solution_single}")
+    # f.close()
+    #print(solution_dict)
+    pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_n_{137}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl", 'wb'))
+
+    if output_results:
+        print('MIS size qtensor:', size_indep_set_qiro_qtensor)
+        if p==1: 
+            print('MIS size single:', size_indep_set_qiro_single)
+
+    return size_indep_set_qiro_qtensor, solution_qtensor
 
 def execute_QIRO_single_instance(n, p, run, version, initialization, variation='standard', output_results=False, gamma=None, beta=None):
     my_path = os.path.dirname(__file__)
