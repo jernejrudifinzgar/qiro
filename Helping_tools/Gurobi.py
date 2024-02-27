@@ -5,6 +5,7 @@ import networkx as nx
 import pickle
 from itertools import product
 import numpy as np
+import os
 import time
 
 
@@ -96,18 +97,30 @@ if __name__ == '__main__':
 
     # pickle.dump(list_solutions, open(f"100_regular_graphs_nodes_{n}_reg_3_solutions.pkl", 'wb'))
 
+
+
+
     #MIS
     n = 80
     list_solutions = []
-    with open(f'rudis_100_regular_graphs_nodes_{n}_reg_3.pkl', 'rb') as f:
+    #with open(f'rudis_100_regular_graphs_nodes_{n}_reg_3.pkl', 'rb') as f:
     #with open(f'100_regular_graphs_nodes_{n}_reg_3.pkl', 'rb') as f:
-        data = pickle.load(f)
-    counter = 0
-    for graph in data:
-        counter += 1
-        solution = solve_MIS(graph)
-        print(f"Solution for graph {counter} found")
-        list_solutions.append(-solution)
+        #data = pickle.load(f)
+    # counter = 0
+    # for graph in data:
+    #     counter += 1
+    #     solution = solve_MIS(graph)
+    #     print(f"Solution for graph {counter} found")
+    #     list_solutions.append(-solution)
 
-    pickle.dump(list_solutions, open(f"rudis_100_regular_graphs_nodes_{n}_reg_3_MIS_solutions.pkl", 'wb'))
+    # pickle.dump(list_solutions, open(f"rudis_100_regular_graphs_nodes_{n}_reg_3_MIS_solutions.pkl", 'wb'))
     #pickle.dump(list_solutions, open(f"100_regular_graphs_nodes_{n}_reg_3_MIS_solutions.pkl", 'wb'))
+
+
+    for i in range(1, 11):
+        graph = nx.read_adjlist(f'./graphs/{i}-graph.adjlist', nodetype=int)
+        solution = solve_MIS(graph)
+        list_solutions.append(-solution)
+    
+    pickle.dump(list_solutions, open(f"./graphs/10_graphs_nodes_{137}_MIS_solutions.pkl", 'wb'))
+

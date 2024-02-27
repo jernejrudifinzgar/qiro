@@ -98,6 +98,7 @@ def execute_QIRO_single_instance_137_nodes(p, run, version, initialization, vari
 
     return size_indep_set_qiro_qtensor, solution_qtensor
 
+
 def execute_QIRO_single_instance(n, p, run, version, initialization, variation='standard', output_results=False, gamma=None, beta=None):
     my_path = os.path.dirname(__file__)
     my_path = os.path.dirname(my_path)

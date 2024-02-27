@@ -32,7 +32,7 @@ if __name__ == '__main__':
     results_list=[]
 
     
-    execute_QIRO_single_instance_137_nodes(3, 1, 1, initialization=initialization, variation='standard', output_results=True)
+    execute_QIRO_single_instance_137_nodes(3, 1, 1, initialization='random', variation='standard', output_results=True)
     
     
     #execute_QIRO_parallel([12], [1, 2], [0, 1], version, initialization=initialization, variations=variations)

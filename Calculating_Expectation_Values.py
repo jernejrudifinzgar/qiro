@@ -1633,7 +1633,6 @@ class QtensorQAOAExpectationValuesQUBO_GPU(ExpectationValues):
             expectation_values_qtensor_transition = QtensorQAOAExpectationValuesQUBO(self.problem, step, gamma=gamma_new, beta=beta_new, pbar=True, opt = self.opt, opt_kwargs=dict(**self.opt_kwargs))
             max_expect_val_location, max_expect_val_sign, max_expect_val = expectation_values_qtensor_transition.optimize(steps=steps, **kwargs)
             energy_qtensor_transition = float(expectation_values_qtensor_transition.energy)
-            print(energy_qtensor_transition)
             
             gamma_old = [float(i) for i in expectation_values_qtensor_transition.gamma]
             beta_old = [float(i) for i in expectation_values_qtensor_transition.beta]
