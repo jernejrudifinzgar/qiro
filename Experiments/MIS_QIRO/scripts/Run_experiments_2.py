@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 if __name__ == '__main__':
 
     reg = 3
-    ns = [60, 80, 100]#, 140, 180]
+    ns = [40, 120, 140]#, 140, 180]
     seed = 666
     ps= [1, 2, 3]
     #num_runs = 10
@@ -32,14 +32,14 @@ if __name__ == '__main__':
     results_list=[]
 
     
-    execute_QIRO_single_instance_137_nodes(3, 1, 1, initialization='random', variation='standard', output_results=True)
+    #execute_QIRO_single_instance_137_nodes(3, 1, 1, initialization='interpolation', variation='standard', output_results=True)
     
     
     #execute_QIRO_parallel([12], [1, 2], [0, 1], version, initialization=initialization, variations=variations)
 
 
 
-    #execute_QIRO_parallel(ns, ps, runs, version, initialization=initialization, variations=variations)
+    execute_QIRO_parallel(ns, ps, runs, version, initialization=initialization, variations=variations)
     
     
     

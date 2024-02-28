@@ -672,6 +672,7 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
                 #beta=[0.1] * p
                 beta=[random.uniform(0, 0.5)]*p
 
+        print(gamma, beta)
         self.opt = opt
         self.opt_kwargs = opt_kwargs
         self.pbar=pbar
@@ -727,6 +728,7 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
                     E = torch.real(sim.simulate_batch(composer.circuit, peo=peo))
                     composer.builder.reset()
                     matrix_entry = self.problem.matrix[i, j]
+                    print(E)
                     self.loss += E * matrix_entry
                     self.E_nodes [(i, j)] = E
         
