@@ -423,7 +423,7 @@ def execute_QIRO_parallel(ns, ps, runs, version, initialization='random', variat
 def execute_QIRO_multiple_instances_different_n_2(ns, p, run, version, initialization, variation):
     for n in ns: 
         
-        execute_QIRO_single_instance(n, p, run, version, initialization, variation=variation)
+        execute_QIRO_single_instance_2(n, p, run, version, initialization, variation=variation)
 
 
 def execute_QIRO_parallel_2(ns, ps, runs, version, initialization='random', variations=['standard']):
@@ -434,4 +434,4 @@ def execute_QIRO_parallel_2(ns, ps, runs, version, initialization='random', vari
                 arguments_list.append((ns, p, run, version, initialization, variation))
     
     pool = mp.Pool(len(arguments_list))
-    pool.starmap(execute_QIRO_multiple_instances_different_n, arguments_list)
+    pool.starmap(execute_QIRO_multiple_instances_different_n_2, arguments_list)
