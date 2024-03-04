@@ -1,2 +1,0 @@
-CMDLINE taskset -c 180-240 python Run_experiments_v2.py
-MEM 0.570312 1709134864.1212

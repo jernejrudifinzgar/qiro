@@ -2,7 +2,7 @@ import networkx as nx
 import pickle
 
 reg=3
-ns=[30]
+ns=[40]
 num_graphs=100
 
 for n in ns:

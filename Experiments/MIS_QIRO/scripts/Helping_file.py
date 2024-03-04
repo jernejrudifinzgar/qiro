@@ -107,7 +107,7 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, variation='
 
     ns_graphs_rudi = list(range(60, 220, 20))
 
-    ns_graphs_maxi = [30, 50]
+    ns_graphs_maxi = [30, 40, 50]
 
     if n in ns_graphs_rudi:
         with open(my_path + f'/graphs/rudis_100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
@@ -151,7 +151,7 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, variation='
 
         problem = Generator.MIS(G)
         expectation_values_single = SingleLayerQAOAExpectationValues(problem)
-        QIRO_single = QIRO_MIS(5, expectation_values_single)
+        QIRO_single = QIRO_MIS(5, expectation_values_single, variation=variation)
         QIRO_single.execute()
         solution_single = QIRO_single.solution
         size_indep_set_qiro_single = np.sum(solution_single >= 0)
@@ -179,6 +179,64 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, variation='
             print('MIS size single:', size_indep_set_qiro_single)
 
     return size_indep_set_qiro_qtensor, solution_qtensor
+
+
+def execute_QIRO_single_instance_2(n, p, run, version, initialization, variation='standard', output_results=False, gamma=None, beta=None):
+    my_path = os.path.dirname(__file__)
+    my_path = os.path.dirname(my_path)
+    reg = 3
+    seed = 666
+
+    ns_graphs_rudi = list(range(60, 220, 20))
+
+    ns_graphs_maxi = [30, 40, 50]
+
+    if n in ns_graphs_rudi:
+        with open(my_path + f'/graphs/rudis_100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
+            data = pickle.load(file)
+        G = data[run]
+    elif n in ns_graphs_maxi:
+        with open(my_path + f'/graphs/100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
+            data = pickle.load(file)
+        G = data[run]
+    else: 
+        #random.seed()
+        G = nx.random_regular_graph(reg, n, seed=seed)
+
+        #for Erdos Renyi graphs:
+        #prob = reg/(n-1) 
+        #G = nx.erdos_renyi_graph(n, prob)
+
+    problem = Generator.MIS(G)
+    solution_dict = {}
+
+    if p==1:
+        size_greedy = greedy_mis(G)
+        solution_dict['size_solution_greedy'] = size_greedy
+
+        problem = Generator.MIS(G)
+        expectation_values_single = SingleLayerQAOAExpectationValues(problem)
+        QIRO_single = QIRO_MIS(5, expectation_values_single, variation=variation)
+        QIRO_single.execute()
+        solution_single = QIRO_single.solution
+        size_indep_set_qiro_single = np.sum(solution_single >= 0)
+        solution_dict['size_solution_single'] = size_indep_set_qiro_single
+        solution_dict['solution_single'] = solution_single
+        solution_dict['energies_single'] = QIRO_single.energies_list
+        solution_dict['num_nodes_single'] = QIRO_single.num_nodes
+
+    # f = open(my_path + f"/data/results_test_run_{run}_n_{n}_p_{p}_version_{version}.txt", "w+")
+    # f.write(f"\nRequired time in seconds for RQAOA: {required_time}")
+    # f.write(f"\nRequired time in minutes for RQAOA: {required_time/60}")
+    # f.write(f"\nRequired time in hours for RQAOA: {required_time/3600}")
+    # f.write(f"\nCalculated number of cuts with tensor networks: {cuts_qtensor}")
+    # f.write(f"\nCalculated solution with tensor networks: {solution_qtensor}")
+    # if p==1:
+    #     f.write(f"\nCalculated number of cuts with analytic method:: {cuts_single}")
+    #     f.write(f"\nCalculated solution with analytic method: {solution_single}")
+    # f.close()
+    #print(solution_dict)
+    pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl", 'wb'))
 
 #@profile
 def execute_QIRO_multiple_instances(ns, ps, num_runs):
@@ -357,3 +415,23 @@ def execute_QIRO_parallel(ns, ps, runs, version, initialization='random', variat
     pool = mp.Pool(len(arguments_list))
     pool.starmap(execute_QIRO_multiple_instances_different_n, arguments_list)
     
+
+
+
+
+
+def execute_QIRO_multiple_instances_different_n_2(ns, p, run, version, initialization, variation):
+    for n in ns: 
+        
+        execute_QIRO_single_instance(n, p, run, version, initialization, variation=variation)
+
+
+def execute_QIRO_parallel_2(ns, ps, runs, version, initialization='random', variations=['standard']):
+    arguments_list = []
+    for p in ps:
+        for variation in variations:
+            for run in runs:
+                arguments_list.append((ns, p, run, version, initialization, variation))
+    
+    pool = mp.Pool(len(arguments_list))
+    pool.starmap(execute_QIRO_multiple_instances_different_n, arguments_list)
