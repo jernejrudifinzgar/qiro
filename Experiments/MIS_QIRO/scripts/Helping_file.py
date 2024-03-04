@@ -341,17 +341,18 @@ def give_hessian(n, p, run, version, initialization, output_results=False, gamma
 
 
 
-def execute_QIRO_multiple_instances_different_n(ns, ps, run, version, initialization, variation):
+def execute_QIRO_multiple_instances_different_n(ns, p, run, version, initialization, variation):
     for n in ns: 
-        for p in ps:
-            execute_QIRO_single_instance(n, p, run, version, initialization, variation=variation)
+        
+        execute_QIRO_single_instance(n, p, run, version, initialization, variation=variation)
 
 
 def execute_QIRO_parallel(ns, ps, runs, version, initialization='random', variations=['standard']):
     arguments_list = []
-    for variation in variations:
-        for run in runs:
-            arguments_list.append((ns, ps, run, version, initialization, variation))
+    for p in ps:
+        for variation in variations:
+            for run in runs:
+                arguments_list.append((ns, p, run, version, initialization, variation))
     
     pool = mp.Pool(len(arguments_list))
     pool.starmap(execute_QIRO_multiple_instances_different_n, arguments_list)

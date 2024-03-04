@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 if __name__ == '__main__':
 
     reg = 3
-    ns = [60, 80, 100]#, 140, 180]
+    ns = [140, 160]#, 140, 180]
     seed = 666
     ps= [1, 2, 3]
     #num_runs = 10
