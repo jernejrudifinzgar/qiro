@@ -282,13 +282,17 @@ def plot_MIS_size_per_n(ns, ps, runs, version, initialization, variations, regul
 
                 for run in runs:
                     try:
-                        with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl", 'rb') as file:
-                            data = pickle.load(file)
+                        #with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl", 'rb') as file:
+                        #    data = pickle.load(file)
 
-                        if p==4:
+                        if p==1:
+                            with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{2}.pkl", 'rb') as file:
+                                data = pickle.load(file)
                             MIS_size_list_n.append(data['size_solution_single']/MIS_size_exact[run])
                             list_graphs_qtensor.append(run)
                         else:
+                            with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl", 'rb') as file:
+                                data = pickle.load(file)
                             MIS_size_list_n.append(data['size_solution_qtensor']/MIS_size_exact[run])
                             list_graphs_qtensor.append(run)
 
