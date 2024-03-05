@@ -282,17 +282,13 @@ def plot_MIS_size_per_n(ns, ps, runs, version, initialization, variations, regul
 
                 for run in runs:
                     try:
-                        #with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl", 'rb') as file:
-                        #    data = pickle.load(file)
+                        with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl", 'rb') as file:
+                            data = pickle.load(file)
 
                         if p==1:
-                            with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{2}.pkl", 'rb') as file:
-                                data = pickle.load(file)
                             MIS_size_list_n.append(data['size_solution_single']/MIS_size_exact[run])
                             list_graphs_qtensor.append(run)
                         else:
-                            with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl", 'rb') as file:
-                                data = pickle.load(file)
                             MIS_size_list_n.append(data['size_solution_qtensor']/MIS_size_exact[run])
                             list_graphs_qtensor.append(run)
 
@@ -305,21 +301,24 @@ def plot_MIS_size_per_n(ns, ps, runs, version, initialization, variations, regul
                 MIS_size_qtensor_list_dic[f'{variation}_size'].append(average)   
                 MIS_size_qtensor_list_dic[f'{variation}_std'].append(std)   
 
-        plt.plot(MIS_size_qtensor_list_dic['ns'], MIS_size_qtensor_list_dic['greedy_size'], color=colors[counter], linestyle=linestyles[counter], label = 'Greedy algorithm')
+        #plt.plot(MIS_size_qtensor_list_dic['ns'], MIS_size_qtensor_list_dic['greedy_size'], color=colors[counter], linestyle=linestyles[counter], label = 'Greedy algorithm')
+        plt.errorbar(MIS_size_qtensor_list_dic['ns'], MIS_size_qtensor_list_dic['greedy_size'], yerr=MIS_size_qtensor_list_dic['greedy_std'], capsize = 10, color=colors[counter], linestyle=linestyles[counter], label = 'Greedy algorithm')
+
         counter += 1
         for variation in variations:
-            plt.plot(MIS_size_qtensor_list_dic['ns'], MIS_size_qtensor_list_dic[f'{variation}_size'], color=colors[counter], linestyle=linestyles[counter], label = f'{variation} algorithm')
+            #plt.plot(MIS_size_qtensor_list_dic['ns'], MIS_size_qtensor_list_dic[f'{variation}_size'], color=colors[counter], linestyle=linestyles[counter], label = f'{variation} algorithm')
+            plt.errorbar(MIS_size_qtensor_list_dic['ns'], MIS_size_qtensor_list_dic[f'{variation}_size'], MIS_size_qtensor_list_dic[f'{variation}_std'], capsize = 10, color=colors[counter], linestyle=linestyles[counter], label = f'{variation} algorithm')
+
             counter += 1
 
-
-         
-            
         #plt.xticks(runs, list(range(len(MIS_size_single_list))))
-        plt.xlabel('ns')
+        plt.xlabel('Problem size n')
+        plt.xticks(ns, ns)
         plt.ylabel('MIS size approximation ratio')
+        plt.ylim([0.70, 1.01])
         plt.legend()    
         plt.show()
-        #fig.savefig(my_path + f'/results/MIS_size_reg_{regularity}_n_{n}_initialization_{initialization}_runs_{runs[0]}_{runs[-1]}_version_{version}.png')
+        fig.savefig(my_path + f'/results/MIS_size_per_n_reg_{regularity}_ns_{ns[0]}_{ns[-1]}_p_{p}_same_scale_initialization_{initialization}_runs_{runs[0]}_{runs[-1]}_version_{version}.png')
 
 
 def plot_energies(ns, ps, runs, version, regularity, per_node=False):
@@ -580,9 +579,32 @@ if __name__ == '__main__':
     #plot_energies_initialization(ns, ps, runs, version, initialization, regularity, per_node=True)
 
     plot_MIS_size_per_n(ns, ps, runs, version, initialization, variations, regularity)
+    
+    # my_path = os.path.dirname(__file__)
+    # my_path = os.path.dirname(my_path)
+   
+    # for n in ns:
+    #     for run in runs:
+    #         for variation in variations:
+    #             try:
+
+    #                 with open(my_path + f"/data/results_run_{run}_n_{n}_p_{1}_initialization_{initialization}_variation_{variation}_version_{2}.pkl", 'rb') as file:
+    #                     data_correct = pickle.load(file)
+                    
+    #                 with open(my_path + f"/data/results_run_{run}_n_{n}_p_{1}_initialization_{initialization}_variation_{variation}_version_{1}.pkl", 'rb') as file:
+    #                     data = pickle.load(file)
 
 
+    #                 data['size_solution_single'] = data_correct['size_solution_single']
+    #                 data['solution_single'] = data_correct['solution_single']
+    #                 data['energies_single'] = data_correct['energies_single']
+    #                 data['num_nodes_single'] = data_correct['num_nodes_single']
 
+
+    #                 pickle.dump(data, open(my_path + f"/data/results_run_{run}_n_{n}_p_{1}_initialization_{initialization}_variation_{variation}_version_{1}.pkl", 'wb'))
+
+    #             except:
+    #                 print(1)
 
 
 """     

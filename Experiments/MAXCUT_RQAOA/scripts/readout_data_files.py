@@ -673,7 +673,7 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
     #ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper center', handletextpad=0.5, ncols = 6, columnspacing=1, bbox_to_anchor=(0.5, 1.24))
 
 
-    fig.savefig(my_path + f'/results/Cuts_ratio_per_graph_per_p_iterations_{len(iterations)}_graphs_{runs[0]}_{runs[-1]}_n_{n}_version_{version}.pdf', format="pdf", dpi=2000)
+    #fig.savefig(my_path + f'/results/Cuts_ratio_per_graph_per_p_iterations_{len(iterations)}_graphs_{runs[0]}_{runs[-1]}_n_{n}_version_{version}.pdf', format="pdf", dpi=2000)
     plt.show()
 
 def plot_time(ns, ps, runs, regularity, recalculation, iterations, version):
@@ -757,13 +757,13 @@ def plot_time(ns, ps, runs, regularity, recalculation, iterations, version):
 if __name__ == '__main__':
     ns = [50] #[60, 80, 100, 120, 140, 160, 180, 200]
     ps= [1, 2, 3]
-    recalculations = [5]
+    recalculations = [10]
     regularity = 3
-    runs = [0, 1, 2, 3, 5, 6, 7, 9]
-    #runs = list(range(0, 10))
-    recalculation = 5
-    version = 1
-    iterations = list(range(1))
+    #runs = [0, 1, 2, 3, 5, 6, 7, 9]
+    runs = list(range(0, 25))
+    recalculation = 10
+    version = 3
+    iterations = list(range(5))
 
     colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']
 

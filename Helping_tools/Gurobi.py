@@ -7,6 +7,7 @@ from itertools import product
 import numpy as np
 import os
 import time
+import matplotlib.pyplot as plt
 
 
 def cb(model, where, threshold_time=1):
@@ -48,8 +49,10 @@ def solve_max_cut(G, id=None, timeout=1, nthr=1, verbose=True, return_optimality
     if m.status == GRB.OPTIMAL:
         print("Found optimal cut.")
         obj = 0
+        print(G.edges())
         for e1, e2 in G.edges:
             if m.x[e1] != m.x[e2]:
+                print(e1, e2)
                 obj += G[e1][e2].get("weight", 1)
         # return m
         return obj if not return_optimality else [obj, 1]
@@ -89,6 +92,16 @@ if __name__ == '__main__':
     # with open(f'100_regular_graphs_nodes_{n}_reg_3.pkl', 'rb') as f:
     #     data = pickle.load(f)
     # counter = 0
+    
+    G = nx.Graph()
+    for i in range(11):
+        G.add_node(i)
+    
+    G.add_edges_from([(0, 2), (0, 3), (0, 5), (1, 4), (1, 5), (2, 3), (2, 7), (3, 8), (4, 8), (5, 7), (6, 7), (7, 9), (8, 9), (8, 10), (9, 10)])
+
+    solution = solve_max_cut(G)
+    print(solution)
+
     # for graph in data:
     #     counter += 1
     #     solution = solve_max_cut(graph)
@@ -101,20 +114,20 @@ if __name__ == '__main__':
 
 
     #MIS
-    ns = [60, 100, 120, 140, 160, 180, 200]
-    for n in ns:
-        list_solutions = []
-        with open(f'./graphs/rudis_100_regular_graphs_nodes_{n}_reg_3.pkl', 'rb') as f:
+    #ns = [60, 100, 120, 140, 160, 180, 200]
+    #for n in ns:
+    #    list_solutions = []
+    #    with open(f'./graphs/rudis_100_regular_graphs_nodes_{n}_reg_3.pkl', 'rb') as f:
         #with open(f'./graphs/100_regular_graphs_nodes_{n}_reg_3.pkl', 'rb') as f:
-            data = pickle.load(f)
+    #        data = pickle.load(f)
         # counter = 0
-        for graph in data:
+    #    for graph in data:
         #    counter += 1
-            solution = solve_MIS(graph)
+    #        solution = solve_MIS(graph)
         #    print(f"Solution for graph {counter} found")
-            list_solutions.append(-solution)
+    #        list_solutions.append(-solution)
 
-        pickle.dump(list_solutions, open(f"./graphs/rudis_100_regular_graphs_nodes_{n}_reg_3_MIS_solutions.pkl", 'wb'))
+    #    pickle.dump(list_solutions, open(f"./graphs/rudis_100_regular_graphs_nodes_{n}_reg_3_MIS_solutions.pkl", 'wb'))
         #pickle.dump(list_solutions, open(f"100_regular_graphs_nodes_{n}_reg_3_MIS_solutions.pkl", 'wb'))
 
 
