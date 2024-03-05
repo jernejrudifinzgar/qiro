@@ -672,7 +672,6 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
                 #beta=[0.1] * p
                 beta=[random.uniform(0, 0.5)]*p
 
-        print(gamma, beta)
         self.opt = opt
         self.opt_kwargs = opt_kwargs
         self.pbar=pbar
@@ -728,7 +727,6 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
                     E = torch.real(sim.simulate_batch(composer.circuit, peo=peo))
                     composer.builder.reset()
                     matrix_entry = self.problem.matrix[i, j]
-                    print(E)
                     self.loss += E * matrix_entry
                     self.E_nodes [(i, j)] = E
         
@@ -818,7 +816,6 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
                     #     max_expect_val_sign_list.append(np.sign(energy))
 
         if len(max_expect_val_list) > 1:
-            print(max_expect_val_list)
             index = random.randrange(len(max_expect_val_list))
             max_expect_val = max_expect_val_list[index]
             max_expect_val_location = max_expect_val_location_list[index]
@@ -900,7 +897,6 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
             
             gamma_old = gamma_min.copy()
             beta_old = beta_min.copy()
-            print(energy_min)
         self.expect_val_dict = correlations_min
         self.energy = energy_min
         self.losses = losses_min
@@ -925,7 +921,6 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
                 expectation_values_qtensor_transition = QtensorQAOAExpectationValuesQUBO(self.problem, step, gamma=gamma_ts, beta=beta_ts, pbar=True, opt = torch.optim.LBFGS, opt_kwargs=dict())
                 max_expect_val_location, max_expect_val_sign, max_expect_val = expectation_values_qtensor_transition.optimize(steps=steps, **kwargs)
                 energy_qtensor_transition = float(expectation_values_qtensor_transition.energy)
-                print(energy_qtensor_transition)
                 if j==0:
                     energy_min = energy_qtensor_transition
                     gamma_min = [float(i) for i in expectation_values_qtensor_transition.gamma]
@@ -946,7 +941,6 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
             
             gamma_old = gamma_min.copy()
             beta_old = beta_min.copy()
-            print(energy_min)
         self.expect_val_dict = correlations_min
         self.energy = energy_min
         self.losses = losses_min
@@ -1127,7 +1121,6 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
             expectation_values_qtensor_transition = QtensorQAOAExpectationValuesQUBO(self.problem, step, gamma=gamma_new, beta=beta_new, pbar=True, opt = self.opt, opt_kwargs=dict(**self.opt_kwargs))
             max_expect_val_location, max_expect_val_sign, max_expect_val = expectation_values_qtensor_transition.optimize(steps=steps, **kwargs)
             energy_qtensor_transition = float(expectation_values_qtensor_transition.energy)
-            print(energy_qtensor_transition)
             
             gamma_old = [float(i) for i in expectation_values_qtensor_transition.gamma]
             beta_old = [float(i) for i in expectation_values_qtensor_transition.beta]
