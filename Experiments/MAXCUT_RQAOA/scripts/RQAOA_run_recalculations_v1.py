@@ -41,7 +41,7 @@ if __name__ == '__main__':
     seed = 666
     ps= [1, 2, 3]
     #num_runs = 10
-    runs=list(range(0, 10, 1))
+    runs=list(range(20, 30, 1))
     # for i in range(10, 20, 1):
     #     runs.append(i)
     iterations = [0]
