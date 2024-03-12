@@ -616,15 +616,17 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
                     except Exception as error:
                         print(error)
 
+                
                 average = sum(list_cuts)/len(list_cuts)
                 data_dic[f'p={p}'].append(average)
                 error_dic[f'p={p}'][0].append(round(average-min(list_cuts), 5))
                 error_dic[f'p={p}'][1].append(round(max(list_cuts)-average, 5))
                 #error_dic[f'p={p}'].append(np.std(list_cuts))
-    try:
-        data_dic['p=3'][4]=1
-    except Exception as error:
-        print(error)
+    # try:
+    #     data_dic['p=3'][4]=1
+    #     print('done')
+    # except Exception as error:
+    #     print(error)
 
     x = np.arange(len(runs))
     x2 = np.arange(len(runs)+1)
@@ -644,6 +646,7 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
     multiplier = 0
     for attribute, measurement in data_dic.items():
         average = np.mean(measurement)
+        print(average)
         plt.plot(x2, [average for i in x2], color=colors[6+multiplier], linestyle='dashed', linewidth=1.3, path_effects=[pe.Stroke(linewidth=1.8, foreground='black'), pe.Normal()], label = f'${attribute}$ mean')    
         #plt.plot(x2, [average for i in x2], color=colors[6+multiplier], linestyle=(5, (10, 3)), linewidth=2, label = f'Average optimal cuts ratio of QAOA with {attribute}')    
         multiplier += 1
@@ -757,13 +760,14 @@ def plot_time(ns, ps, runs, regularity, recalculation, iterations, version):
 if __name__ == '__main__':
     ns = [50] #[60, 80, 100, 120, 140, 160, 180, 200]
     ps= [1, 2, 3]
-    recalculations = [10]
+    recalculations = [1]
     regularity = 3
     #runs = [0, 1, 2, 3, 5, 6, 7, 9]
-    runs = list(range(0, 25))
-    recalculation = 10
-    version = 3
-    iterations = list(range(5))
+    #runs = list(range(0, 3)) + list(range(4, 15)) + list(range(20, 30))
+    runs = list(range(0, 20))
+    recalculation = 70
+    version = 1
+    iterations = list(range(1))
 
     colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']
 

@@ -46,7 +46,7 @@ if __name__ == '__main__':
     #     runs.append(i)
     iterations = [0]
     version = 1
-    recalculation = 1
+    recalculation = 70
 
     #execute_RQAOA_single_instance(ns[0], ps[0], num_runs)
     #execute_RQAOA_multiple_instances(ns, ps, num_runs)
