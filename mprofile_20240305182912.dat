@@ -1,0 +1,2 @@
+CMDLINE taskset -c 0-49 python RQAOA_run_recalculations_v2.py
+MEM 0.585938 1709659752.2099
