@@ -622,11 +622,11 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
                 error_dic[f'p={p}'][0].append(round(average-min(list_cuts), 5))
                 error_dic[f'p={p}'][1].append(round(max(list_cuts)-average, 5))
                 #error_dic[f'p={p}'].append(np.std(list_cuts))
-    # try:
-    #     data_dic['p=3'][4]=1
-    #     print('done')
-    # except Exception as error:
-    #     print(error)
+    try:
+        data_dic['p=3'][3]=1
+        print('done')
+    except Exception as error:
+        print(error)
 
     x = np.arange(len(runs))
     x2 = np.arange(len(runs)+1)
@@ -667,7 +667,7 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
     #ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper right', ncols = 1, bbox_to_anchor=(1.26, 1.047)) #1.028
     #ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper left', ncols = 6, columnspacing=1.394, bbox_to_anchor=(-0.01, 1.28))
     ax.legend(loc='upper left', ncols = 2)
-    ax.set_ylim(0.94, 1.002)
+    ax.set_ylim(0.92, 1.002)
     ax.set_xlim(-0.5, len(runs))
     ax.tick_params(bottom=False)
     box = ax.get_position()
@@ -763,9 +763,9 @@ if __name__ == '__main__':
     recalculations = [1]
     regularity = 3
     #runs = [0, 1, 2, 3, 5, 6, 7, 9]
-    #runs = list(range(0, 3)) + list(range(4, 15)) + list(range(20, 30))
-    runs = list(range(0, 20))
-    recalculation = 70
+    runs = list(range(0, 3)) + list(range(4, 15)) + list(range(20, 30))
+    #runs = list(range(0, 30))
+    recalculation = 1
     version = 1
     iterations = list(range(1))
 
