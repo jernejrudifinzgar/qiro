@@ -44,7 +44,7 @@ if __name__ == '__main__':
     runs=list(range(24, 25, 1))
     # for i in range(10, 20, 1):
     #     runs.append(i)
-    iterations = [2, 3, 4]
+    iterations = [3, 4]
     version = 1
     recalculation = 1
 
@@ -53,4 +53,4 @@ if __name__ == '__main__':
     execute_RQAOA_parallel_recalculation_nonsynchronous_iterations(ns, ps, runs, iterations, recalculation, version)
  
     #print(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-    #print(resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss)
+    #print(resourdfsdfsdfqe.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss)
