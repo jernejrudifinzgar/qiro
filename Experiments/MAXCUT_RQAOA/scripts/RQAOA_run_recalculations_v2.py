@@ -43,7 +43,7 @@ if __name__ == '__main__':
     #num_runs = 10
     runs=list(range(0, 30, 1))
     version = 1
-    iterations = [0]
+    iterations = [1, 2, 3, 4]
     recalculation = 70
     #execute_RQAOA_single_instance_recalculation(50, 1, 7, 0, 5, 1, output_results=True)
     #execute_RQAOA_single_instance_recalculation_GPU(12, 2, 0, 0, 1, 1, output_results=True)
