@@ -609,6 +609,7 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
 
         for p in ps:
             list_energies = []
+            list_cuts_overall = []
             for run in runs:
                 list_cuts = []
                 
@@ -621,13 +622,13 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
                         cuts_qtensor = data['cuts_qtensor']
                         #print(cuts_qtensor)
                         if p==1:
-                            energy= (num_edges - data['energies_single'][0])/2
-                            print(energy)
+                            energy= (num_edges - float(data['energies_single'][0]))/2
                         else:
-                            energy= (num_edges - data['energies_qtensor'][0])/2
+                            energy= (num_edges - float(data['energies_qtensor'][0]))/2
                         #print(energy)
                         list_energies.append(energy/list_exact[run])
                         list_cuts.append(cuts_qtensor/list_exact[run])
+                        list_cuts_overall.append(cuts_qtensor/list_exact[run])
                     except Exception as error:
                         print(error)
 
@@ -637,8 +638,14 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
                 error_dic[f'p={p}'][1].append(round(max(list_cuts)-average, 5))
                 #error_dic[f'p={p}'].append(np.std(list_cuts))
             
-            average_bare = sum(list_energies)/(len(list_energies))
-            print(average_bare)
+            average_bare = np.mean(list_energies)
+            std_bare = np.std(list_energies)
+            print('bare', p, average_bare, std_bare)
+
+            average_overall = np.mean(list_cuts_overall)
+            std_overall = np.std(list_cuts_overall)
+            print('overall', p, average_overall, std_overall)
+
     # try:
     #     data_dic['p=3'][3]=1
     #     print('done')
@@ -780,11 +787,11 @@ if __name__ == '__main__':
     recalculations = [1]
     regularity = 3
     #runs = [0, 1, 2, 3, 5, 6, 7, 9]
-    #runs = list(range(0, 3)) + list(range(4, 15)) + list(range(20, 30))
-    runs = list(range(0, 30))
-    recalculation = 70
+    runs = list(range(0, 3)) + list(range(5, 15)) + list(range(16, 18)) + list(range(19, 28)) + list(range(29, 30))
+    #runs = list(range(0, 30))
+    recalculation = 1
     version = 1
-    iterations = list(range(1))
+    iterations = list(range(5))
 
     colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']
 
