@@ -604,29 +604,46 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
                 data = pickle.load(file)
             list_exact = data.copy()
 
+            with open(f'100_regular_graphs_nodes_{n}_reg_3.pkl', 'rb') as f:
+                graphs = pickle.load(f)
+
         for p in ps:
+            list_energies = []
             for run in runs:
                 list_cuts = []
+                
                 for iteration in iterations:
+                    graph = graphs[iteration]
+                    num_edges = graph.number_of_edges()
                     try:
                         with open (my_path + f"/data/results_run_{run}_iteration_{iteration}_n_{n}_p_{p}_recalc_{recalculation}_initialization_fixed_angles_optimization_version_{version}.pkl", 'rb') as f:
                             data = pickle.load(f)
                         cuts_qtensor = data['cuts_qtensor']
+                        #print(cuts_qtensor)
+                        if p==1:
+                            energy= (num_edges - data['energies_single'][0])/2
+                            print(energy)
+                        else:
+                            energy= (num_edges - data['energies_qtensor'][0])/2
+                        #print(energy)
+                        list_energies.append(energy/list_exact[run])
                         list_cuts.append(cuts_qtensor/list_exact[run])
                     except Exception as error:
                         print(error)
 
-                
                 average = sum(list_cuts)/len(list_cuts)
                 data_dic[f'p={p}'].append(average)
                 error_dic[f'p={p}'][0].append(round(average-min(list_cuts), 5))
                 error_dic[f'p={p}'][1].append(round(max(list_cuts)-average, 5))
                 #error_dic[f'p={p}'].append(np.std(list_cuts))
-    try:
-        data_dic['p=3'][3]=1
-        print('done')
-    except Exception as error:
-        print(error)
+            
+            average_bare = sum(list_energies)/(len(list_energies))
+            print(average_bare)
+    # try:
+    #     data_dic['p=3'][3]=1
+    #     print('done')
+    # except Exception as error:
+    #     print(error)
 
     x = np.arange(len(runs))
     x2 = np.arange(len(runs)+1)
@@ -763,9 +780,9 @@ if __name__ == '__main__':
     recalculations = [1]
     regularity = 3
     #runs = [0, 1, 2, 3, 5, 6, 7, 9]
-    runs = list(range(0, 3)) + list(range(4, 15)) + list(range(20, 30))
-    #runs = list(range(0, 30))
-    recalculation = 1
+    #runs = list(range(0, 3)) + list(range(4, 15)) + list(range(20, 30))
+    runs = list(range(0, 30))
+    recalculation = 70
     version = 1
     iterations = list(range(1))
 
