@@ -789,7 +789,7 @@ if __name__ == '__main__':
     #runs = [0, 1, 2, 3, 5, 6, 7, 9]
     runs = list(range(0, 3)) + list(range(5, 15)) + list(range(16, 18)) + list(range(19, 28)) + list(range(29, 30))
     #runs = list(range(0, 30))
-    recalculation = 1
+    recalculation = 70
     version = 1
     iterations = list(range(5))
 

@@ -21,14 +21,14 @@ import matplotlib.pyplot as plt
 if __name__ == '__main__':
 
     reg = 3
-    ns = [140, 160]#, 140, 180]
+    ns = [60, 80, 100, 120]#, 140, 180]
     seed = 666
-    ps= [1, 2, 3]
+    ps= [1]
     #num_runs = 10
     runs=list(range(0, 20, 1))
     initialization = 'interpolation'
     variations=['standard', 'MINQ', 'MAXQ', 'MMQ']
-    version = 1
+    version = 2
     results_list=[]
 
     #execute_QIRO_parallel([12], [1, 2], [0, 1], version, initialization=initialization, variations=variations)

@@ -125,7 +125,7 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, variation='
         #prob = reg/(n-1) 
         #G = nx.erdos_renyi_graph(n, prob)
 
-    problem = Generator.MIS(G)
+    problem = Generator.MIS(G, alpha = 1.0)
 
     expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, opt=torch.optim.RMSprop, initialization = initialization, opt_kwargs=dict(lr=0.005), gamma=gamma, beta=beta)
     QIRO_qtensor = QIRO_MIS(5, expectation_values_qtensor, variation=variation)
@@ -149,7 +149,7 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, variation='
         size_greedy = greedy_mis(G)
         solution_dict['size_solution_greedy'] = size_greedy
 
-        problem = Generator.MIS(G)
+        problem = Generator.MIS(G, alpha=1.0)
         expectation_values_single = SingleLayerQAOAExpectationValues(problem)
         QIRO_single = QIRO_MIS(5, expectation_values_single, variation=variation)
         QIRO_single.execute()

@@ -242,6 +242,7 @@ def plot_MIS_size_per_n(ns, ps, runs, version, initialization, variations, regul
     for p in ps:
         counter = 0
         MIS_size_qtensor_list_dic = {} 
+        MIS_size_analytic_list_dic = {}
         list_graphs_qtensor = []
 
         for variation in variations:
@@ -249,6 +250,8 @@ def plot_MIS_size_per_n(ns, ps, runs, version, initialization, variations, regul
             MIS_size_qtensor_list_dic[f'{variation}_std'] = []
             MIS_size_qtensor_list_dic['greedy_size'] = []
             MIS_size_qtensor_list_dic['greedy_std'] = []
+            MIS_size_analytic_list_dic[f'{variation}_size'] = []
+            MIS_size_analytic_list_dic[f'{variation}_std'] = []
             MIS_size_qtensor_list_dic['ns'] = []
 
         fig = plt.figure()
@@ -285,7 +288,7 @@ def plot_MIS_size_per_n(ns, ps, runs, version, initialization, variations, regul
                         with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl", 'rb') as file:
                             data = pickle.load(file)
 
-                        if p==1:
+                        if p==4:
                             MIS_size_list_n.append(data['size_solution_single']/MIS_size_exact[run])
                             list_graphs_qtensor.append(run)
                         else:
@@ -315,10 +318,10 @@ def plot_MIS_size_per_n(ns, ps, runs, version, initialization, variations, regul
         plt.xlabel('Problem size n')
         plt.xticks(ns, ns)
         plt.ylabel('MIS size approximation ratio')
-        plt.ylim([0.70, 1.01])
+        #plt.ylim([0.70, 1.01])
         plt.legend()    
         plt.show()
-        fig.savefig(my_path + f'/results/MIS_size_per_n_reg_{regularity}_ns_{ns[0]}_{ns[-1]}_p_{p}_same_scale_initialization_{initialization}_runs_{runs[0]}_{runs[-1]}_version_{version}.png')
+        #fig.savefig(my_path + f'/results/MIS_size_per_n_reg_{regularity}_ns_{ns[0]}_{ns[-1]}_p_{p}_same_scale_initialization_{initialization}_runs_{runs[0]}_{runs[-1]}_version_{version}.png')
 
 
 def plot_energies(ns, ps, runs, version, regularity, per_node=False):
