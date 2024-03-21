@@ -35,6 +35,7 @@ import matplotlib.pyplot as plt
 from RQAOA import RQAOA, RQAOA_recalculate
 import torch.multiprocessing as mp
 from time import time
+import time
 
 def execute_QIRO_single_instance_137_nodes(p, run, version, initialization, variation='standard', output_results=False, gamma=None, beta=None):
     my_path = os.path.dirname(__file__)
@@ -108,11 +109,14 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, variation='
     try:
         with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl", 'rb') as file:
             file = pickle.load(file)
-        #print(f'run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}')
-        print(os.stat(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pk"))
+        print(f'run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}')
+        
+        print("Date modified: "+time.ctime(
+os.path.getmtime(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl"))
+        )
     
-    
-    except:
+    except Exception as error:
+        print(error)
         print(f'run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version} not available')
 
         ns_graphs_rudi = list(range(60, 220, 20))
