@@ -35,7 +35,7 @@ import matplotlib.pyplot as plt
 from RQAOA import RQAOA, RQAOA_recalculate
 import torch.multiprocessing as mp
 from time import time
-import time
+import time as ti
 
 def execute_QIRO_single_instance_137_nodes(p, run, version, initialization, variation='standard', output_results=False, gamma=None, beta=None):
     my_path = os.path.dirname(__file__)
@@ -106,18 +106,20 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, variation='
     reg = 3
     seed = 666
 
-    try:
-        with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl", 'rb') as file:
-            file = pickle.load(file)
-        print(f'run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}')
-        
-        print("Date modified: "+time.ctime(
-os.path.getmtime(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl"))
-        )
+    # FOR GETTING TIME OF LAST MODIFICATION:
+    # print(f'run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}')
+    # print(os.path.getmtime(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl"))
     
-    except Exception as error:
-        print(error)
-        print(f'run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version} not available')
+    # print("Date modified: "+ti.ctime(
+    # os.path.getmtime(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl"))
+    # )
+    # print(ti.ctime(1710507850.5994823))
+
+    if os.path.getmtime(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl") < 1710507850.5994823:
+
+
+    
+        print(f'run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version} needs recalculation')
 
         ns_graphs_rudi = list(range(60, 220, 20))
 

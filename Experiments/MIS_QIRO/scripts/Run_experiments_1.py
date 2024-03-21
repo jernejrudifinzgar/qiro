@@ -25,6 +25,7 @@ if __name__ == '__main__':
     seed = 666
     ps= [1]
     #num_runs = 10
+
     runs=list(range(0, 20, 1))
     initialization = 'interpolation'
     variations=['standard', 'MINQ', 'MAXQ', 'MMQ']
