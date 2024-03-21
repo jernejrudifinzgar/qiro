@@ -108,8 +108,9 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, variation='
     try:
         with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl", 'rb') as file:
             file = pickle.load(file)
+        print(f'run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}')
     except:
-
+        print(f'run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version} not available')
 
         ns_graphs_rudi = list(range(60, 220, 20))
 
