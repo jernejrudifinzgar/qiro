@@ -120,21 +120,21 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, iteration, 
 
         #print(f'run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version} needs recalculation')
 
-    ns_graphs_rudi = list(range(60, 220, 20))
+    #ns_graphs_rudi = list(range(60, 220, 20))
 
-    ns_graphs_maxi = [30, 40, 50]
+    ns_graphs_maxi = [30, 40, 50, 60, 80, 100, 120, 140, 160, 180, 200]
 
-    if n in ns_graphs_rudi:
-        with open(my_path + f'/graphs/rudis_100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
-            data = pickle.load(file)
-        G = data[run]
-    elif n in ns_graphs_maxi:
+    # if n in ns_graphs_rudi:
+    #     with open(my_path + f'/graphs/rudis_100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
+    #         data = pickle.load(file)
+    #     G = data[run]
+    if n in ns_graphs_maxi:
         with open(my_path + f'/graphs/100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
             data = pickle.load(file)
         G = data[run]
-    else: 
-        #random.seed()
-        G = nx.random_regular_graph(reg, n, seed=seed)
+    # else: 
+    #     #random.seed()
+    #     G = nx.random_regular_graph(reg, n, seed=seed)
 
         #for Erdos Renyi graphs:
         #prob = reg/(n-1) 
