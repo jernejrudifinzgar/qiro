@@ -5,6 +5,7 @@ import sys
 sys.path.append("./../../../../miniconda3/envs/qiro/lib/python3.9/site-packages/")
 import os
 import matplotlib.pyplot as plt
+import copy
 import matplotlib
 import matplotlib.patheffects as pe
 from IPython.display import set_matplotlib_formats
@@ -577,7 +578,7 @@ def plot_cuts_per_graph_recalculation(ns, ps, runs, regularity, recalculation, i
         plt.show()
         #plt.close()
 
-def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, version):
+def grouped_bar_chart(dic_results, ns, ps, runs, regularity, recalculation, iterations, version):
     colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']
     linestyles = ['solid', 'dashed', 'dashdot', 'dotted']
 
@@ -623,12 +624,14 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
                         #print(cuts_qtensor)
                         if p==1:
                             energy= (num_edges - float(data['energies_single'][0]))/2
+                            cuts = data['cuts_single']
                         else:
                             energy= (num_edges - float(data['energies_qtensor'][0]))/2
+                            cuts = data['cuts_qtensor']
                         #print(energy)
                         list_energies.append(energy/list_exact[run])
-                        list_cuts.append(cuts_qtensor/list_exact[run])
-                        list_cuts_overall.append(cuts_qtensor/list_exact[run])
+                        list_cuts.append(cuts/list_exact[run])
+                        list_cuts_overall.append(cuts/list_exact[run])
                     except Exception as error:
                         print(error)
 
@@ -637,14 +640,69 @@ def grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, versi
                 error_dic[f'p={p}'][0].append(round(average-min(list_cuts), 5))
                 error_dic[f'p={p}'][1].append(round(max(list_cuts)-average, 5))
                 #error_dic[f'p={p}'].append(np.std(list_cuts))
-            
+
+
+
+            print(p, len(list_energies), len(list_cuts_overall))
             average_bare = np.mean(list_energies)
             std_bare = np.std(list_energies)
+            min_bare = min(list_energies)
+            max_bare = max(list_energies)
             print('bare', p, average_bare, std_bare)
+
+            list_energies_sorted = copy.deepcopy(list_energies)
+            list_energies_sorted.sort()
+            l=len(list_energies_sorted)
+            median_bare = list_energies_sorted[int((l-1)/2)]
+            lower_quartile_bare = list_energies_sorted[int((l-1)/4)]
+            upper_quartile_bare = list_energies_sorted[int(3*(l-1)/4)]
 
             average_overall = np.mean(list_cuts_overall)
             std_overall = np.std(list_cuts_overall)
+            min_overall = min(list_cuts_overall)
+            max_overall = max(list_cuts_overall)
+
+            list_cuts_overall_sorted = copy.deepcopy(list_cuts_overall)
+            list_cuts_overall_sorted.sort()
+            l=len(list_cuts_overall_sorted)
+            median_overall = list_cuts_overall_sorted[int((l-1)/2)]
+            lower_quartile_overall = list_cuts_overall_sorted[int((l-1)/4)]
+            upper_quartile_overall = list_cuts_overall_sorted[int(3*(l-1)/4)]
+
+
+
+
             print('overall', p, average_overall, std_overall)
+
+            if recalculation==1:
+            
+                dic_results['ShrinkingRec']['mean'][f'p={p}']=average_overall
+                dic_results['ShrinkingRec']['std'][f'p={p}']=std_overall
+                dic_results['ShrinkingRec']['minimum'][f'p={p}']=min_overall
+                dic_results['ShrinkingRec']['maximum'][f'p={p}']=max_overall
+
+                dic_results['classic']['mean'][f'p={p}']=average_bare
+                dic_results['classic']['std'][f'p={p}']=std_bare
+                dic_results['classic']['minimum'][f'p={p}']=min_bare
+                dic_results['classic']['maximum'][f'p={p}']=max_bare
+
+                dic_results['ShrinkingRec']['median'][f'p={p}']=median_overall
+                dic_results['ShrinkingRec']['lower_quartile'][f'p={p}']=lower_quartile_overall
+                dic_results['ShrinkingRec']['upper_quartile'][f'p={p}']=upper_quartile_overall
+
+                dic_results['classic']['median'][f'p={p}']=median_bare
+                dic_results['classic']['lower_quartile'][f'p={p}']=lower_quartile_bare
+                dic_results['classic']['upper_quartile'][f'p={p}']=upper_quartile_bare
+            else:
+                dic_results['Shrinking']['mean'][f'p={p}']=average_overall
+                dic_results['Shrinking']['std'][f'p={p}']=std_overall
+                dic_results['Shrinking']['minimum'][f'p={p}']=min_overall
+                dic_results['Shrinking']['maximum'][f'p={p}']=max_overall
+
+                dic_results['Shrinking']['median'][f'p={p}']=median_overall
+                dic_results['Shrinking']['lower_quartile'][f'p={p}']=lower_quartile_overall
+                dic_results['Shrinking']['upper_quartile'][f'p={p}']=upper_quartile_overall
+
 
     # try:
     #     data_dic['p=3'][3]=1
@@ -782,6 +840,39 @@ def plot_time(ns, ps, runs, regularity, recalculation, iterations, version):
 
 
 if __name__ == '__main__':
+    # ns = [50] #[60, 80, 100, 120, 140, 160, 180, 200]
+    # ps= [1, 2, 3]
+    # recalculations = [1]
+    # regularity = 3
+    # #runs = [0, 1, 2, 3, 5, 6, 7, 9]
+    # runs = list(range(0, 3)) + list(range(5, 15)) + list(range(16, 18)) + list(range(19, 28)) + list(range(29, 30))
+    # #runs = list(range(0, 30))
+    # recalculation = 1
+    # version = 1
+    # iterations = list(range(1))
+
+    # colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']
+
+    # my_path = os.path.dirname(__file__)
+    # my_path = os.path.dirname(my_path)
+
+    # #plot_cuts_per_graph(ns, ps, runs, regularity, version)
+    # #plot_cuts_recalculation_per_p(ns, ps, runs, regularity, version)
+
+    # #for iteration in iterations:
+    # #    plot_cuts_per_graph_recalculation(ns, ps, runs, regularity, recalculation, iteration, version)
+    # dic_results = {'classic': {'mean': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'std': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'minimum': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'maximum': {'p=1': 0, 'p=2': 0, 'p=3': 0}}, 'Shrinking': {'mean': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'std': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'minimum': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'maximum': {'p=1': 0, 'p=2': 0, 'p=3': 0}}, 'ShrinkingRec': {'mean': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'std': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'minimum': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'maximum': {'p=1': 0, 'p=2': 0, 'p=3': 0}}}
+
+    # grouped_bar_chart(dic_results, ns, ps, runs, regularity, recalculation, iterations, version)
+
+
+    #plot_time(ns, ps, runs, regularity, recalculation, iterations, version)
+
+    
+
+
+
+    #Save data dictionary for paper:
     ns = [50] #[60, 80, 100, 120, 140, 160, 180, 200]
     ps= [1, 2, 3]
     recalculations = [1]
@@ -789,23 +880,28 @@ if __name__ == '__main__':
     #runs = [0, 1, 2, 3, 5, 6, 7, 9]
     runs = list(range(0, 3)) + list(range(5, 15)) + list(range(16, 18)) + list(range(19, 28)) + list(range(29, 30))
     #runs = list(range(0, 30))
-    recalculation = 70
+    recalculation = 1
     version = 1
     iterations = list(range(5))
-
-    colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']
-
     my_path = os.path.dirname(__file__)
     my_path = os.path.dirname(my_path)
 
-    #plot_cuts_per_graph(ns, ps, runs, regularity, version)
-    #plot_cuts_recalculation_per_p(ns, ps, runs, regularity, version)
+    dic_results = {'classic': {'mean': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'median': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 
+                               'std': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'minimum': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'maximum': {'p=1': 0, 'p=2': 0, 'p=3': 0},
+                               'lower_quartile': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'upper_quartile': {'p=1': 0, 'p=2': 0, 'p=3': 0}}, 
+                    'Shrinking': {'mean': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'median': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'std': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 
+                                  'minimum': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'maximum': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 
+                                  'lower_quartile': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'upper_quartile': {'p=1': 0, 'p=2': 0, 'p=3': 0}}, 
+                    'ShrinkingRec': {'mean': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'median': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'std': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 
+                                     'minimum': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'maximum': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 
+                                     'lower_quartile': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'upper_quartile': {'p=1': 0, 'p=2': 0, 'p=3': 0}}
+                    }
 
-    #for iteration in iterations:
-    #    plot_cuts_per_graph_recalculation(ns, ps, runs, regularity, recalculation, iteration, version)
+    grouped_bar_chart(dic_results, ns, ps, runs, regularity, recalculation, iterations, version)
 
-    grouped_bar_chart(ns, ps, runs, regularity, recalculation, iterations, version)
+    print(dic_results)
+    grouped_bar_chart(dic_results, ns, ps, runs, regularity, 70, iterations, version)
+    print(dic_results)
 
-    #plot_time(ns, ps, runs, regularity, recalculation, iterations, version)
-
-    
+    with open('Higher_depth_QAOA_data_median.json', 'w') as f:
+        json.dump(dic_results, f)

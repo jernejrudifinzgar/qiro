@@ -3,7 +3,7 @@ import numpy as np
 import copy
 import os
 
-def greedy_mis(graph, seed=None, return_sol=False):
+def min_greedy_mis(graph, seed=None, return_sol=False):
     """Computes the MIS greedily."""
     if seed is None:
         seed = np.random.randint(100000)
@@ -17,11 +17,48 @@ def greedy_mis(graph, seed=None, return_sol=False):
         # get the nodes that have the minimum degree
         selectable_nodes = [x for x, y in deg_list if y == deg_list[0][1]]
         # select a random node of minimal degree
-        selected_node = rng.choice(selectable_nodes)
+        #selected_node = rng.choice(selectable_nodes)
+
+        # sort and select first node
+        selectable_nodes.sort()
+        selected_node = selectable_nodes[0]
+
         g.remove_node(selected_node)
         g.remove_nodes_from(graph.neighbors(selected_node))
         indep_set.append(selected_node)
         
+    if return_sol:
+        return indep_set
+    else:
+        return len(indep_set)
+    
+def max_greedy_mis(graph, seed=None, return_sol=False):
+    """Computes the MIS greedily with maximum degree."""
+    if seed is None:
+        seed = np.random.randint(100000)
+    g = copy.deepcopy(graph)
+    rng = np.random.default_rng(seed)
+
+    indep_set = []
+
+    while g.number_of_nodes() > 0:
+        deg_list = sorted(g.degree(), key=lambda x: x[1], reverse=True)
+        # get the nodes that have the maximum degree
+        selectable_nodes = [x for x, y in deg_list if y == deg_list[0][1]]
+        # select a random node of minimal degree
+        #selected_node = rng.choice(selectable_nodes)
+
+        # sort and select first node
+        selectable_nodes.sort()
+        selected_node = selectable_nodes[0]
+
+        g.remove_node(selected_node)
+
+        for node, degree in copy.deepcopy(g.degree()):
+            if degree ==0:
+                indep_set.append(node)
+                g.remove_node(node)
+                
     if return_sol:
         return indep_set
     else:

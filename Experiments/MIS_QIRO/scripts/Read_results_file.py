@@ -563,7 +563,7 @@ def solve_greedy():
 if __name__ == '__main__':
 
     ns = [60, 80, 100, 120]
-    ps = [1, 2, 3]
+    ps = [1]#, 2, 3]
     runs = list(range(0, 20))
     regularity = 3
     versions = [1, 2]

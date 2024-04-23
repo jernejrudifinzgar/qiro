@@ -174,7 +174,7 @@ def execute_RQAOA_single_instance_recalculation(n, p, run, iteration, recalculat
 
     problem = Generator.MAXCUT(G)
     expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, initialization='fixed_angles_optimization', opt=torch.optim.SGD, opt_kwargs=dict(lr=0.0001))#, ordering_algo='tamaki_30')
-    RQAOA_qtensor = RQAOA_recalculate(expectation_values_qtensor, 4, iteration, recalculations=recalculation, type_of_problem="MAXCUT")
+    RQAOA_qtensor = RQAOA_recalculate(expectation_values_qtensor, 6, iteration, recalculations=recalculation, type_of_problem="MAXCUT")
     time_start = time()
     cuts_qtensor, solution_qtensor = RQAOA_qtensor.execute()
     time_end = time()
@@ -192,7 +192,7 @@ def execute_RQAOA_single_instance_recalculation(n, p, run, iteration, recalculat
     if p==1:
         problem = Generator.MAXCUT(G)
         expectation_values_single = SingleLayerQAOAExpectationValues(problem)
-        RQAOA_single = RQAOA_recalculate(expectation_values_single, 4, iteration, recalculations=recalculation, type_of_problem="MAXCUT")
+        RQAOA_single = RQAOA_recalculate(expectation_values_single, 6, iteration, recalculations=recalculation, type_of_problem="MAXCUT")
         cuts_single, solution_single = RQAOA_single.execute()
         solution_dict['cuts_single']=cuts_single
         solution_dict['solution_single']=solution_single

@@ -11,14 +11,14 @@ sys.path.append("../../../classical_benchmarks")
 #print(os.path.abspath(os.curdir))
 #print(os.chdir("../../Qtensor"))
 #print(os.path.abspath(os.curdir))
-from greedy_mis import greedy_mis
+from greedy_mis import min_greedy_mis, max_greedy_mis
 
 from qtensor import ZZQtreeQAOAComposer, ZZQtreeQAOAComposer_MIS, ZZQtreeQAOAComposer_MAXCUT
 from qtensor import QAOAQtreeSimulator, QAOAQtreeSimulator_MIS, QAOAQtreeSimulator_MAXCUT
 from qtensor.contraction_backends import TorchBackend
 import Generating_Problems as Generator
 from Calculating_Expectation_Values import SingleLayerQAOAExpectationValues, QtensorQAOAExpectationValuesMIS,QtensorQAOAExpectationValuesMAXCUT, QtensorQAOAExpectationValuesQUBO
-from QIRO import QIRO_MIS, QIRO_MIS_QMIN
+from QIRO import QIRO_MIS, MINQ_MIS, MAXQ_MIS
 import torch
 import qtensor
 import networkx as nx
@@ -100,7 +100,7 @@ def execute_QIRO_single_instance_137_nodes(p, run, version, initialization, vari
     return size_indep_set_qiro_qtensor, solution_qtensor
 
 
-def execute_QIRO_single_instance(n, p, run, version, initialization, variation='standard', output_results=False, gamma=None, beta=None):
+def execute_QIRO_single_instance(n, p, run, version, initialization, iteration, variation='standard', output_results=False, gamma=None, beta=None):
     my_path = os.path.dirname(__file__)
     my_path = os.path.dirname(my_path)
     reg = 3
@@ -113,88 +113,100 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, variation='
     # print("Date modified: "+ti.ctime(
     # os.path.getmtime(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl"))
     # )
-    # print(ti.ctime(1710507850.5994823))
+    #print(ti.ctime(1710507850.5994823))
 
-    if os.path.getmtime(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl") < 1710507850.5994823:
+    #if os.path.getmtime(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl") < 1710507850.5994823:
+
+        #print(f'run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version} needs recalculation')
+
+    ns_graphs_rudi = list(range(60, 220, 20))
+
+    ns_graphs_maxi = [30, 40, 50]
+
+    if n in ns_graphs_rudi:
+        with open(my_path + f'/graphs/rudis_100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
+            data = pickle.load(file)
+        G = data[run]
+    elif n in ns_graphs_maxi:
+        with open(my_path + f'/graphs/100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
+            data = pickle.load(file)
+        G = data[run]
+    else: 
+        #random.seed()
+        G = nx.random_regular_graph(reg, n, seed=seed)
+
+        #for Erdos Renyi graphs:
+        #prob = reg/(n-1) 
+        #G = nx.erdos_renyi_graph(n, prob)
+
+    problem = Generator.MIS(G, alpha = 2.0)
+
+    expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, variation = variation, opt=torch.optim.RMSprop, variation = variation, initialization = initialization, opt_kwargs=dict(lr=0.005), gamma=gamma, beta=beta)
+    if variation in ['QIRO', 'MMQ']:
+        QIRO_qtensor = QIRO_MIS(2, expectation_values_qtensor, variation=variation)
+    elif variation == 'MINQ':
+        QIRO_qtensor = MINQ_MIS(1, expectation_values_qtensor, variation=variation)
+    elif variation == 'MAXQ':
+        QIRO_qtensor = MAXQ_MIS(2, expectation_values_qtensor, variation=variation)
 
 
+
+    time_start = time()
+    QIRO_qtensor.execute()
+    time_end = time()
+    required_time = time_end-time_start
+
+    solution_qtensor = QIRO_qtensor.solution
+    size_indep_set_qiro_qtensor = np.sum(solution_qtensor > 0)  
+    solution_dict = {}
+    solution_dict['size_solution_qtensor'] = size_indep_set_qiro_qtensor
+    solution_dict['solution_qtensor'] = solution_qtensor
+    solution_dict['energies_qtensor'] = QIRO_qtensor.energies_list
+    solution_dict['losses_qtensor'] = QIRO_qtensor.losses_list
+    solution_dict['num_nodes_qtensor'] = QIRO_qtensor.num_nodes
     
-        print(f'run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version} needs recalculation')
-
-        ns_graphs_rudi = list(range(60, 220, 20))
-
-        ns_graphs_maxi = [30, 40, 50]
-
-        if n in ns_graphs_rudi:
-            with open(my_path + f'/graphs/rudis_100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
-                data = pickle.load(file)
-            G = data[run]
-        elif n in ns_graphs_maxi:
-            with open(my_path + f'/graphs/100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
-                data = pickle.load(file)
-            G = data[run]
-        else: 
-            #random.seed()
-            G = nx.random_regular_graph(reg, n, seed=seed)
-
-            #for Erdos Renyi graphs:
-            #prob = reg/(n-1) 
-            #G = nx.erdos_renyi_graph(n, prob)
-
-        problem = Generator.MIS(G, alpha = 1.0)
-
-        expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, opt=torch.optim.RMSprop, initialization = initialization, opt_kwargs=dict(lr=0.005), gamma=gamma, beta=beta)
-        QIRO_qtensor = QIRO_MIS(6, expectation_values_qtensor, variation=variation)
-
-        time_start = time()
-        QIRO_qtensor.execute()
-        time_end = time()
-        required_time = time_end-time_start
-
-        solution_qtensor = QIRO_qtensor.solution
-        size_indep_set_qiro_qtensor = np.sum(solution_qtensor >= 0)  
-        solution_dict = {}
-        solution_dict['size_solution_qtensor'] = size_indep_set_qiro_qtensor
-        solution_dict['solution_qtensor'] = solution_qtensor
-        solution_dict['energies_qtensor'] = QIRO_qtensor.energies_list
-        solution_dict['losses_qtensor'] = QIRO_qtensor.losses_list
-        solution_dict['num_nodes_qtensor'] = QIRO_qtensor.num_nodes
+    size_min_greedy = min_greedy_mis(G)
+    size_max_greedy = max_greedy_mis(G)
+    solution_dict['size_solution_min_greedy'] = size_min_greedy
+    solution_dict['size_solution_max_greedy'] = size_max_greedy
+    
+    if p==1:
+        problem = Generator.MIS(G, alpha=2.0)
+        expectation_values_single = SingleLayerQAOAExpectationValues(problem)
+        if variation in ['QIRO', 'MMQ']:
+            QIRO_single = QIRO_MIS(2, expectation_values_single, variation=variation)
+        elif variation == 'MINQ':
+            QIRO_single = MINQ_MIS(1, expectation_values_single, variation=variation)
+        elif variation == 'MAXQ':
+            QIRO_single = MAXQ_MIS(2, expectation_values_single, variation=variation)
         
-        
-        if p==1:
-            size_greedy = greedy_mis(G)
-            solution_dict['size_solution_greedy'] = size_greedy
+        QIRO_single.execute()
+        solution_single = QIRO_single.solution
+        size_indep_set_qiro_single = np.sum(solution_single >= 0)
+        solution_dict['size_solution_single'] = size_indep_set_qiro_single
+        solution_dict['solution_single'] = solution_single
+        solution_dict['energies_single'] = QIRO_single.energies_list
+        solution_dict['num_nodes_single'] = QIRO_single.num_nodes
 
-            problem = Generator.MIS(G, alpha=1.0)
-            expectation_values_single = SingleLayerQAOAExpectationValues(problem)
-            QIRO_single = QIRO_MIS(5, expectation_values_single, variation=variation)
-            QIRO_single.execute()
-            solution_single = QIRO_single.solution
-            size_indep_set_qiro_single = np.sum(solution_single >= 0)
-            solution_dict['size_solution_single'] = size_indep_set_qiro_single
-            solution_dict['solution_single'] = solution_single
-            solution_dict['energies_single'] = QIRO_single.energies_list
-            solution_dict['num_nodes_single'] = QIRO_single.num_nodes
+    # f = open(my_path + f"/data/results_test_run_{run}_n_{n}_p_{p}_version_{version}.txt", "w+")
+    # f.write(f"\nRequired time in seconds for RQAOA: {required_time}")
+    # f.write(f"\nRequired time in minutes for RQAOA: {required_time/60}")
+    # f.write(f"\nRequired time in hours for RQAOA: {required_time/3600}")
+    # f.write(f"\nCalculated number of cuts with tensor networks: {cuts_qtensor}")
+    # f.write(f"\nCalculated solution with tensor networks: {solution_qtensor}")
+    # if p==1:
+    #     f.write(f"\nCalculated number of cuts with analytic method:: {cuts_single}")
+    #     f.write(f"\nCalculated solution with analytic method: {solution_single}")
+    # f.close()
+    #print(solution_dict)
+    pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_iteration_{iteration}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl", 'wb'))
 
-        # f = open(my_path + f"/data/results_test_run_{run}_n_{n}_p_{p}_version_{version}.txt", "w+")
-        # f.write(f"\nRequired time in seconds for RQAOA: {required_time}")
-        # f.write(f"\nRequired time in minutes for RQAOA: {required_time/60}")
-        # f.write(f"\nRequired time in hours for RQAOA: {required_time/3600}")
-        # f.write(f"\nCalculated number of cuts with tensor networks: {cuts_qtensor}")
-        # f.write(f"\nCalculated solution with tensor networks: {solution_qtensor}")
-        # if p==1:
-        #     f.write(f"\nCalculated number of cuts with analytic method:: {cuts_single}")
-        #     f.write(f"\nCalculated solution with analytic method: {solution_single}")
-        # f.close()
-        #print(solution_dict)
-        pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl", 'wb'))
+    if output_results:
+        print('MIS size qtensor:', size_indep_set_qiro_qtensor)
+        if p==1: 
+            print('MIS size single:', size_indep_set_qiro_single)
 
-        if output_results:
-            print('MIS size qtensor:', size_indep_set_qiro_qtensor)
-            if p==1: 
-                print('MIS size single:', size_indep_set_qiro_single)
-
-        return size_indep_set_qiro_qtensor, solution_qtensor
+    return size_indep_set_qiro_qtensor, solution_qtensor
 
 
 #@profile
@@ -358,19 +370,27 @@ def give_hessian(n, p, run, version, initialization, output_results=False, gamma
 
 
 
-def execute_QIRO_multiple_instances_different_n(ns, p, run, version, initialization, variation):
+def execute_QIRO_multiple_instances_different_n(ns, ps, run, iteration, version, initialization, variation):
     for n in ns: 
-        
-        execute_QIRO_single_instance(n, p, run, version, initialization, variation=variation)
+        for p in ps:
+            execute_QIRO_single_instance(n, p, run, version, initialization, iteration, variation=variation)
 
 
-def execute_QIRO_parallel(ns, ps, runs, version, initialization='random', variations=['standard']):
+
+def execute_QIRO_parallel(ns, ps, runs, version, iterations, initialization='random', variations=['standard']):
     arguments_list = []
-    for p in ps:
-        for variation in variations:
-            for run in runs:
-                arguments_list.append((ns, p, run, version, initialization, variation))
-    
+    for variation in variations:
+        for run in runs:
+            for iteration in iterations:
+                #for n in ns:
+                #    my_path = os.path.dirname(__file__)
+                #    my_path = os.path.dirname(my_path)
+                #    print(f'run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}')
+                    #print(os.path.getmtime(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl"))
+                    #print("Date modified: "+ti.ctime(os.path.getmtime(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl")))
+                  
+                arguments_list.append((ns, ps, run, iteration, version, initialization, variation))
+
     pool = mp.Pool(len(arguments_list))
     pool.starmap(execute_QIRO_multiple_instances_different_n, arguments_list)
     
