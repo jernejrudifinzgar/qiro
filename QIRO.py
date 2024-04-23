@@ -250,7 +250,6 @@ class QIRO_MIS(QIRO):
                         print(f"Attempting with the {which_correlation}. largest correlation.")
                     else:
                         print(f"We have fixed the following variables: {fixed_variables}. Moving on.")
-        print(self.fixed_correlations)
         solution = [var[0] * assig for var, assig, _ in self.fixed_correlations]
         sorted_solution = sorted(solution, key=lambda x: abs(x))
         print(f"Solution: {sorted_solution}")

@@ -906,7 +906,7 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
             max_expect_val = max_expect_val_list[index]
             max_expect_val_location = max_expect_val_location_list[index]
             max_expect_val_sign = max_expect_val_sign_list[index]
-        print(self.expect_val_dict)
+        print(self.variation, self.expect_val_dict)
         return max_expect_val_location, max_expect_val_sign, max_expect_val
 
     def calc_expect_val(self):

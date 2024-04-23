@@ -371,6 +371,7 @@ def give_hessian(n, p, run, version, initialization, output_results=False, gamma
 
 
 def execute_QIRO_multiple_instances_different_n(ns, ps, run, iteration, version, initialization, variation):
+    print(variation)
     for n in ns: 
         for p in ps:
             execute_QIRO_single_instance(n, p, run, version, initialization, iteration, variation=variation)
