@@ -26,7 +26,7 @@ if __name__ == '__main__':
     ps= [1, 2, 3]
     runs=list(range(0, 20, 1))
     initialization = 'interpolation'
-    variations=['QIRO', 'MINQ', 'MAXQ', 'MMQ']
+    variations=['QIRO', 'MMQ', 'MINQ', 'MAXQ']
     iterations=list(range(0, 1))
     version = 2
     results_list=[]

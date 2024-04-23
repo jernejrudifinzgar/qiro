@@ -105,6 +105,7 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, iteration, 
     my_path = os.path.dirname(my_path)
     reg = 3
     seed = 666
+    print(variation)
 
     # FOR GETTING TIME OF LAST MODIFICATION:
     # print(f'run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}')
@@ -144,9 +145,9 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, iteration, 
     expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, opt=torch.optim.RMSprop, variation = variation, initialization = initialization, opt_kwargs=dict(lr=0.005), gamma=gamma, beta=beta)
     if variation in ['QIRO', 'MMQ']:
         QIRO_qtensor = QIRO_MIS(2, expectation_values_qtensor, variation=variation)
-    elif variation == 'MINQ':
+    if variation == 'MINQ':
         QIRO_qtensor = MINQ_MIS(1, expectation_values_qtensor)
-    elif variation == 'MAXQ':
+    if variation == 'MAXQ':
         QIRO_qtensor = MAXQ_MIS(2, expectation_values_qtensor)
 
 
@@ -175,10 +176,10 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, iteration, 
         expectation_values_single = SingleLayerQAOAExpectationValues(problem)
         if variation in ['QIRO', 'MMQ']:
             QIRO_single = QIRO_MIS(2, expectation_values_single, variation=variation)
-        elif variation == 'MINQ':
-            QIRO_single = MINQ_MIS(1, expectation_values_single, variation=variation)
-        elif variation == 'MAXQ':
-            QIRO_single = MAXQ_MIS(2, expectation_values_single, variation=variation)
+        if variation == 'MINQ':
+            QIRO_single = MINQ_MIS(1, expectation_values_single)
+        if variation == 'MAXQ':
+            QIRO_single = MAXQ_MIS(2, expectation_values_single)
         
         QIRO_single.execute()
         solution_single = QIRO_single.solution
@@ -371,14 +372,13 @@ def give_hessian(n, p, run, version, initialization, output_results=False, gamma
 
 
 def execute_QIRO_multiple_instances_different_n(ns, ps, run, iteration, version, initialization, variation):
-    print(variation)
     for n in ns: 
         for p in ps:
             execute_QIRO_single_instance(n, p, run, version, initialization, iteration, variation=variation)
 
 
 
-def execute_QIRO_parallel(ns, ps, runs, version, iterations, initialization='random', variations=['standard']):
+def execute_QIRO_parallel(ns, ps, runs, version, iterations, initialization='random', variations=['QIRO']):
     arguments_list = []
     for variation in variations:
         for run in runs:
@@ -391,7 +391,7 @@ def execute_QIRO_parallel(ns, ps, runs, version, iterations, initialization='ran
                     #print("Date modified: "+ti.ctime(os.path.getmtime(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl")))
                   
                 arguments_list.append((ns, ps, run, iteration, version, initialization, variation))
-
+    print(len(arguments_list))
     pool = mp.Pool(len(arguments_list))
     pool.starmap(execute_QIRO_multiple_instances_different_n, arguments_list)
     
