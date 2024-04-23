@@ -9,7 +9,6 @@ import networkx as nx
 import Generating_Problems as Generator
 from Calculating_Expectation_Values import SingleLayerQAOAExpectationValues, QtensorQAOAExpectationValuesMIS
 from QIRO import QIRO_MIS
-from classical_benchmarks.greedy_mis import greedy_mis, random_greedy_mis
 from time import time
 import multiprocessing as mp
 from Helping_file import *
@@ -21,26 +20,24 @@ import matplotlib.pyplot as plt
 if __name__ == '__main__':
 
     reg = 3
-    ns = [40, 120]#, 140, 180]
+    ns = [40, 60, 80, 100, 120]#, 140, 180]
     seed = 666
     ps= [1, 2, 3]
-    #num_runs = 10
-    runs=list(range(0, 20, 1))
+    runs=list(range(10, 20, 1))
     initialization = 'interpolation'
-    variations=['standard', 'MINQ', 'MAXQ', 'MMQ']
-    version = 1
+    variations=['QIRO', 'MMQ', 'MINQ', 'MAXQ']
+    iterations=list(range(0, 1))
+    version = 2
     results_list=[]
 
-    
-    #execute_QIRO_single_instance_137_nodes(3, 1, 1, initialization='interpolation', variation='standard', output_results=True)
-    
-    
+    #ns = [14]
+    #runs = [0, 1]
+
     #execute_QIRO_parallel([12], [1, 2], [0, 1], version, initialization=initialization, variations=variations)
 
 
 
-    execute_QIRO_parallel(ns, ps, runs, version, initialization=initialization, variations=variations)
-    
+    execute_QIRO_parallel(ns, ps, runs, version, initialization=initialization, variations=variations, iterations=iterations)
     
     
     

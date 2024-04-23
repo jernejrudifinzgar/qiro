@@ -24,15 +24,15 @@ if __name__ == '__main__':
     ns = [40, 60, 80, 100, 120]#, 140, 180]
     seed = 666
     ps= [1, 2, 3]
-    runs=list(range(0, 20, 1))
+    runs=list(range(0, 10, 1))
     initialization = 'interpolation'
     variations=['QIRO', 'MMQ', 'MINQ', 'MAXQ']
     iterations=list(range(0, 1))
     version = 2
     results_list=[]
 
-    ns = [14]
-    runs = [0, 1]
+    #ns = [14]
+    #runs = [0, 1]
 
     #execute_QIRO_parallel([12], [1, 2], [0, 1], version, initialization=initialization, variations=variations)
 

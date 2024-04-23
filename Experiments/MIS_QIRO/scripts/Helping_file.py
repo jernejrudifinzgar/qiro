@@ -202,7 +202,7 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, iteration, 
     # f.close()
     #print(solution_dict)
     pickle.dump(solution_dict, open(my_path + f"/data/results_run_{run}_iteration_{iteration}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl", 'wb'))
-
+    print(f'saved results_run_{run}_iteration_{iteration}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}')
     if output_results:
         print('MIS size qtensor:', size_indep_set_qiro_qtensor)
         if p==1: 
