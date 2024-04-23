@@ -9,7 +9,7 @@ import networkx as nx
 import Generating_Problems as Generator
 from Calculating_Expectation_Values import SingleLayerQAOAExpectationValues, QtensorQAOAExpectationValuesMIS
 from QIRO import QIRO_MIS
-from classical_benchmarks.greedy_mis import greedy_mis, random_greedy_mis
+import classical_benchmarks.greedy_mis
 from time import time
 import multiprocessing as mp
 from Helping_file import *
