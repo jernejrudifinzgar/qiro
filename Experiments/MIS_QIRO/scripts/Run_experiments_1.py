@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
 
 
-    execute_QIRO_parallel(ns, ps, runs, version, initialization=initialization, variations=variations)
+    execute_QIRO_parallel(ns, ps, runs, version, initialization=initialization, variations=variations, iterations=iterations)
     
     
     

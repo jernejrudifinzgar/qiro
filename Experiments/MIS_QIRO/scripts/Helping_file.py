@@ -141,7 +141,7 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, iteration, 
 
     problem = Generator.MIS(G, alpha = 2.0)
 
-    expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, variation = variation, opt=torch.optim.RMSprop, variation = variation, initialization = initialization, opt_kwargs=dict(lr=0.005), gamma=gamma, beta=beta)
+    expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, opt=torch.optim.RMSprop, variation = variation, initialization = initialization, opt_kwargs=dict(lr=0.005), gamma=gamma, beta=beta)
     if variation in ['QIRO', 'MMQ']:
         QIRO_qtensor = QIRO_MIS(2, expectation_values_qtensor, variation=variation)
     elif variation == 'MINQ':
