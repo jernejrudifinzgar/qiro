@@ -171,23 +171,24 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, iteration, 
     solution_dict['size_solution_min_greedy'] = size_min_greedy
     solution_dict['size_solution_max_greedy'] = size_max_greedy
     
-    if p==1:
-        problem = Generator.MIS(G, alpha=2.0)
-        expectation_values_single = SingleLayerQAOAExpectationValues(problem)
-        if variation in ['QIRO', 'MMQ']:
-            QIRO_single = QIRO_MIS(2, expectation_values_single, variation=variation)
-        if variation == 'MINQ':
-            QIRO_single = MINQ_MIS(1, expectation_values_single)
-        if variation == 'MAXQ':
-            QIRO_single = MAXQ_MIS(2, expectation_values_single)
+    #additional single layer
+    # if p==1:
+    #     problem = Generator.MIS(G, alpha=2.0)
+    #     expectation_values_single = SingleLayerQAOAExpectationValues(problem)
+    #     if variation in ['QIRO', 'MMQ']:
+    #         QIRO_single = QIRO_MIS(2, expectation_values_single, variation=variation)
+    #     if variation == 'MINQ':
+    #         QIRO_single = MINQ_MIS(1, expectation_values_single)
+    #     if variation == 'MAXQ':
+    #         QIRO_single = MAXQ_MIS(2, expectation_values_single)
         
-        QIRO_single.execute()
-        solution_single = QIRO_single.solution
-        size_indep_set_qiro_single = np.sum(solution_single >= 0)
-        solution_dict['size_solution_single'] = size_indep_set_qiro_single
-        solution_dict['solution_single'] = solution_single
-        solution_dict['energies_single'] = QIRO_single.energies_list
-        solution_dict['num_nodes_single'] = QIRO_single.num_nodes
+    #     QIRO_single.execute()
+    #     solution_single = QIRO_single.solution
+    #     size_indep_set_qiro_single = np.sum(solution_single >= 0)
+    #     solution_dict['size_solution_single'] = size_indep_set_qiro_single
+    #     solution_dict['solution_single'] = solution_single
+    #     solution_dict['energies_single'] = QIRO_single.energies_list
+    #     solution_dict['num_nodes_single'] = QIRO_single.num_nodes
 
     # f = open(my_path + f"/data/results_test_run_{run}_n_{n}_p_{p}_version_{version}.txt", "w+")
     # f.write(f"\nRequired time in seconds for RQAOA: {required_time}")
