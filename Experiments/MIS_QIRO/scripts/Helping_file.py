@@ -145,9 +145,9 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, iteration, 
     if variation in ['QIRO', 'MMQ']:
         QIRO_qtensor = QIRO_MIS(2, expectation_values_qtensor, variation=variation)
     elif variation == 'MINQ':
-        QIRO_qtensor = MINQ_MIS(1, expectation_values_qtensor, variation=variation)
+        QIRO_qtensor = MINQ_MIS(1, expectation_values_qtensor)
     elif variation == 'MAXQ':
-        QIRO_qtensor = MAXQ_MIS(2, expectation_values_qtensor, variation=variation)
+        QIRO_qtensor = MAXQ_MIS(2, expectation_values_qtensor)
 
 
 

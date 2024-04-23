@@ -1413,7 +1413,6 @@ class QtensorQAOAExpectationValuesQUBO_GPU(ExpectationValues):
                     #     max_expect_val_sign_list.append(np.sign(energy))
 
         if len(max_expect_val_list) > 1:
-            print(max_expect_val_list)
             index = random.randrange(len(max_expect_val_list))
             max_expect_val = max_expect_val_list[index]
             max_expect_val_location = max_expect_val_location_list[index]
