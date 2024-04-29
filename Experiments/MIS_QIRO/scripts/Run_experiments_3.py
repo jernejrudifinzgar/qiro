@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 if __name__ == '__main__':
 
     reg = 3
-    ns = [40, 60, 80, 100, 120]#, 140, 180]
+    ns = [140, 160]
     seed = 666
     ps= [1, 2, 3]
     runs=list(range(20, 30, 1))
