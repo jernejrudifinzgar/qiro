@@ -20,10 +20,10 @@ import matplotlib.pyplot as plt
 if __name__ == '__main__':
 
     reg = 3
-    ns = [40, 60, 80, 100, 120]#, 140, 180]
+    ns = [140, 160]
     seed = 666
     ps= [1, 2, 3]
-    runs=list(range(10, 20, 1))
+    runs=list(range(0, 20, 1))
     initialization = 'interpolation'
     variations=['QIRO', 'MMQ', 'MINQ', 'MAXQ']
     iterations=list(range(0, 1))
