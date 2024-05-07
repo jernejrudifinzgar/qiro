@@ -12,7 +12,7 @@ import numpy as np
 sys.path.append("../../../Qtensor")
 sys.path.append("../../../Qtensor/qtree_git")
 sys.path.append("../../../classical_benchmarks")
-from greedy_mis import greedy_mis
+from greedy_mis import min_greedy_mis, max_greedy_mis
 
 def plot_MIS_size_per_graph(ns, ps, runs, version, regularity):
     colors=['tab:blue', 'tab:orange', 'tab:pink', 'tab:red', 'tab:cyan', 'tab:green', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:purple']
@@ -230,13 +230,15 @@ def plot_MIS_size_per_graph_initialization(ns, ps, runs, version, initialization
         plt.show()
         fig.savefig(my_path + f'/results/MIS_size_reg_{regularity}_n_{n}_initialization_{initialization}_runs_{runs[0]}_{runs[-1]}_version_{version}.png')
 
-def plot_MIS_size_per_n(ns, ps, runs, version, initialization, variations, regularity):
+def plot_MIS_size_per_n(ns, ps, runs, version, iterations, initialization, variations, regularity):
     colors=['tab:blue', 'tab:orange', 'tab:pink', 'tab:red', 'tab:cyan', 'tab:green', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:purple']
     markers = ['s', 'D', 'v', '*', '.', 's', 'D', 'v', '*', '.']
     linestyles = ['solid', 'dashed', 'dashdot', 'dotted', (0, (3, 5, 1, 5, 1, 5)), 'solid', 'dashed', 'dashdot', 'dotted', (0, (3, 5, 1, 5, 1, 5))]
     my_path = os.path.dirname(__file__)
     my_path = os.path.dirname(my_path)
-    ns_graphs_rudi = list(range(60, 220, 20))
+    
+    #ns_graphs_rudi = list(range(60, 220, 20))
+    
     ns_graphs_maxi = [30, 40, 50]
     
     for p in ps:
@@ -260,19 +262,22 @@ def plot_MIS_size_per_n(ns, ps, runs, version, initialization, variations, regul
         for n in ns:
             MIS_size_greedy_list = []
             MIS_size_qtensor_list_dic['ns'].append(n)
-            if n in ns_graphs_rudi:
-                with open(my_path + f"/graphs/rudis_100_regular_graphs_nodes_{n}_reg_3_MIS_solutions.pkl", 'rb') as file:
-                    MIS_size_exact = pickle.load(file)
+            # if n in ns_graphs_rudi:
+            #     with open(my_path + f"/graphs/rudis_100_regular_graphs_nodes_{n}_reg_3_MIS_solutions.pkl", 'rb') as file:
+            #         MIS_size_exact = pickle.load(file)
 
-            elif n in ns_graphs_maxi:
-                with open(my_path + f"/graphs/100_regular_graphs_nodes_{n}_reg_3_MIS_solutions.pkl", 'rb') as file:
-                    MIS_size_exact = pickle.load(file)
+            #elif n in ns_graphs_maxi:
+            with open(my_path + f"/graphs/100_regular_graphs_nodes_{n}_reg_3_MIS_solutions.pkl", 'rb') as file:
+                MIS_size_exact = pickle.load(file)
+            with open(my_path + f"/graphs/rudis_100_regular_graphs_nodes_{n}_reg_3_MIS_solutions.pkl", 'rb') as file:
+                MIS_size_exact_2 = pickle.load(file)
 
 
             for run in runs:
-                with open(my_path + f"/data/results_run_{run}_n_{n}_p_{1}_initialization_{initialization}_variation_standard_version_{version}.pkl", 'rb') as file:
-                    data = pickle.load(file)
-                MIS_size_greedy_list.append(data['size_solution_greedy']/MIS_size_exact[run])       
+                for iteration in iterations:
+                    with open(my_path + f"/data/results_run_{run}_iteration_{iteration}_n_{n}_p_{1}_initialization_{initialization}_variation_QIRO_version_{version}.pkl", 'rb') as file:
+                        data = pickle.load(file)
+                    MIS_size_greedy_list.append(data['size_solution_min_greedy']/MIS_size_exact[run])       
             average = np.average(MIS_size_greedy_list)
             std = np.std(MIS_size_greedy_list)
             MIS_size_qtensor_list_dic['greedy_size'].append(average)   
@@ -283,32 +288,75 @@ def plot_MIS_size_per_n(ns, ps, runs, version, initialization, variations, regul
                 MIS_size_list_n = []
                 MIS_size_greedy_list = []
 
-                for run in runs:
-                    try:
-                        with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl", 'rb') as file:
-                            data = pickle.load(file)
+                if variation in ['QIRO', 'MMQ']:
 
-                        if p==4:
-                            MIS_size_list_n.append(data['size_solution_single']/MIS_size_exact[run])
-                            list_graphs_qtensor.append(run)
-                        else:
-                            MIS_size_list_n.append(data['size_solution_qtensor']/MIS_size_exact[run])
-                            list_graphs_qtensor.append(run)
+                    if variation =='QIRO':
+                        variation_2 = 'standard'
+                    else:
+                        variation_2 = variation
 
-                    except Exception as error:
-                        print(error)
-                        print(f'file results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl not available')
+                    for run in runs:
+                        for iteration in iterations:
+                            try:
+                                with open(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation_2}_version_1.pkl", 'rb') as file:
+                                    data = pickle.load(file)
 
-                average = np.average(MIS_size_list_n)
-                std = np.std(MIS_size_list_n)
-                MIS_size_qtensor_list_dic[f'{variation}_size'].append(average)   
-                MIS_size_qtensor_list_dic[f'{variation}_std'].append(std)   
+                                if p==1:
+                                    MIS_size_list_n.append(data['size_solution_single']/MIS_size_exact_2[run])
+                                    list_graphs_qtensor.append(run)
+                                else:
+                                    MIS_size_list_n.append(data['size_solution_qtensor']/MIS_size_exact_2[run])
+                                    list_graphs_qtensor.append(run)
+
+                            except Exception as error:
+                                print(error)
+                                print(f'file results_run_{run}_n_{n}_p_{p}_iteration_{iteration}_initialization_{initialization}_variation_{variation}_version_{version}.pkl not available')
+                                        
+                    print(variation, p, n)
+                    # for i in MIS_size_list_n:
+                    #     if i>1:
+                    #         print(i)
+
+                    average = np.average(MIS_size_list_n)
+                    std = np.std(MIS_size_list_n)
+                    print(average)
+                    
+                    MIS_size_qtensor_list_dic[f'{variation}_size'].append(average)   
+                    MIS_size_qtensor_list_dic[f'{variation}_std'].append(std)   
+                
+                else:
+                    for run in runs:
+                        for iteration in iterations:
+                            try:
+                                with open(my_path + f"/data/results_run_{run}_iteration_{iteration}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl", 'rb') as file:
+                                    data = pickle.load(file)
+
+                                if p==4:
+                                    MIS_size_list_n.append(data['size_solution_single']/MIS_size_exact[run])
+                                    list_graphs_qtensor.append(run)
+                                else:
+                                    MIS_size_list_n.append(data['size_solution_qtensor']/MIS_size_exact[run])
+                                    list_graphs_qtensor.append(run)
+
+                            except Exception as error:
+                                print(error)
+                                print(f'file results_run_{run}_n_{n}_p_{p}_iteration_{iteration}_initialization_{initialization}_variation_{variation}_version_{version}.pkl not available')
+
+                    # print(variation, p, n)
+                    # for i in MIS_size_list_n:
+                    #     if i>1:
+                    #         print(i)
+                    average = np.average(MIS_size_list_n)
+                    std = np.std(MIS_size_list_n)
+                    MIS_size_qtensor_list_dic[f'{variation}_size'].append(average)   
+                    MIS_size_qtensor_list_dic[f'{variation}_std'].append(std)   
 
         #plt.plot(MIS_size_qtensor_list_dic['ns'], MIS_size_qtensor_list_dic['greedy_size'], color=colors[counter], linestyle=linestyles[counter], label = 'Greedy algorithm')
         plt.errorbar(MIS_size_qtensor_list_dic['ns'], MIS_size_qtensor_list_dic['greedy_size'], yerr=MIS_size_qtensor_list_dic['greedy_std'], capsize = 10, color=colors[counter], linestyle=linestyles[counter], label = 'Greedy algorithm')
 
         counter += 1
         for variation in variations:
+
             #plt.plot(MIS_size_qtensor_list_dic['ns'], MIS_size_qtensor_list_dic[f'{variation}_size'], color=colors[counter], linestyle=linestyles[counter], label = f'{variation} algorithm')
             plt.errorbar(MIS_size_qtensor_list_dic['ns'], MIS_size_qtensor_list_dic[f'{variation}_size'], MIS_size_qtensor_list_dic[f'{variation}_std'], capsize = 10, color=colors[counter], linestyle=linestyles[counter], label = f'{variation} algorithm')
 
@@ -321,7 +369,7 @@ def plot_MIS_size_per_n(ns, ps, runs, version, initialization, variations, regul
         #plt.ylim([0.70, 1.01])
         plt.legend()    
         plt.show()
-        #fig.savefig(my_path + f'/results/MIS_size_per_n_reg_{regularity}_ns_{ns[0]}_{ns[-1]}_p_{p}_same_scale_initialization_{initialization}_runs_{runs[0]}_{runs[-1]}_version_{version}.png')
+        fig.savefig(my_path + f'/results/MIS_size_per_n_reg_{regularity}_ns_{ns[0]}_{ns[-1]}_p_{p}_same_scale_initialization_{initialization}_runs_{runs[0]}_{runs[-1]}_version_{version}.png')
 
 
 def plot_energies(ns, ps, runs, version, regularity, per_node=False):
@@ -563,13 +611,14 @@ def solve_greedy():
 if __name__ == '__main__':
 
     ns = [60, 80, 100, 120]
-    ps = [1]#, 2, 3]
+    ps = [1, 2, 3]
     runs = list(range(0, 20))
+    iterations = list(range(0, 1))
     regularity = 3
     versions = [1, 2]
-    version = 1
+    version = 2
     initialization = 'interpolation'
-    variations=['standard', 'MINQ', 'MAXQ', 'MMQ']
+    variations=['QIRO', 'MINQ', 'MAXQ', 'MMQ']
 
 
     #plot_MIS_size_per_graph(ns, ps, runs, version, regularity)
@@ -581,7 +630,7 @@ if __name__ == '__main__':
     #plot_MIS_size_per_graph_initialization(ns, ps, runs, version, initialization, regularity)
     #plot_energies_initialization(ns, ps, runs, version, initialization, regularity, per_node=True)
 
-    plot_MIS_size_per_n(ns, ps, runs, version, initialization, variations, regularity)
+    plot_MIS_size_per_n(ns, ps, runs, version, iterations, initialization, variations, regularity)
     
     # my_path = os.path.dirname(__file__)
     # my_path = os.path.dirname(my_path)

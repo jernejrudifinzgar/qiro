@@ -93,14 +93,14 @@ if __name__ == '__main__':
     #     data = pickle.load(f)
     # counter = 0
     
-    G = nx.Graph()
-    for i in range(11):
-        G.add_node(i)
+    # G = nx.Graph()
+    # for i in range(11):
+    #     G.add_node(i)
     
-    G.add_edges_from([(0, 2), (0, 3), (0, 5), (1, 4), (1, 5), (2, 3), (2, 7), (3, 8), (4, 8), (5, 7), (6, 7), (7, 9), (8, 9), (8, 10), (9, 10)])
+    # G.add_edges_from([(0, 2), (0, 3), (0, 5), (1, 4), (1, 5), (2, 3), (2, 7), (3, 8), (4, 8), (5, 7), (6, 7), (7, 9), (8, 9), (8, 10), (9, 10)])
 
-    solution = solve_max_cut(G)
-    print(solution)
+    # solution = solve_max_cut(G)
+    # print(solution)
 
     # for graph in data:
     #     counter += 1
@@ -114,23 +114,29 @@ if __name__ == '__main__':
 
 
     #MIS
-    #ns = [60, 100, 120, 140, 160, 180, 200]
-    #for n in ns:
-    #    list_solutions = []
-    #    with open(f'./graphs/rudis_100_regular_graphs_nodes_{n}_reg_3.pkl', 'rb') as f:
-        #with open(f'./graphs/100_regular_graphs_nodes_{n}_reg_3.pkl', 'rb') as f:
-    #        data = pickle.load(f)
-        # counter = 0
-    #    for graph in data:
-        #    counter += 1
-    #        solution = solve_MIS(graph)
-        #    print(f"Solution for graph {counter} found")
-    #        list_solutions.append(-solution)
+    ns = [60, 80, 100, 120, 140, 160, 180, 200]
+    for n in ns:
+        list_solutions = []
+        #with open(f'./graphs/rudis_100_regular_graphs_nodes_{n}_reg_3.pkl', 'rb') as f:
+        with open(f'./graphs/100_regular_graphs_nodes_{n}_reg_3.pkl', 'rb') as f:
+            data = pickle.load(f)
+        counter = 0
+        for graph in data:
+            counter += 1
+            solution = solve_MIS(graph)
+            print(f"Solution for graph {counter} found")
+            list_solutions.append(-solution)
 
-    #    pickle.dump(list_solutions, open(f"./graphs/rudis_100_regular_graphs_nodes_{n}_reg_3_MIS_solutions.pkl", 'wb'))
-        #pickle.dump(list_solutions, open(f"100_regular_graphs_nodes_{n}_reg_3_MIS_solutions.pkl", 'wb'))
+        #pickle.dump(list_solutions, open(f"./graphs/rudis_100_regular_graphs_nodes_{n}_reg_3_MIS_solutions.pkl", 'wb'))
+        pickle.dump(list_solutions, open(f"100_regular_graphs_nodes_{n}_reg_3_MIS_solutions.pkl", 'wb'))
 
 
+
+
+
+
+
+    #137 nodes graphs from Rudi:
     # for i in range(1, 11):
     #     graph = nx.read_adjlist(f'./graphs/{i}-graph.adjlist', nodetype=int)
     #     solution = solve_MIS(graph)

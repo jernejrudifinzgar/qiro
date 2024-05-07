@@ -45,7 +45,7 @@ def max_greedy_mis(graph, seed=None, return_sol=False):
         deg_list = sorted(g.degree(), key=lambda x: x[1], reverse=True)
         # get the nodes that have the maximum degree
         selectable_nodes = [x for x, y in deg_list if y == deg_list[0][1]]
-        # select a random node of minimal degree
+        # select a random node of maximal degree
         #selected_node = rng.choice(selectable_nodes)
 
         # sort and select first node

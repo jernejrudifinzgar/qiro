@@ -181,20 +181,22 @@ class QIRO_MIS(QIRO):
          
             # sorts correlations in decreasing order. Ties are broken randomly.
             if self.variation=='QIRO':
+                #sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (abs(item[1]), np.random.rand()), reverse=True)
                 sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (abs(item[1]), np.random.rand()), reverse=True)
-            elif self.variation=='MINQ':
+
+            if self.variation=='MINQ':
                 #random order of same values
                 #sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (item[1], np.random.rand()), reverse=True)
                 #not random order of same values:
                 sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (item[1]), reverse=True)
 
-            elif self.variation=='MAXQ':
+            if self.variation=='MAXQ':
                 #random
                 #sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (item[1], np.random.rand()))
                 #not random
                 sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (item[1]))
 
-            elif self.variation=='MMQ':
+            if self.variation=='MMQ':
                 sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (abs(item[1]), np.random.rand()), reverse=True)
             
             selectable_nodes = []
@@ -207,10 +209,10 @@ class QIRO_MIS(QIRO):
                 #print('location', max_expect_val_location)
                 #print(self.expectation_values.expect_val_dict)
                 max_expect_val_location = [self.problem.position_translater[idx] for idx in max_expect_val_location]
-                if max_expect_val==0:
-                    max_expect_val_sign = 1
-                else:
-                    max_expect_val_sign = np.sign(max_expect_val).astype(int)
+                #if max_expect_val==0:
+                #    max_expect_val_sign = -1
+                #else:
+                max_expect_val_sign = np.sign(max_expect_val).astype(int)
 
                 if len(max_expect_val_location) == 1:
                     if self.output_steps:
