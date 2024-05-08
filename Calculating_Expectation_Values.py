@@ -684,6 +684,7 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
         self.initialization = initialization
         self.type = 'QtensorQAOAExpectationValuesQUBO'
         #if self.backend == qtensor.contraction_backends.TorchBackend():
+        self.saving_dictionary = {}
     
         self.gamma, self.beta = torch.tensor(gamma, requires_grad=True), torch.tensor(beta, requires_grad=True)
 
@@ -699,29 +700,29 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
     def energy_peo(self):
         opt = qtensor.toolbox.get_ordering_algo(self.ordering_algo)
         peos = {}
-        if self.correlations == 'single':
-            for i in range(1, len(self.problem.matrix)):
+        # if self.correlations == 'single':
+        #     for i in range(1, len(self.problem.matrix)):
+        #         composer = qtensor.TorchQAOAComposer_QUBO(self.problem.graph, self.problem.matrix, self.problem.position_translater, gamma = self.gamma, beta = self.beta)
+        #         composer.energy_expectation_lightcone([self.problem.position_translater[i]-1])
+        #         tn = qtensor.optimisation.TensorNet.QtreeTensorNet.from_qtree_gates(composer.circuit)
+        #         peo, _ = opt.optimize(tn)
+        #         peos[(i, i)] = peo
+
+        # else:
+        for i in range(1, len(self.problem.matrix)):
+            for j in range(1, i+1):
+                #if self.problem.matrix[i, j] != 0:
+                
                 composer = qtensor.TorchQAOAComposer_QUBO(self.problem.graph, self.problem.matrix, self.problem.position_translater, gamma = self.gamma, beta = self.beta)
-                composer.energy_expectation_lightcone([self.problem.position_translater[i]-1])
+                if i == j:
+                    composer.energy_expectation_lightcone([self.problem.position_translater[i]-1])
+
+                else:
+                    composer.energy_expectation_lightcone([self.problem.position_translater[i]-1, self.problem.position_translater[j]-1])
+
                 tn = qtensor.optimisation.TensorNet.QtreeTensorNet.from_qtree_gates(composer.circuit)
                 peo, _ = opt.optimize(tn)
-                peos[(i, i)] = peo
-
-        else:
-            for i in range(1, len(self.problem.matrix)):
-                for j in range(1, i+1):
-                    #if self.problem.matrix[i, j] != 0:
-                    
-                    composer = qtensor.TorchQAOAComposer_QUBO(self.problem.graph, self.problem.matrix, self.problem.position_translater, gamma = self.gamma, beta = self.beta)
-                    if i == j:
-                        composer.energy_expectation_lightcone([self.problem.position_translater[i]-1])
-
-                    else:
-                        composer.energy_expectation_lightcone([self.problem.position_translater[i]-1, self.problem.position_translater[j]-1])
-
-                    tn = qtensor.optimisation.TensorNet.QtreeTensorNet.from_qtree_gates(composer.circuit)
-                    peo, _ = opt.optimize(tn)
-                    peos[(i, j)] = peo
+                peos[(i, j)] = peo
         return peos
 
     def energy_loss(self):
@@ -729,36 +730,36 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
         composer = qtensor.TorchQAOAComposer_QUBO(self.problem.graph, self.problem.matrix, self.problem.position_translater, gamma=self.gamma, beta=self.beta)
         self.loss = torch.tensor([0.])
         self.E_nodes = {}
-        if self.correlations == 'single':
-            for i in range(1, len(self.problem.matrix)):
-                if self.problem.matrix[i, i] != 0:
-                    peo = self.peos[(i, i)]
-                    composer.energy_expectation_lightcone([self.problem.position_translater[i]-1])
+        # if self.correlations == 'single':
+        #     for i in range(1, len(self.problem.matrix)):
+        #         if self.problem.matrix[i, i] != 0:
+        #             peo = self.peos[(i, i)]
+        #             composer.energy_expectation_lightcone([self.problem.position_translater[i]-1])
+        #             E = torch.real(sim.simulate_batch(composer.circuit, peo=peo))
+        #             composer.builder.reset()
+        #             matrix_entry = self.problem.matrix[i, i]
+        #             self.loss += E * matrix_entry
+        #             self.E_nodes [(i, i)] = E
+        #         else:
+        #             self.E_nodes [(i, i)] = 0
+
+        # else:
+        for i in range(1, len(self.problem.matrix)):
+            for j in range(1, i+1):
+                if self.problem.matrix[i, j] != 0:
+                    peo = self.peos[(i, j)]
+                    if i == j:
+                        composer.energy_expectation_lightcone([self.problem.position_translater[i]-1])
+                    else:
+                        composer.energy_expectation_lightcone([self.problem.position_translater[i]-1, self.problem.position_translater[j]-1])
                     E = torch.real(sim.simulate_batch(composer.circuit, peo=peo))
                     composer.builder.reset()
-                    matrix_entry = self.problem.matrix[i, i]
+                    matrix_entry = self.problem.matrix[i, j]
                     self.loss += E * matrix_entry
-                    self.E_nodes [(i, i)] = E
+                    self.E_nodes [(i, j)] = E
                 else:
-                    self.E_nodes [(i, i)] = 0
-
-        else:
-            for i in range(1, len(self.problem.matrix)):
-                for j in range(1, i+1):
-                    if self.problem.matrix[i, j] != 0:
-                        peo = self.peos[(i, j)]
-                        if i == j:
-                            composer.energy_expectation_lightcone([self.problem.position_translater[i]-1])
-                        else:
-                            composer.energy_expectation_lightcone([self.problem.position_translater[i]-1, self.problem.position_translater[j]-1])
-                        E = torch.real(sim.simulate_batch(composer.circuit, peo=peo))
-                        composer.builder.reset()
-                        matrix_entry = self.problem.matrix[i, j]
-                        self.loss += E * matrix_entry
-                        self.E_nodes [(i, j)] = E
-                    else:
-                        if i==j:
-                            self.E_nodes [(i, j)] = 0
+                    if i==j:
+                        self.E_nodes [(i, j)] = 0
 
         
         if self.loss ==0:
@@ -809,31 +810,31 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
         max_expect_val_sign_list = []
 
         if self.correlations == 'single':
-                for i in range(1, len(self.problem.matrix)):
-                    energy = float(self.E_nodes[(i, i)])
-                    self.expect_val_dict[frozenset({i})] = energy
+            for i in range(1, len(self.problem.matrix)):
+                energy = float(self.E_nodes[(i, i)])
+                self.expect_val_dict[frozenset({i})] = energy
 
-                    if abs(energy) >= max_expect_val:
-                        max_expect_val_list = []
-                        max_expect_val_location_list = []
-                        max_expect_val_sign_list = []
+                if abs(energy) >= max_expect_val:
+                    max_expect_val_list = []
+                    max_expect_val_location_list = []
+                    max_expect_val_sign_list = []
 
-                        max_expect_val = abs(energy)
-                        max_expect_val_sign = np.sign(energy)
-                        max_expect_val_location = ([self.problem.position_translater[i]])
-                        max_expect_val_location_list.append(max_expect_val_location)
-                        max_expect_val_list.append(max_expect_val)
-                        max_expect_val_sign_list.append(max_expect_val_sign)
+                    max_expect_val = abs(energy)
+                    max_expect_val_sign = np.sign(energy)
+                    max_expect_val_location = ([self.problem.position_translater[i]])
+                    max_expect_val_location_list.append(max_expect_val_location)
+                    max_expect_val_list.append(max_expect_val)
+                    max_expect_val_sign_list.append(max_expect_val_sign)
 
-                        # elif abs(energy) == max_expect_val:
-                        #     if i == j:
-                        #         max_expect_val_location_help = ([self.problem.position_translater[i]])
-                        #     else:
-                        #         max_expect_val_location_help = ([self.problem.position_translater[i], self.problem.position_translater[j]])
+                    # elif abs(energy) == max_expect_val:
+                    #     if i == j:
+                    #         max_expect_val_location_help = ([self.problem.position_translater[i]])
+                    #     else:
+                    #         max_expect_val_location_help = ([self.problem.position_translater[i], self.problem.position_translater[j]])
 
-                        #     max_expect_val_location_list.append(max_expect_val_location_help)
-                        #     max_expect_val_list.append(abs(energy))
-                        #     max_expect_val_sign_list.append(np.sign(energy))
+                    #     max_expect_val_location_list.append(max_expect_val_location_help)
+                    #     max_expect_val_list.append(abs(energy))
+                    #     max_expect_val_sign_list.append(np.sign(energy))
 
         else:
             for i in range(1, len(self.problem.matrix)):
@@ -1193,9 +1194,11 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
             correlations_min = expectation_value_single.expect_val_dict.copy()
             self.expect_val_dict = correlations_min
             self.energy = expectation_value_single.energy
+            self.saving_dictionary['p=1']=correlations_min.copy()
         else:
             expectation_value_single = SingleLayerQAOAExpectationValues(self.problem)
             expectation_value_single.optimize()
+            self.saving_dictionary['p=1']=expectation_value_single.expect_val_dict.copy()
             gamma_old = [expectation_value_single.gamma/np.pi]
             beta_old = [expectation_value_single.beta/np.pi]
 
@@ -1217,6 +1220,8 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
                 expectation_values_qtensor_transition = QtensorQAOAExpectationValuesQUBO(self.problem, step, gamma=gamma_new, beta=beta_new, variation = self.variation, pbar=True, opt = self.opt, opt_kwargs=dict(**self.opt_kwargs))
                 max_expect_val_location, max_expect_val_sign, max_expect_val = expectation_values_qtensor_transition.optimize(steps=steps, **kwargs)
                 energy_qtensor_transition = float(expectation_values_qtensor_transition.energy)
+                self.saving_dictionary[f'p={step}']=expectation_values_qtensor_transition.expect_val_dict.copy()
+
                 
                 gamma_old = [float(i) for i in expectation_values_qtensor_transition.gamma]
                 beta_old = [float(i) for i in expectation_values_qtensor_transition.beta]

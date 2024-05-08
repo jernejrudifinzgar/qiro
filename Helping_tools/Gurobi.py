@@ -114,7 +114,7 @@ if __name__ == '__main__':
 
 
     #MIS
-    ns = [60, 80, 100, 120, 140, 160, 180, 200]
+    ns = [20]
     for n in ns:
         list_solutions = []
         #with open(f'./graphs/rudis_100_regular_graphs_nodes_{n}_reg_3.pkl', 'rb') as f:

@@ -3,7 +3,7 @@ import pickle
 import json
 
 reg=3
-ns=[60, 80, 100, 120, 140, 160, 180, 200]
+ns=[20]
 num_graphs=100
 
 for n in ns:

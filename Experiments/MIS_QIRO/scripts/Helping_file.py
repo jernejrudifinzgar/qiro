@@ -122,16 +122,16 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, iteration, 
 
     #ns_graphs_rudi = list(range(60, 220, 20))
 
-    ns_graphs_maxi = [30, 40, 50, 60, 80, 100, 120, 140, 160, 180, 200]
+    ns_graphs_maxi = [20, 30, 40, 50, 60, 80, 100, 120, 140, 160, 180, 200]
 
     # if n in ns_graphs_rudi:
     #     with open(my_path + f'/graphs/rudis_100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
     #         data = pickle.load(file)
     #     G = data[run]
-    if n in ns_graphs_maxi:
-        with open(my_path + f'/graphs/100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
-            data = pickle.load(file)
-        G = data[run]
+    #if n in ns_graphs_maxi:
+    with open(my_path + f'/graphs/100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
+        data = pickle.load(file)
+    G = data[run]
     # else: 
     #     #random.seed()
     #     G = nx.random_regular_graph(reg, n, seed=seed)
@@ -146,9 +146,9 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, iteration, 
     if variation in ['QIRO', 'MMQ']:
         QIRO_qtensor = QIRO_MIS(6, expectation_values_qtensor, variation=variation)
     if variation == 'MINQ':
-        QIRO_qtensor = MINQ_MIS(6, expectation_values_qtensor)
+        QIRO_qtensor = MINQ_MIS(1, expectation_values_qtensor)
     if variation == 'MAXQ':
-        QIRO_qtensor = MAXQ_MIS(6, expectation_values_qtensor)
+        QIRO_qtensor = MAXQ_MIS(1, expectation_values_qtensor)
 
 
 
@@ -158,13 +158,14 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, iteration, 
     required_time = time_end-time_start
 
     solution_qtensor = QIRO_qtensor.solution
-    size_indep_set_qiro_qtensor = np.sum(solution_qtensor > 0)  
+    size_indep_set_qiro_qtensor = np.sum(solution_qtensor >= 0)  
     solution_dict = {}
     solution_dict['size_solution_qtensor'] = size_indep_set_qiro_qtensor
     solution_dict['solution_qtensor'] = solution_qtensor
     solution_dict['energies_qtensor'] = QIRO_qtensor.energies_list
     solution_dict['losses_qtensor'] = QIRO_qtensor.losses_list
     solution_dict['num_nodes_qtensor'] = QIRO_qtensor.num_nodes
+    solution_dict['correlations_qtensor'] = QIRO_qtensor.correlations
     
     size_min_greedy = min_greedy_mis(G)
     size_max_greedy = max_greedy_mis(G)
@@ -372,10 +373,10 @@ def give_hessian(n, p, run, version, initialization, output_results=False, gamma
 
 
 
-def execute_QIRO_multiple_instances_different_n(ns, ps, run, iteration, version, initialization, variation):
-    for n in ns: 
-        for p in ps:
-            execute_QIRO_single_instance(n, p, run, version, initialization, iteration, variation=variation)
+def execute_QIRO_multiple_instances_different_n(n, p, run, iteration, version, initialization, variation):
+    #for n in ns: 
+    #for p in ps:
+    execute_QIRO_single_instance(n, p, run, version, initialization, iteration, variation=variation)
 
 
 
@@ -384,6 +385,8 @@ def execute_QIRO_parallel(ns, ps, runs, version, iterations, initialization='ran
     for variation in variations:
         for run in runs:
             for iteration in iterations:
+                for n in ns: 
+                    for p in ps:
                 #for n in ns:
                 #    my_path = os.path.dirname(__file__)
                 #    my_path = os.path.dirname(my_path)
@@ -391,7 +394,7 @@ def execute_QIRO_parallel(ns, ps, runs, version, iterations, initialization='ran
                     #print(os.path.getmtime(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl"))
                     #print("Date modified: "+ti.ctime(os.path.getmtime(my_path + f"/data/results_run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl")))
                   
-                arguments_list.append((ns, ps, run, iteration, version, initialization, variation))
+                        arguments_list.append((n, p, run, iteration, version, initialization, variation))
     print(len(arguments_list))
     pool = mp.Pool(len(arguments_list))
     pool.starmap(execute_QIRO_multiple_instances_different_n, arguments_list)

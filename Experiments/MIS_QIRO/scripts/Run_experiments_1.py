@@ -22,13 +22,14 @@ if __name__ == '__main__':
 
     reg = 3
     ns = [40, 60, 80, 100, 120, 140, 160]
+    ns = [20, 40, 60]
     seed = 666
     ps= [1, 2, 3]
-    runs=list(range(0, 30, 1))
+    runs=list(range(0, 5, 1))
     initialization = 'interpolation'
     variations=['QIRO', 'MMQ', 'MINQ', 'MAXQ']
-    iterations=list(range(1, 3))
-    version = 2
+    iterations=list(range(0, 1))
+    version = 3
     results_list=[]
 
     #ns = [14]

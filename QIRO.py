@@ -16,6 +16,7 @@ class QIRO():
         self.expectation_values = expectation_values
         self.assignment = []
         self.solution = [] 
+        self.correlations = []
 
     def brute_force(self) -> np.ndarray:
         """Calculate brute force solution."""
@@ -170,6 +171,7 @@ class QIRO_MIS(QIRO):
             self.energies_list.append(self.expectation_values.energy)
             self.losses_list.append(self.expectation_values.losses)
             self.num_nodes.append(self.graph.number_of_nodes())
+            self.correlations.append(self.expectation_values.saving_dictionary)
 
             if self.variation=='MINQ' or self.variation=='MAXQ' or self.variation=='MMQ':
                 for key in self.expectation_values.expect_val_dict.copy().keys():
@@ -668,6 +670,8 @@ class MINQ_MIS(QIRO):
             self.expectation_values.optimize()
             self.energies_list.append(self.expectation_values.energy)
             self.losses_list.append(self.expectation_values.losses)
+            self.correlations.append(self.expectation_values.saving_dictionary)
+
             self.num_nodes.append(self.graph.number_of_nodes())
 
             #plt.plot(self.expectation_values.losses, label = self.problem.graph.number_of_nodes())
@@ -864,6 +868,8 @@ class MAXQ_MIS(QIRO):
             self.energies_list.append(self.expectation_values.energy)
             self.losses_list.append(self.expectation_values.losses)
             self.num_nodes.append(self.graph.number_of_nodes())
+            self.correlations.append(self.expectation_values.saving_dictionary)
+
 
             #plt.plot(self.expectation_values.losses, label = self.problem.graph.number_of_nodes())
             #plt.draw()
