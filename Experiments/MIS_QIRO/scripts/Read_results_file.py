@@ -441,6 +441,8 @@ def plot_MIS_size_per_n(ns, ps, runs, version, iterations, initialization, varia
                             else:
                                 MIS_size_list_n.append(data['size_solution_qtensor']/MIS_size_exact[run])
                                 list_graphs_qtensor.append(run)
+                                if variation =='MAXQ':
+                                    print(MIS_size_list_n)
 
                         except Exception as error:
                             print(error)
@@ -769,15 +771,15 @@ def solve_greedy():
 if __name__ == '__main__':
     my_path = os.path.dirname(__file__)
     my_path = os.path.dirname(my_path)
-    ns = [60, 80, 100, 120]
+    ns = [20, 40, 60] #, 80, 100, 120]
     ps = [1, 2, 3]
-    runs = list(range(0, 30))
+    runs = list(range(0, 5))
     iterations = list(range(0, 1))
     regularity = 3
     versions = [1, 2]
-    version = 2
+    version = 3
     initialization = 'interpolation'
-    variations=['QIRO', 'MINQ', 'MAXQ', 'MMQ']
+    variations=['QIRO', 'MINQ', 'MMQ']
 
     #plot_MIS_size_per_graph(ns, ps, runs, version, regularity)
     #plot_energies(ns, ps, runs, version, regularity, per_node=True)

@@ -758,8 +758,8 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
                     self.loss += E * matrix_entry
                     self.E_nodes [(i, j)] = E
                 else:
-                    if i==j:
-                        self.E_nodes [(i, j)] = 0
+                   if i==j:
+                       self.E_nodes [(i, j)] = 0
 
         
         if self.loss ==0:
@@ -892,6 +892,16 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
                                 max_expect_val_list.append(max_expect_val)
                                 max_expect_val_sign_list.append(max_expect_val_sign)
 
+
+
+
+
+
+
+
+
+
+
                         # elif abs(energy) == max_expect_val:
                         #     if i == j:
                         #         max_expect_val_location_help = ([self.problem.position_translater[i]])
@@ -907,7 +917,7 @@ class QtensorQAOAExpectationValuesQUBO(ExpectationValues):
             max_expect_val = max_expect_val_list[index]
             max_expect_val_location = max_expect_val_location_list[index]
             max_expect_val_sign = max_expect_val_sign_list[index]
-        print(self.variation, self.expect_val_dict)
+        #print(self.variation, self.expect_val_dict)
         return max_expect_val_location, max_expect_val_sign, max_expect_val
 
     def calc_expect_val(self):

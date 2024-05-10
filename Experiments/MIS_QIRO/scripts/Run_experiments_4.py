@@ -9,7 +9,6 @@ import networkx as nx
 import Generating_Problems as Generator
 from Calculating_Expectation_Values import SingleLayerQAOAExpectationValues, QtensorQAOAExpectationValuesMIS
 from QIRO import QIRO_MIS
-import classical_benchmarks.greedy_mis
 from time import time
 import multiprocessing as mp
 from Helping_file import *
@@ -21,7 +20,7 @@ import matplotlib.pyplot as plt
 if __name__ == '__main__':
 
     reg = 3
-    ns = [20, 160]
+    ns = [80, 100]
     seed = 666
     ps= [1, 2, 3]
     runs=list(range(0, 20, 1))
@@ -39,6 +38,7 @@ if __name__ == '__main__':
 
 
     execute_QIRO_parallel(ns, ps, runs, version, initialization=initialization, variations=variations, iterations=iterations)
+    
     
     
     

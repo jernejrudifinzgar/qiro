@@ -212,7 +212,7 @@ class QIRO_MIS(QIRO):
                 #print(self.expectation_values.expect_val_dict)
                 max_expect_val_location = [self.problem.position_translater[idx] for idx in max_expect_val_location]
                 #if max_expect_val==0:
-                #    max_expect_val_sign = -1
+                #    max_expect_val_sign = 1
                 #else:
                 max_expect_val_sign = np.sign(max_expect_val).astype(int)
 
