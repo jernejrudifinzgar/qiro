@@ -4,6 +4,8 @@ import itertools as it
 import copy
 import random 
 import time
+import qubovert as qv
+import networkx as nx
 
 
 class Matrix():
@@ -258,43 +260,118 @@ class MAXCUT(Problem):
         return number_of_cuts
 
     
+# class SetCover(Problem):
+#     """Set cover problem generator."""
+#     def __init__(self, set, subsets):
+#         Problem.__init__(self)
+#         self.var_list = None
+#         self.position_translater=None
+#         self.type = "SetCover"
+
+#         self.set_size = len(set)
+#         self.num_alphas = []
+
+#         for element in set:
+#             num_included_elements = 0
+#             for subset in subsets:
+#                 if element in subset:
+#                     num_included_elements += 1
+#             self.num_alphas.append(num_included_elements)
+
+#         size_matrix = self.set_size
+#         for num_alpha in self.num_alphas:
+#             size_matrix += num_alpha
+
+#         self.matrixClass = Matrix(size_matrix+1)
+#         self.matrix = self.matrixClass.matrix
+
+#         for i in range(self.set_size):
+#             for j in range(i):
+#                 self.matrix[i+1, j+1] = 0
+
+#             for alpha in range(self.num_alphas[i]):
+#                 for j in range(alpha):
+#                     self.matrix[self.num_alphas[i], j] = 0
+#                     self.set_size[self.num_alphas[j]]
+
+#         for i in range(self.set_size):
+#             for j in range(i):
+#                 self.matrix[i+1, j+1] = 0
+
 class SetCover(Problem):
-    """Set cover problem generator."""
-    def __init__(self, set, subsets):
+    """Set cover problem generator"""
+    def __init__(self, set, subsets, A=2, B=1):
         Problem.__init__(self)
         self.var_list = None
         self.position_translater=None
+        self.set = set
+        self.subsets = subsets
+        self.A = A
+        self.B = B
         self.type = "SetCover"
-
         self.set_size = len(set)
-        self.num_alphas = []
+        self.num_sets = len(subsets)
+        self.qv_problem = qv.problems.SetCover(set, subsets, log_trick=False)
+        self.qv_qubo_dic = self.qv_problem.to_qubo(A=self.A, B=self.B)
+        self.qv_quso_dic = self.qv_problem.to_quso(A=self.A, B=self.B)
+        self.num_variables = self.qv_problem.num_binary_variables
+        self.qv_quso_matrix = np.zeros((self.num_variables, self.num_variables))
+        for key, value in self.qv_quso_dic.items():
+            if len(key) == 0:
+                self.constant = value
+            elif len(key)== 1:
+                self.qv_quso_matrix[key[0], key[0]] = value
+            else:
+                self.qv_quso_matrix[key[1], key[0]] = value
+        self.matrix_to_graph()
 
-        for element in set:
-            num_included_elements = 0
-            for subset in subsets:
-                if element in subset:
-                    num_included_elements += 1
-            self.num_alphas.append(num_included_elements)
-
-        size_matrix = self.set_size
-        for num_alpha in self.num_alphas:
-            size_matrix += num_alpha
-
-        self.matrixClass = Matrix(size_matrix+1)
+        self.matrixClass = Matrix(self.num_variables+1)
         self.matrix = self.matrixClass.matrix
+        for key, value in self.qv_quso_dic.items():
+            if len(key) == 0:
+                self.constant = value
+            elif len(key)== 1:
+                self.matrix[key[0]+1, key[0]+1] = value
+            else:
+                self.matrix[key[1]+1, key[0]+1] = value
 
-        for i in range(self.set_size):
-            for j in range(i):
-                self.matrix[i+1, j+1] = 0
+        self.remain_var_list = copy.deepcopy(self.var_list)
+        
+    def matrix_to_graph(self):
+        self.graph = nx.from_numpy_array(self.qv_quso_matrix)
 
-            for alpha in range(self.num_alphas[i]):
-                for j in range(alpha):
-                    self.matrix[self.num_alphas[i], j] = 0
-                    self.set_size[self.num_alphas[j]]
+        # matrix is one dimension larger due to the 0-th row and column, which are set to 0 by convention.
+        # self.matrixClass = Matrix(self.graph.number_of_nodes()+1)
+        # self.matrix = self.matrixClass.matrix
 
-        for i in range(self.set_size):
-            for j in range(i):
-                self.matrix[i+1, j+1] = 0
+        # Transform graph nodes in ordered list of variables. These run from 1 -> n (instead of 0 -> n-1)
+        variable_set = set()
+        for node_shifted in self.graph.nodes:
+            node = node_shifted + 1
+            variable_set.add(node)
+        variables = list(variable_set)
+        variables.sort()
+        self.var_list = copy.deepcopy(variables)
+
+        # Filling the matrix (here the type of optimization problem is encoded, MIS in this case)
+        # we skip the zeroth index, which is set to 0 by convention
+
+        # for variable in variables:
+        #     idx = variables.index(variable) + 1
+        #     self.matrix[idx, idx] = self.graph[variable-1][variable-1]['weight']
+
+        # for correlation in self.graph.edges:
+        #     # the first correlation + 1 comes from the fact that graph nodes run from 0...n-1
+        #     # the fact that we add another +1 to the index is because the variables list runs 1....n 
+        #     # and the indices in the matrix run 0...n
+        #     idx1, idx2 = variables.index(correlation[0] + 1) + 1, variables.index(correlation[1] + 1) + 1
+        #     self.matrix[max(idx1, idx2), min(idx1, idx2)] = self.graph[correlation[0]][correlation[1]]['weight']
+
+        # we define the appropriate position translater
+        self.position_translater = [0] + variables
+
+
+
 
 
         

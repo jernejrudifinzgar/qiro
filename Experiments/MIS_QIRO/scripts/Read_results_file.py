@@ -415,7 +415,7 @@ def plot_MIS_size_per_n(ns, ps, runs, version, iterations, initialization, varia
 
             for run in runs:
                 for iteration in iterations:
-                    with open(my_path + f"/data/results_run_{run}_iteration_{iteration}_n_{n}_p_{1}_initialization_{initialization}_variation_QIRO_version_{version}.pkl", 'rb') as file:
+                    with open(my_path + f"/data/version_{version}/results_run_{run}_iteration_{iteration}_n_{n}_p_{1}_initialization_{initialization}_variation_QIRO_version_{version}.pkl", 'rb') as file:
                         data = pickle.load(file)
                     MIS_size_greedy_list.append(data['size_solution_min_greedy']/MIS_size_exact[run])       
             average = np.average(MIS_size_greedy_list)
@@ -432,7 +432,7 @@ def plot_MIS_size_per_n(ns, ps, runs, version, iterations, initialization, varia
                 for run in runs:
                     for iteration in iterations:
                         try:
-                            with open(my_path + f"/data/results_run_{run}_iteration_{iteration}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl", 'rb') as file:
+                            with open(my_path + f"/data/version_{version}/results_run_{run}_iteration_{iteration}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version}.pkl", 'rb') as file:
                                 data = pickle.load(file)
 
                             if p==4:
@@ -441,8 +441,6 @@ def plot_MIS_size_per_n(ns, ps, runs, version, iterations, initialization, varia
                             else:
                                 MIS_size_list_n.append(data['size_solution_qtensor']/MIS_size_exact[run])
                                 list_graphs_qtensor.append(run)
-                                if variation =='MAXQ':
-                                    print(MIS_size_list_n)
 
                         except Exception as error:
                             print(error)
@@ -476,7 +474,7 @@ def plot_MIS_size_per_n(ns, ps, runs, version, iterations, initialization, varia
         #plt.ylim([0.70, 1.01])
         plt.legend()    
         plt.show()
-        #fig.savefig(my_path + f'/results/MIS_size_per_n_reg_{regularity}_ns_{ns[0]}_{ns[-1]}_p_{p}_same_scale_initialization_{initialization}_runs_{runs[0]}_{runs[-1]}_version_{version}.png')
+        fig.savefig(my_path + f'/results/MIS_size_per_n_reg_{regularity}_ns_{ns[0]}_{ns[-1]}_p_{p}_same_scale_initialization_{initialization}_runs_{runs[0]}_{runs[-1]}_version_{version}.png')
 
 
 #print out solutions:
@@ -771,15 +769,15 @@ def solve_greedy():
 if __name__ == '__main__':
     my_path = os.path.dirname(__file__)
     my_path = os.path.dirname(my_path)
-    ns = [20, 40, 60] #, 80, 100, 120]
+    ns = [20, 40, 60, 80, 100, 120, 140, 160]
     ps = [1, 2, 3]
-    runs = list(range(0, 5))
+    runs = list(range(0, 20))
     iterations = list(range(0, 1))
     regularity = 3
     versions = [1, 2]
     version = 3
     initialization = 'interpolation'
-    variations=['QIRO', 'MINQ', 'MMQ']
+    variations=['QIRO', 'MINQ', 'MMQ', 'MAXQ']
 
     #plot_MIS_size_per_graph(ns, ps, runs, version, regularity)
     #plot_energies(ns, ps, runs, version, regularity, per_node=True)
