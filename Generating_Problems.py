@@ -331,10 +331,11 @@ class SetCover(Problem):
             if len(key) == 0:
                 self.constant = value
             elif len(key)== 1:
-                self.matrix[key[0]+1, key[0]+1] = value
+                self.matrix[key[0]+1, key[0]+1] = -value
             else:
                 self.matrix[key[1]+1, key[0]+1] = value
 
+        #self.matrix = -self.matrix
         self.remain_var_list = copy.deepcopy(self.var_list)
         
     def matrix_to_graph(self):

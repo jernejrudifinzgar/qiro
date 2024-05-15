@@ -979,11 +979,9 @@ class QIRO_SetCover(QIRO):
                     if i in subset:
                         subset.remove(i)
                         
-            for subset in self.problem.subsets:
-                if len(subset)==0:
-                    self.problem.subsets.remove([])
-            ns = copy.deepcopy(self.problem.graph.neighbors(node))
+            self.problem.subsets = [subset for subset in self.problem.subsets if len(subset)!=0]
 
+            ns = copy.deepcopy(self.problem.graph.neighbors(node))
             for n in ns:
                 if n != node:
                     self.problem.graph.remove_node(n)
@@ -1000,7 +998,7 @@ class QIRO_SetCover(QIRO):
         fixing_list.append([variable_index])
         assignments.append(max_expect_val_sign)
         
-        if len(self.problem.set) > 0:
+        if len(self.problem.set) >0 and len(self.problem.subsets)> 0:
         # reinitailize the problem object with the new, updated, graph:
             self.problem = SetCover(self.problem.set, self.problem.subsets, A=self.problem.A, B=self.problem.B)
 
@@ -1063,7 +1061,7 @@ class QIRO_SetCover(QIRO):
         for node in prune_assignments.keys():
             self.graph.remove_node(node)
 
-        if len(self.problem.set) > 0:
+        if len(self.problem.set) > 0 and len(self.problem.subsets)>0:
 
             self.problem = SetCover(self.problem.set, self.problem.subsets, A=self.problem.A, B=self.problem.B)
 
@@ -1126,7 +1124,7 @@ class QIRO_SetCover(QIRO):
                 #random
                 #sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (item[1], np.random.rand()))
                 #not random
-                sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (item[1]))
+                sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (item[1]), reverse = False)
 
             if self.variation=='MMQ':
                 sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (abs(item[1]), np.random.rand()), reverse=True)
@@ -1147,7 +1145,13 @@ class QIRO_SetCover(QIRO):
                 #else:
 
                 #IMPORTANT here I changed the sign because of the encoding of the problem
-                max_expect_val_sign = -1*np.sign(max_expect_val).astype(int)
+                if self.variation in ['QIRO', 'MMQ']:
+                    max_expect_val_sign = np.sign(max_expect_val).astype(int)
+                elif self.variation == 'MINQ':
+                    max_expect_val_sign = +1
+                elif self.variation == 'MAXQ':
+                    max_expect_val_sign = -1
+
 
                 if len(max_expect_val_location) == 1:
                     if self.output_steps:
