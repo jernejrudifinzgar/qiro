@@ -770,7 +770,7 @@ if __name__ == '__main__':
     my_path = os.path.dirname(__file__)
     my_path = os.path.dirname(my_path)
     ns = [20, 40, 60, 80, 100, 120, 140, 160]
-    ps = [1, 2, 3]
+    ps = [3]
     runs = list(range(0, 20))
     iterations = list(range(0, 1))
     regularity = 3
