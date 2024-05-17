@@ -103,8 +103,8 @@ def create_and_solve_multiple_parallel(num_problems = 1):
 
 def main():
     random.seed(100)
-    num_nodes = 2
-    num_problems_per_node = 2
+    num_nodes = 100
+    num_problems_per_node = 100
 
     arguments_list = []
     for i in range(num_nodes):
