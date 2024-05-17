@@ -304,14 +304,15 @@ class SetCover(Problem):
         Problem.__init__(self)
         self.var_list = None
         self.position_translater=None
-        self.set = set
-        self.subsets = subsets
+        self.set = copy.deepcopy(set)
+        self.subsets = copy.deepcopy(subsets)
         self.A = A
         self.B = B
         self.type = "SetCover"
         self.set_size = len(set)
         self.num_sets = len(subsets)
         self.qv_problem = qv.problems.SetCover(set, subsets, log_trick=False)
+        self.M = self.qv_problem.M
         self.qv_qubo_dic = self.qv_problem.to_qubo(A=self.A, B=self.B)
         self.qv_quso_dic = self.qv_problem.to_quso(A=self.A, B=self.B)
         self.num_variables = self.qv_problem.num_binary_variables

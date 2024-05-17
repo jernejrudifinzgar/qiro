@@ -962,23 +962,39 @@ class QIRO_SetCover(QIRO):
         self.losses_list = []
         self.num_nodes = []
         self.variation=variation
+        self.original_subsets = copy.deepcopy(self.problem.subsets)
+        self.subsets_numbering = list(range(len(self.original_subsets)))
         
     def update_single(self, variable_index, max_expect_val_sign):
         """Updates Hamiltonian according to fixed single point correlation"""
         node = variable_index - 1
 
         fixing_list = []
+        fixing_list_original = []
         assignments = []
+        chosen_subset = copy.deepcopy(self.problem.subsets[node])
+        chosen_original_subset = copy.deepcopy(self.original_subsets[node])
+        print('chosen original', chosen_original_subset)
+
         # if the node is included in the used sets we remove its neighbors
         if max_expect_val_sign == 1:
             print('subset', self.problem.subsets[node])
-            for i in copy.deepcopy(self.problem.subsets[node]):
+            del self.problem.subsets[node]
+            del self.original_subsets[node]
+            for i in chosen_subset:
                 self.problem.set.remove(i)
                 #print('remove', i)
                 for subset in self.problem.subsets:
                     if i in subset:
                         subset.remove(i)
-                        
+            
+            for i, subset in enumerate(self.problem.subsets):
+                if len(subset) == 0:
+                    fixing_list.append(subset)
+                    fixing_list_original.append(self.original_subsets[i])
+                    assignments.append(-1)
+                    del self.original_subsets[i]
+                    
             self.problem.subsets = [subset for subset in self.problem.subsets if len(subset)!=0]
 
             ns = copy.deepcopy(self.problem.graph.neighbors(node))
@@ -990,12 +1006,15 @@ class QIRO_SetCover(QIRO):
         
         # in any case we remove the node which was selected by correlations:
         else:
+            print('subset', self.problem.subsets[node])
             del self.problem.subsets[node]
+            del self.original_subsets[node]
 
         self.problem.graph.remove_node(node)
         
 
-        fixing_list.append([variable_index])
+        fixing_list.append(chosen_subset)
+        fixing_list_original.append(chosen_original_subset)
         assignments.append(max_expect_val_sign)
         
         if len(self.problem.set) >0 and len(self.problem.subsets)> 0:
@@ -1009,7 +1028,7 @@ class QIRO_SetCover(QIRO):
         else:
             self.problem.set_size = 0
 
-        return fixing_list, assignments
+        return fixing_list, fixing_list_original, assignments
     
     def update_correlation(self, variables, max_expect_val_sign):
         """Updates Hamiltonian according to fixed two point correlation -- RQAOA (for now)."""
@@ -1085,7 +1104,7 @@ class QIRO_SetCover(QIRO):
         step_nr = 0
        
         while self.problem.set_size > 0:
-            print(self.problem.set_size)
+            #print(self.problem.set_size)
             step_nr += 1
             print(f"Step: {step_nr}. Number of nodes: {self.problem.graph.number_of_nodes()}.")
             fixed_variables = []
@@ -1131,7 +1150,7 @@ class QIRO_SetCover(QIRO):
             
             selectable_nodes = []
             # we iterate until we remove a node
-            print(sorted_correlation_dict)
+            #print(sorted_correlation_dict)
             which_correlation = 0
             while len(fixed_variables) == 0:
                 max_expect_val_location, max_expect_val = sorted_correlation_dict[which_correlation]
@@ -1156,8 +1175,8 @@ class QIRO_SetCover(QIRO):
                 if len(max_expect_val_location) == 1:
                     if self.output_steps:
                         print(f"single var {max_expect_val_location}. Sign: {max_expect_val_sign}")
-                    fixed_variables, assignments = self.update_single(*max_expect_val_location, max_expect_val_sign)
-                    for var, assignment in zip(fixed_variables, assignments):
+                    fixed_variables, fixed_original_variables, assignments = self.update_single(*max_expect_val_location, max_expect_val_sign)
+                    for var, assignment in zip(fixed_original_variables, assignments):
 
                         if var is None:
                             raise Exception("Variable to be eliminated is None. WTF?")
@@ -1192,7 +1211,12 @@ class QIRO_SetCover(QIRO):
                     else:
                         print(f"We have fixed the following variables: {fixed_variables}. Moving on.")
         
-        solution = [var[0] * assig for var, assig, _ in self.fixed_correlations]
-        sorted_solution = sorted(solution, key=lambda x: abs(x))
-        print(f"Solution: {sorted_solution}")
-        self.solution = np.array(sorted_solution).astype(int)
+        solution = [(assig, var) for var, assig, _ in self.fixed_correlations]
+        assignments_list = np.array([assig for var, assig, _ in self.fixed_correlations]).astype(int)
+        #sorted_solution = sorted(solution, key=lambda x: abs(x))
+        print(f"Solution: {solution}")
+        self.solution = solution
+        self.solution_size = np.sum(assignments_list >= 0) 
+        print('Solution size:', self.solution_size)
+        #self.solution = np.array(sorted_solution).astype(int)
+        return self.solution, self.solution_size
