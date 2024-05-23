@@ -40,7 +40,7 @@ def create_and_solve_multiple(i, num_problems = 1, x=None, y=None, p=1):
     my_path = os.path.dirname(my_path)
     random.seed(i*100)
     solution_list = []
-    for i in range(num_problems):
+    for j in range(num_problems):
         x = random.randint(3, 12)
         y_limit = round(80/x)
         y = random.randint(3, y_limit)
@@ -61,7 +61,7 @@ def create_and_solve_multiple(i, num_problems = 1, x=None, y=None, p=1):
 
         solution_list.append({'Set': U, 'Subsets': V, 'shrinking_solution': list(shrinking_solution), 'shrinking_size': int(shrinking_size), 'greedy_solution': list(greedy_solution), 'greedy_size': int(greedy_size)})
         
-        with open(my_path + f"/data/results_node{i}_run_1.json", 'w') as f:
+        with open(my_path + f"/data/results_node{i}_run_2.json", 'w') as f:
             json.dump(solution_list, f)
 
     return solution_list

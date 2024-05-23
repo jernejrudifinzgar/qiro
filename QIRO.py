@@ -1003,30 +1003,63 @@ class QIRO_SetCover(QIRO):
                     self.problem.graph.remove_node(n)
                 #fixing_list.append([n + 1])
                 #assignments.append(-1)
+
+            self.problem.graph.remove_node(node)
+        
+
+            fixing_list.append(chosen_subset)
+            fixing_list_original.append(chosen_original_subset)
+            assignments.append(max_expect_val_sign)
+            
+            if len(self.problem.set) >0 and len(self.problem.subsets)> 0:
+            # reinitailize the problem object with the new, updated, graph:
+                self.problem = SetCover(self.problem.set, self.problem.subsets, A=self.problem.A, B=self.problem.B)
+
+                if self.expectation_values.type == 'QtensorQAOAExpectationValuesQUBO':
+                    self.expectation_values = QtensorQAOAExpectationValuesQUBO(self.problem, self.expectation_values.p, variation=self.variation, initialization=self.expectation_values.initialization, pbar=self.expectation_values.pbar)
+                elif self.expectation_values.type == 'SingleLayerQAOAExpectationValue':
+                    self.expectation_values = SingleLayerQAOAExpectationValues(self.problem)
+            else:
+                self.problem.set_size = 0
         
         # in any case we remove the node which was selected by correlations:
         else:
-            print('subset', self.problem.subsets[node])
-            del self.problem.subsets[node]
-            del self.original_subsets[node]
 
-        self.problem.graph.remove_node(node)
-        
+            print('exclude')
+            checker = True
+            for i in chosen_subset:
+                counter = 0
+                for subset in self.problem.subsets:
+                    if i in subset:
+                        counter +=1
+                if counter == 1:
+                    checker = False
+                    break
+            if checker:
+                print('subset', self.problem.subsets[node])
+                print('remaining subsets', self.problem.subsets)
+                del self.problem.subsets[node]
+                del self.original_subsets[node]
 
-        fixing_list.append(chosen_subset)
-        fixing_list_original.append(chosen_original_subset)
-        assignments.append(max_expect_val_sign)
-        
-        if len(self.problem.set) >0 and len(self.problem.subsets)> 0:
-        # reinitailize the problem object with the new, updated, graph:
-            self.problem = SetCover(self.problem.set, self.problem.subsets, A=self.problem.A, B=self.problem.B)
+                self.problem.graph.remove_node(node)
+                
 
-            if self.expectation_values.type == 'QtensorQAOAExpectationValuesQUBO':
-                self.expectation_values = QtensorQAOAExpectationValuesQUBO(self.problem, self.expectation_values.p, variation=self.variation, initialization=self.expectation_values.initialization, pbar=self.expectation_values.pbar)
-            elif self.expectation_values.type == 'SingleLayerQAOAExpectationValue':
-                self.expectation_values = SingleLayerQAOAExpectationValues(self.problem)
-        else:
-            self.problem.set_size = 0
+                fixing_list.append(chosen_subset)
+                fixing_list_original.append(chosen_original_subset)
+                assignments.append(max_expect_val_sign)
+                
+                if len(self.problem.set) >0 and len(self.problem.subsets)> 0:
+                # reinitailize the problem object with the new, updated, graph:
+                    self.problem = SetCover(self.problem.set, self.problem.subsets, A=self.problem.A, B=self.problem.B)
+
+                    if self.expectation_values.type == 'QtensorQAOAExpectationValuesQUBO':
+                        self.expectation_values = QtensorQAOAExpectationValuesQUBO(self.problem, self.expectation_values.p, variation=self.variation, initialization=self.expectation_values.initialization, pbar=self.expectation_values.pbar)
+                    elif self.expectation_values.type == 'SingleLayerQAOAExpectationValue':
+                        self.expectation_values = SingleLayerQAOAExpectationValues(self.problem)
+                else:
+                    self.problem.set_size = 0
+            else:
+                pass
 
         return fixing_list, fixing_list_original, assignments
     

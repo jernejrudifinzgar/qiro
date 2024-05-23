@@ -60,7 +60,7 @@ def solve_max_cut(G, id=None, timeout=1, nthr=1, verbose=True, return_optimality
         return int(m._cur_obj) if not return_optimality else [obj, 0]
     
 def solve_MIS(G):
-    """Function to solve Maximum Cut problem using Gurobi"""
+    """Function to solve Maximum Independent Set problem using Gurobi"""
     size = G.number_of_nodes()
     matrix = np.zeros((size, size))
 

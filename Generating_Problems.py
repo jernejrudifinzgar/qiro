@@ -338,6 +338,28 @@ class SetCover(Problem):
 
         #self.matrix = -self.matrix
         self.remain_var_list = copy.deepcopy(self.var_list)
+    
+    def solve_bruteforce(self):
+        return self.qv_problem.solve_bruteforce()
+    
+    def solution_check(self, solution_to_check):
+        result = False
+        set_copy = copy.deepcopy(self.set)
+        for j in solution_to_check:
+            if j[0]==1:
+                for value in j[1]:
+                    try:
+                        set_copy.remove(value)
+                    except:
+                        pass
+        
+        if len(set_copy)==0:
+            result = True 
+        return result, len(set_copy)
+
+        
+
+
         
     def matrix_to_graph(self):
         self.graph = nx.from_numpy_array(self.qv_quso_matrix)
