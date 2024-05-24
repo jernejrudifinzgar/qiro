@@ -966,7 +966,6 @@ class QIRO_SetCover(QIRO):
         self.subsets_numbering = list(range(len(self.original_subsets)))
 
     def check_individuals(self):
-        
         set = copy.deepcopy(self.problem.set)
         subsets = copy.deepcopy(self.problem.subsets)
         original_subsets = copy.deepcopy(self.original_subsets)
@@ -987,6 +986,7 @@ class QIRO_SetCover(QIRO):
       
             if counter == 1:
                 self.problem.subsets.remove(subsets_list[0])
+                del self.original_subsets[index_list[0]]
                 for element in subsets_list[0]:
                     try:
                         self.problem.set.remove(element)
@@ -998,6 +998,14 @@ class QIRO_SetCover(QIRO):
                 assignments.append(+1)
                 fixing_list.append(subsets_list[0])
                 fixing_list_original.append(original_subsets[self.problem.position_translater[index_list[0]]])
+                    
+        for i, subset in reversed(list(enumerate(self.problem.subsets))):
+            if len(subset) == 0:
+                fixing_list.append(subset)
+                print('original', self.original_subsets)
+                fixing_list_original.append(self.original_subsets[i])
+                assignments.append(-1)
+                del self.original_subsets[i]
 
         print('individual is working', fixing_list_original)
         print(self.problem.set)
@@ -1025,6 +1033,7 @@ class QIRO_SetCover(QIRO):
         print('chosen original', chosen_original_subset)
 
         # if the node is included in the used sets we remove its neighbors
+        print('b', self.problem.subsets)
         if max_expect_val_sign == 1:
             print('subset', self.problem.subsets[node])
             del self.problem.subsets[node]
@@ -1035,10 +1044,11 @@ class QIRO_SetCover(QIRO):
                 for subset in self.problem.subsets:
                     if i in subset:
                         subset.remove(i)
-            
-            for i, subset in enumerate(self.problem.subsets):
+            print('a', self.problem.subsets)
+            for i, subset in reversed(list(enumerate(self.problem.subsets))):
                 if len(subset) == 0:
                     fixing_list.append(subset)
+                    print('original', self.original_subsets)
                     fixing_list_original.append(self.original_subsets[i])
                     assignments.append(-1)
                     del self.original_subsets[i]
@@ -1196,9 +1206,6 @@ class QIRO_SetCover(QIRO):
                 if var is None:
                     raise Exception("Variable to be eliminated is None. WTF?")
                 self.fixed_correlations.append([var, int(assignment), None])
-            
-           
-           
            
             if self.problem.set_size >0:
 

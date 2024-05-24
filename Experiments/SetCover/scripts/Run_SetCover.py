@@ -112,6 +112,19 @@ def main():
     pool = mp.Pool(len(arguments_list))
     pool.starmap(create_and_solve_multiple, arguments_list)
 
+def main_2():
+    U = [0, 1, 2, 3, 4, 5]
+    V = [[0, 1, 4], [1, 2, 4, 5], [2, 3, 5], [0, 1], [1, 2], [2, 3], [4], [5]]
+    variation = 'MMQ'
+    problem = Generator.SetCover(U, V, A=5, B=1)
+    print('number of qubits:', problem.num_variables)
+    expectation_value_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p=3, variation=variation, opt=torch.optim.RMSprop, initialization = 'interpolation', opt_kwargs=dict(lr=0.001))
+    QIRO_qtensor = QIRO_SetCover(1, expectation_value_qtensor, variation=variation)
+    shrinking_solution, shrinking_size = QIRO_qtensor.execute()
+
+    valid, rest_size = problem.solution_check(list(shrinking_solution))
+    #solution_qtensor = QIRO_qtensor.solution
+    print(valid, rest_size)
 
 
 if __name__ == '__main__':
@@ -120,7 +133,7 @@ if __name__ == '__main__':
 
     # for i in range(num_problems):
     #     print('\nProblem number', i, '\nShrinking size:', solution[i]['shrinking_size'], '\nGreedy size:', solution[i]['greedy_size'])
-    main()
+    main_2()
 
 
 
