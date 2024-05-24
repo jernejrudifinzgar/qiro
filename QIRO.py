@@ -964,6 +964,54 @@ class QIRO_SetCover(QIRO):
         self.variation=variation
         self.original_subsets = copy.deepcopy(self.problem.subsets)
         self.subsets_numbering = list(range(len(self.original_subsets)))
+
+    def check_individuals(self):
+        
+        set = copy.deepcopy(self.problem.set)
+        subsets = copy.deepcopy(self.problem.subsets)
+        original_subsets = copy.deepcopy(self.original_subsets)
+
+        fixing_list = []
+        fixing_list_original = []
+        assignments = []
+
+        for i in copy.deepcopy(set):
+            counter = 0
+            subsets_list = []
+            index_list = []
+            for idx, subset in enumerate(subsets):
+                if i in subset:
+                    counter +=1
+                    subsets_list.append(subset)
+                    index_list.append(idx)
+      
+            if counter == 1:
+                self.problem.subsets.remove(subsets_list[0])
+                for element in subsets_list[0]:
+                    try:
+                        self.problem.set.remove(element)
+                    except:
+                        print(element, 'not in set anymore')
+                    for subset in self.problem.subsets:
+                        if element in subset:
+                            subset.remove(element)
+                assignments.append(+1)
+                fixing_list.append(subsets_list[0])
+                fixing_list_original.append(original_subsets[self.problem.position_translater[index_list[0]]])
+
+        print('individual is working', fixing_list_original)
+        print(self.problem.set)
+
+        if len(self.problem.set) >0 and len(self.problem.subsets)> 0:
+            self.problem = SetCover(self.problem.set, self.problem.subsets, A=self.problem.A, B=self.problem.B)
+            if self.expectation_values.type == 'QtensorQAOAExpectationValuesQUBO':
+                self.expectation_values = QtensorQAOAExpectationValuesQUBO(self.problem, self.expectation_values.p, variation=self.variation, initialization=self.expectation_values.initialization, pbar=self.expectation_values.pbar)
+            elif self.expectation_values.type == 'SingleLayerQAOAExpectationValue':
+                self.expectation_values = SingleLayerQAOAExpectationValues(self.problem)
+        else:
+                self.problem.set_size = 0
+        return fixing_list, fixing_list_original, assignments
+
         
     def update_single(self, variable_index, max_expect_val_sign):
         """Updates Hamiltonian according to fixed single point correlation"""
@@ -1024,8 +1072,6 @@ class QIRO_SetCover(QIRO):
         
         # in any case we remove the node which was selected by correlations:
         else:
-
-            print('exclude')
             checker = True
             for i in chosen_subset:
                 counter = 0
@@ -1036,6 +1082,7 @@ class QIRO_SetCover(QIRO):
                     checker = False
                     break
             if checker:
+                print('exclude')
                 print('subset', self.problem.subsets[node])
                 print('remaining subsets', self.problem.subsets)
                 del self.problem.subsets[node]
@@ -1142,107 +1189,121 @@ class QIRO_SetCover(QIRO):
             print(f"Step: {step_nr}. Number of nodes: {self.problem.graph.number_of_nodes()}.")
             fixed_variables = []
             
-            self.expectation_values.optimize()
+            #for check if individual elements are only in one single subset:
+            fixed_variables, fixed_original_variables, assignments = self.check_individuals()
+            for var, assignment in zip(fixed_original_variables, assignments):
 
-            self.energies_list.append(self.expectation_values.energy)
-            self.losses_list.append(self.expectation_values.losses)
-            self.num_nodes.append(self.graph.number_of_nodes())
-            self.correlations.append(self.expectation_values.saving_dictionary)
-
-            if self.variation=='MINQ' or self.variation=='MAXQ' or self.variation=='MMQ':
-                for key in self.expectation_values.expect_val_dict.copy().keys():
-                    if len(key)==2:
-                        del self.expectation_values.expect_val_dict[key]
-                    elif len(key)==1 and list(key)[0] not in list(range(self.problem.num_sets+1)):
-                        del self.expectation_values.expect_val_dict[key]
-
-
-
-            #plt.plot(self.expectation_values.losses, label = self.problem.graph.number_of_nodes())
-            #plt.draw()
-         
-            # sorts correlations in decreasing order. Ties are broken randomly.
-            if self.variation=='QIRO':
-                #sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (abs(item[1]), np.random.rand()), reverse=True)
-                sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (abs(item[1]), np.random.rand()), reverse=True)
-
-            if self.variation=='MINQ':
-                #random order of same values
-                #sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (item[1], np.random.rand()), reverse=True)
-                #not random order of same values:
-                sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (item[1]), reverse=True)
-
-            if self.variation=='MAXQ':
-                #random
-                #sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (item[1], np.random.rand()))
-                #not random
-                sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (item[1]), reverse = False)
-
-            if self.variation=='MMQ':
-                sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (abs(item[1]), np.random.rand()), reverse=True)
+                if var is None:
+                    raise Exception("Variable to be eliminated is None. WTF?")
+                self.fixed_correlations.append([var, int(assignment), None])
             
-            selectable_nodes = []
-            # we iterate until we remove a node
-            #print(sorted_correlation_dict)
-            which_correlation = 0
-            while len(fixed_variables) == 0:
-                max_expect_val_location, max_expect_val = sorted_correlation_dict[which_correlation]
+           
+           
+           
+            if self.problem.set_size >0:
+
+                self.expectation_values.optimize()
+
+                self.energies_list.append(self.expectation_values.energy)
+                self.losses_list.append(self.expectation_values.losses)
+                self.num_nodes.append(self.graph.number_of_nodes())
+                self.correlations.append(self.expectation_values.saving_dictionary)
+
+                if self.variation=='MINQ' or self.variation=='MAXQ' or self.variation=='MMQ':
+                    for key in self.expectation_values.expect_val_dict.copy().keys():
+                        if len(key)==2:
+                            del self.expectation_values.expect_val_dict[key]
+                        elif len(key)==1 and list(key)[0] not in list(range(self.problem.num_sets+1)):
+                            del self.expectation_values.expect_val_dict[key]
+
+
+
+                #plt.plot(self.expectation_values.losses, label = self.problem.graph.number_of_nodes())
+                #plt.draw()
+            
+                # sorts correlations in decreasing order. Ties are broken randomly.
+                if self.variation=='QIRO':
+                    #sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (abs(item[1]), np.random.rand()), reverse=True)
+                    sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (abs(item[1]), np.random.rand()), reverse=True)
+
+                if self.variation=='MINQ':
+                    #random order of same values
+                    #sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (item[1], np.random.rand()), reverse=True)
+                    #not random order of same values:
+                    sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (item[1]), reverse=True)
+
+                if self.variation=='MAXQ':
+                    #random
+                    #sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (item[1], np.random.rand()))
+                    #not random
+                    sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (item[1]), reverse = False)
+
+                if self.variation=='MMQ':
+                    sorted_correlation_dict = sorted(self.expectation_values.expect_val_dict.items(), key=lambda item: (abs(item[1]), np.random.rand()), reverse=True)
                 
-                #print('translater', self.problem.position_translater)
-                #print('location', max_expect_val_location)
-                #print(self.expectation_values.expect_val_dict)
-                max_expect_val_location = [self.problem.position_translater[idx] for idx in max_expect_val_location]
-                #if max_expect_val==0:
-                #    max_expect_val_sign = 1
-                #else:
+                selectable_nodes = []
+                # we iterate until we remove a node
+                #print(sorted_correlation_dict)
+                which_correlation = 0
+                while len(fixed_variables) == 0:
+                    print(len(sorted_correlation_dict))
+                    max_expect_val_location, max_expect_val = sorted_correlation_dict[which_correlation]
+                    
+                    #print('translater', self.problem.position_translater)
+                    #print('location', max_expect_val_location)
+                    #print(self.expectation_values.expect_val_dict)
+                    max_expect_val_location = [self.problem.position_translater[idx] for idx in max_expect_val_location]
+                    #if max_expect_val==0:
+                    #    max_expect_val_sign = 1
+                    #else:
 
-                #IMPORTANT here I changed the sign because of the encoding of the problem
-                if self.variation in ['QIRO', 'MMQ']:
-                    max_expect_val_sign = np.sign(max_expect_val).astype(int)
-                elif self.variation == 'MINQ':
-                    max_expect_val_sign = +1
-                elif self.variation == 'MAXQ':
-                    max_expect_val_sign = -1
+                    #IMPORTANT here I changed the sign because of the encoding of the problem
+                    if self.variation in ['QIRO', 'MMQ']:
+                        max_expect_val_sign = np.sign(max_expect_val).astype(int)
+                    elif self.variation == 'MINQ':
+                        max_expect_val_sign = +1
+                    elif self.variation == 'MAXQ':
+                        max_expect_val_sign = -1
 
 
-                if len(max_expect_val_location) == 1:
-                    if self.output_steps:
-                        print(f"single var {max_expect_val_location}. Sign: {max_expect_val_sign}")
-                    fixed_variables, fixed_original_variables, assignments = self.update_single(*max_expect_val_location, max_expect_val_sign)
-                    for var, assignment in zip(fixed_original_variables, assignments):
+                    if len(max_expect_val_location) == 1:
+                        if self.output_steps:
+                            print(f"single var {max_expect_val_location}. Sign: {max_expect_val_sign}")
+                        fixed_variables, fixed_original_variables, assignments = self.update_single(*max_expect_val_location, max_expect_val_sign)
+                        for var, assignment in zip(fixed_original_variables, assignments):
 
-                        if var is None:
-                            raise Exception("Variable to be eliminated is None. WTF?")
-                        self.fixed_correlations.append([var, int(assignment), max_expect_val])
-                else:
-                    if self.output_steps:
-                        print(f'Correlation {max_expect_val_location}. Sign: {max_expect_val_sign}.')
-                    fixed_variables, assignments = self.update_correlation(max_expect_val_location, max_expect_val_sign)
-                    for var, assignment in zip(fixed_variables, assignments):
-                        if var is None:
-                            raise Exception("Variable to be eliminated is None. WTF?")
-                        
-                        self.fixed_correlations.append([var, int(assignment), max_expect_val])
-
-                # perform pruning.
-                pruned_variables, pruned_assignments = self.prune_graph()
-                if self.output_steps:
-                    print(f"Pruned {len(pruned_variables)} variables.")
-                
-                for var, assignment in zip(pruned_variables, pruned_assignments):
-                    if var is None:
-                        raise Exception("Variable to be eliminated is None. WTF?")
-                    self.fixed_correlations.append([var, assignment, None])
-                
-                fixed_variables += pruned_variables
-                which_correlation += 1
-                
-                if self.output_steps:
-                    if len(fixed_variables) == 0:
-                        print("No variables could be fixed.")
-                        print(f"Attempting with the {which_correlation}. largest correlation.")
+                            if var is None:
+                                raise Exception("Variable to be eliminated is None. WTF?")
+                            self.fixed_correlations.append([var, int(assignment), max_expect_val])
                     else:
-                        print(f"We have fixed the following variables: {fixed_variables}. Moving on.")
+                        if self.output_steps:
+                            print(f'Correlation {max_expect_val_location}. Sign: {max_expect_val_sign}.')
+                        fixed_variables, assignments = self.update_correlation(max_expect_val_location, max_expect_val_sign)
+                        for var, assignment in zip(fixed_variables, assignments):
+                            if var is None:
+                                raise Exception("Variable to be eliminated is None. WTF?")
+                            
+                            self.fixed_correlations.append([var, int(assignment), max_expect_val])
+
+                    # perform pruning.
+                    pruned_variables, pruned_assignments = self.prune_graph()
+                    if self.output_steps:
+                        print(f"Pruned {len(pruned_variables)} variables.")
+                    
+                    for var, assignment in zip(pruned_variables, pruned_assignments):
+                        if var is None:
+                            raise Exception("Variable to be eliminated is None. WTF?")
+                        self.fixed_correlations.append([var, assignment, None])
+                    
+                    fixed_variables += pruned_variables
+                    which_correlation += 1
+                    
+                    if self.output_steps:
+                        if len(fixed_variables) == 0:
+                            print("No variables could be fixed.")
+                            print(f"Attempting with the {which_correlation}. largest correlation.")
+                        else:
+                            print(f"We have fixed the following variables: {fixed_variables}. Moving on.")
         
         solution = [(assig, var) for var, assig, _ in self.fixed_correlations]
         assignments_list = np.array([assig for var, assig, _ in self.fixed_correlations]).astype(int)
