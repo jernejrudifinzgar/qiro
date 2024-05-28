@@ -986,6 +986,7 @@ class QIRO_SetCover(QIRO):
       
             if counter == 1:
                 self.problem.subsets.remove(subsets_list[0])
+                fixing_list_original.append(original_subsets[index_list[0]])
                 del self.original_subsets[index_list[0]]
                 for element in subsets_list[0]:
                     try:
@@ -997,7 +998,6 @@ class QIRO_SetCover(QIRO):
                             subset.remove(element)
                 assignments.append(+1)
                 fixing_list.append(subsets_list[0])
-                fixing_list_original.append(original_subsets[self.problem.position_translater[index_list[0]]])
                     
         for i, subset in reversed(list(enumerate(self.problem.subsets))):
             if len(subset) == 0:
@@ -1200,16 +1200,16 @@ class QIRO_SetCover(QIRO):
             fixed_variables = []
             
             #for check if individual elements are only in one single subset:
-            fixed_variables, fixed_original_variables, assignments = self.check_individuals()
-            for var, assignment in zip(fixed_original_variables, assignments):
+            # fixed_variables, fixed_original_variables, assignments = self.check_individuals()
+            # for var, assignment in zip(fixed_original_variables, assignments):
 
-                if var is None:
-                    raise Exception("Variable to be eliminated is None. WTF?")
-                self.fixed_correlations.append([var, int(assignment), None])
+            #     if var is None:
+            #         raise Exception("Variable to be eliminated is None. WTF?")
+            #     self.fixed_correlations.append([var, int(assignment), None])
            
             if self.problem.set_size >0:
 
-                self.expectation_values.optimize()
+                self.expectation_values.optimize(steps=100)
 
                 self.energies_list.append(self.expectation_values.energy)
                 self.losses_list.append(self.expectation_values.losses)

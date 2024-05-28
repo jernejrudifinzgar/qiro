@@ -114,9 +114,9 @@ def main():
 
 def main_2():
     U = [0, 1, 2, 3, 4, 5]
-    V = [[0, 1, 4], [1, 2, 4, 5], [2, 3, 5], [0, 1], [1, 2], [2, 3], [4], [5]]
+    V = [[0, 1, 4], [1, 2, 4, 5], [2, 3, 5], [4, 5], [4], [5]]
     variation = 'MMQ'
-    problem = Generator.SetCover(U, V, A=5, B=1)
+    problem = Generator.SetCover(U, V, A=2, B=1)
     print('number of qubits:', problem.num_variables)
     expectation_value_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p=3, variation=variation, opt=torch.optim.RMSprop, initialization = 'interpolation', opt_kwargs=dict(lr=0.001))
     QIRO_qtensor = QIRO_SetCover(1, expectation_value_qtensor, variation=variation)
@@ -126,6 +126,13 @@ def main_2():
     #solution_qtensor = QIRO_qtensor.solution
     print(valid, rest_size)
 
+    losses = QIRO_qtensor.losses_list
+    energies = QIRO_qtensor.energies_list
+    dictionary = {'losses': losses, 'energies': energies}
+    my_path = os.path.dirname(__file__)
+    my_path = os.path.dirname(my_path)
+    with open(my_path + f"/data/example_graph.json", 'w') as f:
+        json.dump(dictionary, f)
 
 if __name__ == '__main__':
     # num_problems = 5
@@ -133,7 +140,7 @@ if __name__ == '__main__':
 
     # for i in range(num_problems):
     #     print('\nProblem number', i, '\nShrinking size:', solution[i]['shrinking_size'], '\nGreedy size:', solution[i]['greedy_size'])
-    main_2()
+    QIRO_qtensor = main_2()
 
 
 
