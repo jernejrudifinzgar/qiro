@@ -140,7 +140,7 @@ if __name__ == '__main__':
 
     # for i in range(num_problems):
     #     print('\nProblem number', i, '\nShrinking size:', solution[i]['shrinking_size'], '\nGreedy size:', solution[i]['greedy_size'])
-    QIRO_qtensor = main_2()
+    main_2()
 
 
 
