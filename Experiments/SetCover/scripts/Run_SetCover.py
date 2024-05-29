@@ -52,7 +52,7 @@ def create_and_solve_multiple(i, num_problems = 1, x=None, y=None, p=1):
             print(x, y)
             if num_qubits<400:
                 qubit_requirement = True
-        variation = 'MMQ'
+        variation = 'MINQ'
         expectation_value_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p=p, variation=variation, opt=torch.optim.RMSprop, initialization = 'interpolation', opt_kwargs=dict(lr=0.001))
         MMQ = QIRO_SetCover(1, expectation_value_qtensor, variation=variation)
         shrinking_solution, shrinking_size = MMQ.execute()     
@@ -140,7 +140,7 @@ if __name__ == '__main__':
 
     # for i in range(num_problems):
     #     print('\nProblem number', i, '\nShrinking size:', solution[i]['shrinking_size'], '\nGreedy size:', solution[i]['greedy_size'])
-    main_2()
+    main()
 
 
 
