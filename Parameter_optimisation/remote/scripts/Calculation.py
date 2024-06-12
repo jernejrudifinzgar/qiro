@@ -141,6 +141,67 @@ def transition_states(problem, ps, opt, **kwargs):
     
     return dictionary_transition_states
 
+def interpolation(problem, ps, opt, **kwargs):
+    if opt=='SGD':
+        optimizer=torch.optim.SGD
+    elif opt=='RMSprop':
+        optimizer=torch.optim.RMSprop
+    elif opt=='Adam':
+        optimizer=torch.optim.Adam
+    dictionary_transition_states={}
+    for p in ps: 
+        dictionary_transition_states_sub={}
+
+        if p==1:
+            expectation_values_single_transition = SingleLayerQAOAExpectationValues(problem)
+            expectation_values_single_transition.optimize()
+            gamma = [expectation_values_single_transition.gamma]
+            beta = [expectation_values_single_transition.beta]
+            energy_single_transition = expectation_values_single_transition.energy
+            dictionary_transition_states_sub['energy'] = energy_single_transition
+            dictionary_transition_states_sub['correlations'] = expectation_values_single_transition.expect_val_dict.copy()
+
+        else:
+
+            expectation_value_single = SingleLayerQAOAExpectationValues(problem)
+            expectation_value_single.optimize()
+            gamma_old = [expectation_value_single.gamma/np.pi]
+            beta_old = [expectation_value_single.beta/np.pi]
+
+            for step in range(2, p+1):
+                gamma_new = []
+                beta_new = []
+                for i in range(step):
+                    if i==0:
+                        gamma_new.append((step-1-(i+1)+1)/(step-1)*gamma_old[i])
+                        beta_new.append((step-1-(i+1)+1)/(step-1)*beta_old[i])
+                    elif i!=0 and i!=(step-1):
+                        gamma_new.append((i+1-1)/(step-1)*gamma_old[i-1]+(step-1-(i+1)+1)/(step-1)*gamma_old[i])
+                        beta_new.append((i+1-1)/(step-1)*beta_old[i-1]+(step-1-(i+1)+1)/(step-1)*beta_old[i])
+                    elif i==(step-1):
+                        gamma_new.append((i+1-1)/(step-1)*gamma_old[i-1])
+                        beta_new.append((i+1-1)/(step-1)*beta_old[i-1])
+                
+                expectation_values_qtensor_transition = QtensorQAOAExpectationValuesMAXCUT(problem, step, gamma=gamma_new, beta=beta_new, pbar=True)
+                expectation_values_qtensor_transition.optimize(Opt=optimizer, **kwargs)
+                energy_qtensor_transition = float(expectation_values_qtensor_transition.energy)
+
+                
+                gamma_old = [float(i) for i in expectation_values_qtensor_transition.gamma]
+                beta_old = [float(i) for i in expectation_values_qtensor_transition.beta]
+            
+            energy_min = float(expectation_values_qtensor_transition.energy)
+            correlations_min = expectation_values_qtensor_transition.expect_val_dict.copy()
+            losses_min = expectation_values_qtensor_transition.losses.copy()
+
+            dictionary_transition_states_sub['energy'] = energy_min
+            dictionary_transition_states_sub['correlations'] = correlations_min.copy()
+            dictionary_transition_states_sub['losses'] = losses_min.copy()
+
+        dictionary_transition_states[f'p={p}'] = dictionary_transition_states_sub
+    print('interpolation complete')
+    return dictionary_transition_states
+
 
 def fixed_angles(problem, regularity, ps):
     with open('angles_regular_graphs.json', 'r') as file:
@@ -213,6 +274,11 @@ def individual_MAXCUT_QAOA_optimization_single_initialization(G_num, n, regulari
         pickle.dump(dictionary_transition_states, open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_initialization_{initialization}_opt_{opt}_lr_{learning_rate}.pkl", 'wb'))
         return dictionary_transition_states.copy()
     
+    elif initialization == 'interpolation':
+        dictionary_transition_states = interpolation(problem, ps, opt, lr=learning_rate)
+        pickle.dump(dictionary_transition_states, open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_initialization_{initialization}_opt_{opt}_lr_{learning_rate}.pkl", 'wb'))
+        return dictionary_transition_states.copy()
+    
     elif initialization =='fixed_angles':
         dictionary_fixed_angles = fixed_angles(problem, regularity, ps)
         pickle.dump(dictionary_fixed_angles, open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_initialization_{initialization}.pkl", 'wb'))
@@ -230,25 +296,27 @@ def individual_MAXCUT_QAOA_optimization_all_initializations(G_num, n, regularity
     
     dictionary={}
     ps = list(range(1, max_p+1))
-    with open(f'rudis_100_regular_graphs_nodes_{n}_reg_{regularity}.pkl', 'rb') as file:
+    with open(f'100_regular_graphs_nodes_{n}_reg_{regularity}.pkl', 'rb') as file:
         data = pickle.load(file)
 
     G = data[G_num]
     problem = Generator.MAXCUT(G)
     dictionary_single = analytic(problem)
+    dictionary_interpolation = interpolation(problem, ps, opt, lr=learning_rate)
     dictionary_random = random_init(problem, ps, opt, lr=learning_rate)
     dictionary_transition_states = transition_states(problem, ps, opt, lr=learning_rate)
     dictionary_fixed_angles = fixed_angles(problem, regularity, ps)
     dictionary_fixed_angles_optimization = fixed_angles_optimization(problem, regularity, ps, opt, lr=learning_rate)      
     dictionary['graph']=G_num
     dictionary['analytic_single_p']=dictionary_single
+    dictionary['interpolation']=dictionary_interpolation
     dictionary['transition_states']=dictionary_transition_states
     dictionary['random_init']=dictionary_random
     dictionary['fixed_angles']=dictionary_fixed_angles
     dictionary['fixed_angles_optimization']=dictionary_fixed_angles_optimization
 
     #print(dictionary)
-    pickle.dump(dictionary, open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_opt_{opt}_lr_{learning_rate}.pkl", 'wb'))
+    pickle.dump(dictionary, open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_opt_{opt}_lr_{learning_rate}_v2.pkl", 'wb'))
     print(f'Sucessfully saved nodes_{n}_reg_{regularity}_graph_{G_num}_opt_{opt}_lr_{learning_rate}.pkl"')
 
 

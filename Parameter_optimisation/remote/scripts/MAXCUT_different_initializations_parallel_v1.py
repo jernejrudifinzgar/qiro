@@ -93,8 +93,8 @@ def MAXCUT_QAOA_optimization_individual_initializations(graphs, ns, regularity, 
 
 
 def MAXCUT_QAOA_optimization_all_initializations(graphs, ns, regularity, max_p=3, parallel=True):
-    optimizers_list = ['SGD']#['SGD', 'RMSprop', 'Adam']
-    learning_rates_SGD = [0.0001]#, 0.0005, 0.001]
+    optimizers_list = ['SGD', 'RMSprop', 'Adam']
+    learning_rates_SGD = [0.0001, 0.0005, 0.001]
     learning_rates_RMSprop = [0.001, 0.005, 0.01, 0.05]
     learning_rates_Adam = [0.001, 0.005, 0.01, 0.05]
    
@@ -142,9 +142,9 @@ def MAXCUT_QAOA_optimization_all_initializations(graphs, ns, regularity, max_p=3
 
 if __name__ == '__main__':
     graphs=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    ns=[200]#, 100, 150, 200]
+    ns=[100]#, 100, 150, 200]
     regularity=3
-    #MAXCUT_QAOA_optimization_all_initializations(graphs, ns, regularity, parallel=False)
-    MAXCUT_QAOA_optimization_individual_initializations(graphs, ns, regularity, max_p=4, parallel=False)
+    MAXCUT_QAOA_optimization_all_initializations(graphs, ns, regularity, parallel=True)
+    #MAXCUT_QAOA_optimization_individual_initializations(graphs, ns, regularity, max_p=4, parallel=False)
 
 
