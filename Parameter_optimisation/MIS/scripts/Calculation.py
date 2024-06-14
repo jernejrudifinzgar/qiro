@@ -234,13 +234,13 @@ def individual_MIS_QAOA_optimization_all_initializations(G_num, n, regularity, m
 
     G = data[G_num]
     problem = Generator.MIS(G)
-    #dictionary_single = analytic(problem)
-    #dictionary_random = random_init(problem, ps, opt, lr=learning_rate)
-    #dictionary_transition_states = transition_states(problem, ps, opt, lr=learning_rate)
+    dictionary_single = analytic(problem)
+    dictionary_random = random_init(problem, ps, opt, lr=learning_rate)
+    dictionary_transition_states = transition_states(problem, ps, opt, lr=learning_rate)
     dictionary_interpolation = interpolation(problem, ps, opt, lr=learning_rate)
 
     try:
-        with open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_opt_{opt}_lr_{learning_rate}_version_{1}.pkl", 'rb') as file:
+        with open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_opt_{opt}_lr_{learning_rate}_v2.pkl", 'rb') as file:
             data = pickle.load(file)
         dictionary['graph']=G_num
         dictionary['analytic_single_p']=data['analytic_single_p']
@@ -248,9 +248,15 @@ def individual_MIS_QAOA_optimization_all_initializations(G_num, n, regularity, m
         dictionary['random_init']=data['random_init']
     except:
         pass
+
+
+    dictionary['graph']=G_num
+    dictionary['analytic_single_p']=dictionary_single
+    dictionary['transition_states']=dictionary_transition_states
+    dictionary['random_init']=dictionary_random
     dictionary['interpolation']=dictionary_interpolation
 
-    pickle.dump(dictionary, open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_opt_{opt}_lr_{learning_rate}_version_{version}.pkl", 'wb'))
+    pickle.dump(dictionary, open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_opt_{opt}_lr_{learning_rate}_v2.pkl", 'wb'))
 
 
     
