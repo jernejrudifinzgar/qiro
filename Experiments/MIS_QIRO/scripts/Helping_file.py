@@ -120,18 +120,18 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, iteration, 
 
         #print(f'run_{run}_n_{n}_p_{p}_initialization_{initialization}_variation_{variation}_version_{version} needs recalculation')
 
-    #ns_graphs_rudi = list(range(60, 220, 20))
+    ns_graphs_rudi = list(range(60, 220, 20))
 
-    ns_graphs_maxi = [20, 30, 40, 50, 60, 80, 100, 120, 140, 160, 180, 200]
+    #ns_graphs_maxi = [20, 30, 40, 50, 60, 80, 100, 120, 140, 160, 180, 200]
 
-    # if n in ns_graphs_rudi:
-    #     with open(my_path + f'/graphs/rudis_100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
-    #         data = pickle.load(file)
-    #     G = data[run]
+    if n in ns_graphs_rudi:
+        with open(my_path + f'/graphs/rudis_100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
+            data = pickle.load(file)
+        G = data[run]
     #if n in ns_graphs_maxi:
-    with open(my_path + f'/graphs/100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
-        data = pickle.load(file)
-    G = data[run]
+    #with open(my_path + f'/graphs/100_regular_graphs_nodes_{n}_reg_{3}.pkl', 'rb') as file:
+    #    data = pickle.load(file)
+    #G = data[run]
     # else: 
     #     #random.seed()
     #     G = nx.random_regular_graph(reg, n, seed=seed)
@@ -144,11 +144,11 @@ def execute_QIRO_single_instance(n, p, run, version, initialization, iteration, 
 
     expectation_values_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p, opt=torch.optim.RMSprop, variation = variation, initialization = initialization, opt_kwargs=dict(lr=0.005), gamma=gamma, beta=beta)
     if variation in ['QIRO', 'MMQ']:
-        QIRO_qtensor = QIRO_MIS(6, expectation_values_qtensor, variation=variation)
+        QIRO_qtensor = QIRO_MIS(5, expectation_values_qtensor, variation=variation)
     if variation == 'MINQ':
-        QIRO_qtensor = MINQ_MIS(2, expectation_values_qtensor)
+        QIRO_qtensor = MINQ_MIS(5, expectation_values_qtensor)
     if variation == 'MAXQ':
-        QIRO_qtensor = MAXQ_MIS(2, expectation_values_qtensor)
+        QIRO_qtensor = MAXQ_MIS(5, expectation_values_qtensor)
 
 
 
