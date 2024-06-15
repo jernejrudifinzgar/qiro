@@ -441,7 +441,7 @@ def plot_MIS_size_per_n(ns, ps, runs, version, iterations, initialization, varia
                             else:
                                 MIS_size_list_n.append(data['size_solution_qtensor']/MIS_size_exact[run])
                                 list_graphs_qtensor.append(run)
-
+                        
                         except Exception as error:
                             print(error)
                             print(f'file results_run_{run}_n_{n}_p_{p}_iteration_{iteration}_initialization_{initialization}_variation_{variation}_version_{version}.pkl not available')
@@ -770,7 +770,7 @@ if __name__ == '__main__':
     my_path = os.path.dirname(__file__)
     my_path = os.path.dirname(my_path)
     ns = [20, 40, 60, 80, 100, 120, 140, 160]
-    ps = [1, 2, 3]
+    ps = [3]
     runs = list(range(0, 20))
     iterations = list(range(0, 1))
     regularity = 3

@@ -612,35 +612,37 @@ def grouped_bar_chart(dic_results, ns, ps, runs, regularity, recalculation, iter
             list_energies = []
             list_cuts_overall = []
             for run in runs:
-                list_cuts = []
-                
-                for iteration in iterations:
-                    graph = graphs[iteration]
-                    num_edges = graph.number_of_edges()
-                    try:
-                        with open (my_path + f"/data/results_run_{run}_iteration_{iteration}_n_{n}_p_{p}_recalc_{recalculation}_initialization_fixed_angles_optimization_version_{version}.pkl", 'rb') as f:
-                            data = pickle.load(f)
-                        cuts_qtensor = data['cuts_qtensor']
-                        #print(cuts_qtensor)
-                        if p==1:
-                            energy= (num_edges - float(data['energies_single'][0]))/2
-                            cuts = data['cuts_single']
-                        else:
-                            energy= (num_edges - float(data['energies_qtensor'][0]))/2
-                            cuts = data['cuts_qtensor']
-                        #print(energy)
-                        list_energies.append(energy/list_exact[run])
-                        list_cuts.append(cuts/list_exact[run])
-                        list_cuts_overall.append(cuts/list_exact[run])
-                    except Exception as error:
-                        print(error)
+                try:
+                    list_cuts = []
+                    
+                    for iteration in iterations:
+                        graph = graphs[iteration]
+                        num_edges = graph.number_of_edges()
+                        try:
+                            with open (my_path + f"/data/results_run_{run}_iteration_{iteration}_n_{n}_p_{p}_recalc_{recalculation}_initialization_fixed_angles_optimization_version_{version}.pkl", 'rb') as f:
+                                data = pickle.load(f)
+                            cuts_qtensor = data['cuts_qtensor']
+                            #print(cuts_qtensor)
+                            if p==1:
+                                energy= (num_edges - float(data['energies_single'][0]))/2
+                                cuts = data['cuts_single']
+                            else:
+                                energy= (num_edges - float(data['energies_qtensor'][0]))/2
+                                cuts = data['cuts_qtensor']
+                            #print(energy)
+                            list_energies.append(energy/list_exact[run])
+                            list_cuts.append(cuts/list_exact[run])
+                            list_cuts_overall.append(cuts/list_exact[run])
+                        except Exception as error:
+                            print(error)
 
-                average = sum(list_cuts)/len(list_cuts)
-                data_dic[f'p={p}'].append(average)
-                error_dic[f'p={p}'][0].append(round(average-min(list_cuts), 5))
-                error_dic[f'p={p}'][1].append(round(max(list_cuts)-average, 5))
-                #error_dic[f'p={p}'].append(np.std(list_cuts))
-
+                    average = sum(list_cuts)/len(list_cuts)
+                    data_dic[f'p={p}'].append(average)
+                    error_dic[f'p={p}'][0].append(round(average-min(list_cuts), 5))
+                    error_dic[f'p={p}'][1].append(round(max(list_cuts)-average, 5))
+                    #error_dic[f'p={p}'].append(np.std(list_cuts))
+                except:
+                    pass
 
 
             print(p, len(list_energies), len(list_cuts_overall))
@@ -693,7 +695,7 @@ def grouped_bar_chart(dic_results, ns, ps, runs, regularity, recalculation, iter
                 dic_results['classic']['median'][f'p={p}']=median_bare
                 dic_results['classic']['lower_quartile'][f'p={p}']=lower_quartile_bare
                 dic_results['classic']['upper_quartile'][f'p={p}']=upper_quartile_bare
-            else:
+            elif recalculation==70:
                 dic_results['Shrinking']['mean'][f'p={p}']=average_overall
                 dic_results['Shrinking']['std'][f'p={p}']=std_overall
                 dic_results['Shrinking']['minimum'][f'p={p}']=min_overall
@@ -702,6 +704,15 @@ def grouped_bar_chart(dic_results, ns, ps, runs, regularity, recalculation, iter
                 dic_results['Shrinking']['median'][f'p={p}']=median_overall
                 dic_results['Shrinking']['lower_quartile'][f'p={p}']=lower_quartile_overall
                 dic_results['Shrinking']['upper_quartile'][f'p={p}']=upper_quartile_overall
+            else:
+                dic_results[f'Shrinking{recalculation}']['mean'][f'p={p}']=average_overall
+                dic_results[f'Shrinking{recalculation}']['std'][f'p={p}']=std_overall
+                dic_results[f'Shrinking{recalculation}']['minimum'][f'p={p}']=min_overall
+                dic_results[f'Shrinking{recalculation}']['maximum'][f'p={p}']=max_overall
+
+                dic_results[f'Shrinking{recalculation}']['median'][f'p={p}']=median_overall
+                dic_results[f'Shrinking{recalculation}']['lower_quartile'][f'p={p}']=lower_quartile_overall
+                dic_results[f'Shrinking{recalculation}']['upper_quartile'][f'p={p}']=upper_quartile_overall
 
 
     # try:
@@ -716,50 +727,50 @@ def grouped_bar_chart(dic_results, ns, ps, runs, regularity, recalculation, iter
     width = 0.25  # the width of the bars
     multiplier = 0
 
-    fig, ax = plt.subplots(layout='constrained')
+    # fig, ax = plt.subplots(layout='constrained')
 
     
-    for attribute, measurement in data_dic.items():
-        offset = width * multiplier
-        rects = ax.bar(x + offset, measurement, width, edgecolor = 'black', linewidth=0.5, yerr = error_dic[attribute], error_kw=dict(lw=1, ecolor='gray', capthick=1), color=colors[6+multiplier], alpha=0.6, label=f'${attribute}$')
-        #ax.bar_label(rects, padding=3)
-        multiplier += 1
+    # for attribute, measurement in data_dic.items():
+    #     offset = width * multiplier
+    #     rects = ax.bar(x + offset, measurement, width, edgecolor = 'black', linewidth=0.5, yerr = error_dic[attribute], error_kw=dict(lw=1, ecolor='gray', capthick=1), color=colors[6+multiplier], alpha=0.6, label=f'${attribute}$')
+    #     #ax.bar_label(rects, padding=3)
+    #     multiplier += 1
 
-    multiplier = 0
-    for attribute, measurement in data_dic.items():
-        average = np.mean(measurement)
-        print(average)
-        plt.plot(x2, [average for i in x2], color=colors[6+multiplier], linestyle='dashed', linewidth=1.3, path_effects=[pe.Stroke(linewidth=1.8, foreground='black'), pe.Normal()], label = f'${attribute}$ mean')    
-        #plt.plot(x2, [average for i in x2], color=colors[6+multiplier], linestyle=(5, (10, 3)), linewidth=2, label = f'Average optimal cuts ratio of QAOA with {attribute}')    
-        multiplier += 1
+    # multiplier = 0
+    # for attribute, measurement in data_dic.items():
+    #     average = np.mean(measurement)
+    #     print(average)
+    #     plt.plot(x2, [average for i in x2], color=colors[6+multiplier], linestyle='dashed', linewidth=1.3, path_effects=[pe.Stroke(linewidth=1.8, foreground='black'), pe.Normal()], label = f'${attribute}$ mean')    
+    #     #plt.plot(x2, [average for i in x2], color=colors[6+multiplier], linestyle=(5, (10, 3)), linewidth=2, label = f'Average optimal cuts ratio of QAOA with {attribute}')    
+    #     multiplier += 1
 
     
-    handles, labels = ax.get_legend_handles_labels()
-    order = [3, 4, 5, 0, 1, 2]
-    order = [0, 1, 2, 3, 4, 5]
-    labels, handles = zip(*sorted(zip(labels, handles), key=lambda t: t[0]))
+    # handles, labels = ax.get_legend_handles_labels()
+    # order = [3, 4, 5, 0, 1, 2]
+    # order = [0, 1, 2, 3, 4, 5]
+    # labels, handles = zip(*sorted(zip(labels, handles), key=lambda t: t[0]))
 
-    # Add some text for labels, title and custom x-axis tick labels, etc.
-    ax.set_ylabel('Approximation ratio')
-    ax.set_xlabel('Problem instance')
-    #ax.set_title(f'MAXCUT RQAOA approximation ratio with recalculation every {recalculation}''$^\\text{th}$ shrinking step')
-    x_labels = [f'{i+1}' for i in runs]
-    ax.set_xticks(x + width, x_labels)
-    ax.set_yticks([0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0], [0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0])
-    #ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper right', ncols = 1, bbox_to_anchor=(1.26, 1.047)) #1.028
-    #ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper left', ncols = 6, columnspacing=1.394, bbox_to_anchor=(-0.01, 1.28))
-    ax.legend(loc='upper left', ncols = 2)
-    ax.set_ylim(0.92, 1.002)
-    ax.set_xlim(-0.5, len(runs))
-    ax.tick_params(bottom=False)
-    box = ax.get_position()
-    #ax.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.85])
+    # # Add some text for labels, title and custom x-axis tick labels, etc.
+    # ax.set_ylabel('Approximation ratio')
+    # ax.set_xlabel('Problem instance')
+    # #ax.set_title(f'MAXCUT RQAOA approximation ratio with recalculation every {recalculation}''$^\\text{th}$ shrinking step')
+    # x_labels = [f'{i+1}' for i in runs]
+    # ax.set_xticks(x + width, x_labels)
+    # ax.set_yticks([0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0], [0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1.0])
+    # #ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper right', ncols = 1, bbox_to_anchor=(1.26, 1.047)) #1.028
+    # #ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper left', ncols = 6, columnspacing=1.394, bbox_to_anchor=(-0.01, 1.28))
+    # ax.legend(loc='upper left', ncols = 2)
+    # ax.set_ylim(0.92, 1.002)
+    # ax.set_xlim(-0.5, len(runs))
+    # ax.tick_params(bottom=False)
+    # box = ax.get_position()
+    # #ax.set_position([box.x0, box.y0 + box.height * 0.1, box.width, box.height * 0.85])
     
-    #ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper center', handletextpad=0.5, ncols = 6, columnspacing=1, bbox_to_anchor=(0.5, 1.24))
+    # #ax.legend([handles[idx] for idx in order],[labels[idx] for idx in order], loc='upper center', handletextpad=0.5, ncols = 6, columnspacing=1, bbox_to_anchor=(0.5, 1.24))
 
 
-    #fig.savefig(my_path + f'/results/Cuts_ratio_per_graph_per_p_iterations_{len(iterations)}_graphs_{runs[0]}_{runs[-1]}_n_{n}_version_{version}.pdf', format="pdf", dpi=2000)
-    plt.show()
+    # #fig.savefig(my_path + f'/results/Cuts_ratio_per_graph_per_p_iterations_{len(iterations)}_graphs_{runs[0]}_{runs[-1]}_n_{n}_version_{version}.pdf', format="pdf", dpi=2000)
+    # plt.show()
 
 def plot_time(ns, ps, runs, regularity, recalculation, iterations, version):
     colors=['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:pink', 'tab:brown', 'tab:grey', 'tab:olive', 'tab:cyan']
@@ -894,6 +905,15 @@ if __name__ == '__main__':
                                   'lower_quartile': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'upper_quartile': {'p=1': 0, 'p=2': 0, 'p=3': 0}}, 
                     'ShrinkingRec': {'mean': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'median': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'std': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 
                                      'minimum': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'maximum': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 
+                                     'lower_quartile': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'upper_quartile': {'p=1': 0, 'p=2': 0, 'p=3': 0}}, 
+                    'Shrinking5': {'mean': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'median': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'std': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 
+                                     'minimum': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'maximum': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 
+                                     'lower_quartile': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'upper_quartile': {'p=1': 0, 'p=2': 0, 'p=3': 0}},
+                    'Shrinking10': {'mean': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'median': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'std': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 
+                                     'minimum': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'maximum': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 
+                                     'lower_quartile': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'upper_quartile': {'p=1': 0, 'p=2': 0, 'p=3': 0}},
+                    'Shrinking25': {'mean': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'median': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'std': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 
+                                     'minimum': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'maximum': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 
                                      'lower_quartile': {'p=1': 0, 'p=2': 0, 'p=3': 0}, 'upper_quartile': {'p=1': 0, 'p=2': 0, 'p=3': 0}}
                     }
 
@@ -902,6 +922,13 @@ if __name__ == '__main__':
     print(dic_results)
     grouped_bar_chart(dic_results, ns, ps, runs, regularity, 70, iterations, version)
     print(dic_results)
+        
+    grouped_bar_chart(dic_results, ns, ps, runs, regularity, 5, iterations, version)
 
-    with open('Higher_depth_QAOA_data_median.json', 'w') as f:
+    grouped_bar_chart(dic_results, ns, ps, runs, regularity, 10, iterations, 3)
+
+    grouped_bar_chart(dic_results, ns, ps, runs, regularity, 25, iterations, version)
+
+
+    with open('Higher_depth_QAOA_data_median_2.json', 'w') as f:
         json.dump(dic_results, f)
