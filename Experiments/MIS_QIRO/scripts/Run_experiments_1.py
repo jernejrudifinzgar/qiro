@@ -21,14 +21,14 @@ import matplotlib.pyplot as plt
 if __name__ == '__main__':
 
     reg = 3
-    ns = [20, 160]
+    ns = [60, 80, 100]
     seed = 666
     ps= [1, 2, 3]
     runs=list(range(0, 20, 1))
     initialization = 'interpolation'
     variations=['QIRO', 'MMQ', 'MINQ', 'MAXQ']
     iterations=list(range(0, 1))
-    version = 3
+    version = 4
     results_list=[]
 
     #ns = [14]

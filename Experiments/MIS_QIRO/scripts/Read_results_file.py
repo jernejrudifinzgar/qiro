@@ -457,13 +457,13 @@ def plot_MIS_size_per_n(ns, ps, runs, version, iterations, initialization, varia
                 MIS_size_qtensor_list_dic[f'{variation}_std'].append(std)   
 
         #plt.plot(MIS_size_qtensor_list_dic['ns'], MIS_size_qtensor_list_dic['greedy_size'], color=colors[counter], linestyle=linestyles[counter], label = 'Greedy algorithm')
-        plt.errorbar(MIS_size_qtensor_list_dic['ns'], MIS_size_qtensor_list_dic['greedy_size'], yerr=MIS_size_qtensor_list_dic['greedy_std'], capsize = 10, color=colors[counter], linestyle=linestyles[counter], label = 'Greedy algorithm')
+        plt.errorbar(MIS_size_qtensor_list_dic['ns'], MIS_size_qtensor_list_dic['greedy_size'], yerr=MIS_size_qtensor_list_dic['greedy_std'], capsize = 10, color=colors[counter], marker = markers[counter], linestyle='', label = 'Greedy algorithm')
 
         counter += 1
         for variation in variations:
 
             #plt.plot(MIS_size_qtensor_list_dic['ns'], MIS_size_qtensor_list_dic[f'{variation}_size'], color=colors[counter], linestyle=linestyles[counter], label = f'{variation} algorithm')
-            plt.errorbar(MIS_size_qtensor_list_dic['ns'], MIS_size_qtensor_list_dic[f'{variation}_size'], MIS_size_qtensor_list_dic[f'{variation}_std'], capsize = 10, color=colors[counter], linestyle=linestyles[counter], label = f'{variation} algorithm')
+            plt.errorbar(MIS_size_qtensor_list_dic['ns'], MIS_size_qtensor_list_dic[f'{variation}_size'], MIS_size_qtensor_list_dic[f'{variation}_std'], capsize = 10, color=colors[counter], marker = markers[counter], linestyle='', label = f'{variation} algorithm')
 
             counter += 1
 
@@ -474,7 +474,7 @@ def plot_MIS_size_per_n(ns, ps, runs, version, iterations, initialization, varia
         #plt.ylim([0.70, 1.01])
         plt.legend()    
         plt.show()
-        fig.savefig(my_path + f'/results/MIS_size_per_n_reg_{regularity}_ns_{ns[0]}_{ns[-1]}_p_{p}_same_scale_initialization_{initialization}_runs_{runs[0]}_{runs[-1]}_version_{version}.png')
+        #fig.savefig(my_path + f'/results/MIS_size_per_n_reg_{regularity}_ns_{ns[0]}_{ns[-1]}_p_{p}_same_scale_initialization_{initialization}_runs_{runs[0]}_{runs[-1]}_version_{version}.png')
 
 
 #print out solutions:
