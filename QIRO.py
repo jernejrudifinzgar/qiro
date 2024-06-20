@@ -1209,7 +1209,7 @@ class QIRO_SetCover(QIRO):
            
             if self.problem.set_size >0:
 
-                self.expectation_values.optimize(steps=100)
+                self.expectation_values.optimize(steps=50)
 
                 self.energies_list.append(self.expectation_values.energy)
                 self.losses_list.append(self.expectation_values.losses)

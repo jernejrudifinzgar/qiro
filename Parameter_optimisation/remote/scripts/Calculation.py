@@ -101,8 +101,8 @@ def transition_states(problem, ps, opt, **kwargs):
         if p==1:
             expectation_values_single_transition = SingleLayerQAOAExpectationValues(problem)
             expectation_values_single_transition.optimize()
-            gamma = [expectation_values_single_transition.gamma]
-            beta = [expectation_values_single_transition.beta]
+            gamma = [expectation_values_single_transition.gamma/np.pi]
+            beta = [expectation_values_single_transition.beta/np.pi]
             energy_single_transition = expectation_values_single_transition.energy
             dictionary_transition_states_sub['energy'] = energy_single_transition
             dictionary_transition_states_sub['correlations'] = expectation_values_single_transition.expect_val_dict.copy()
@@ -299,21 +299,24 @@ def individual_MAXCUT_QAOA_optimization_all_initializations(G_num, n, regularity
     with open(f'100_regular_graphs_nodes_{n}_reg_{regularity}.pkl', 'rb') as file:
         data = pickle.load(file)
 
+    with open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_opt_{opt}_lr_{learning_rate}_v2.pkl", 'rb') as file:
+        dictionary = pickle.load(file)
+        
     G = data[G_num]
     problem = Generator.MAXCUT(G)
-    dictionary_single = analytic(problem)
-    dictionary_interpolation = interpolation(problem, ps, opt, lr=learning_rate)
-    dictionary_random = random_init(problem, ps, opt, lr=learning_rate)
+    # dictionary_single = analytic(problem)
+    # dictionary_interpolation = interpolation(problem, ps, opt, lr=learning_rate)
+    # dictionary_random = random_init(problem, ps, opt, lr=learning_rate)
     dictionary_transition_states = transition_states(problem, ps, opt, lr=learning_rate)
-    dictionary_fixed_angles = fixed_angles(problem, regularity, ps)
-    dictionary_fixed_angles_optimization = fixed_angles_optimization(problem, regularity, ps, opt, lr=learning_rate)      
-    dictionary['graph']=G_num
-    dictionary['analytic_single_p']=dictionary_single
-    dictionary['interpolation']=dictionary_interpolation
+    # dictionary_fixed_angles = fixed_angles(problem, regularity, ps)
+    # dictionary_fixed_angles_optimization = fixed_angles_optimization(problem, regularity, ps, opt, lr=learning_rate)      
+    # dictionary['graph']=G_num
+    # dictionary['analytic_single_p']=dictionary_single
+    # dictionary['interpolation']=dictionary_interpolation
     dictionary['transition_states']=dictionary_transition_states
-    dictionary['random_init']=dictionary_random
-    dictionary['fixed_angles']=dictionary_fixed_angles
-    dictionary['fixed_angles_optimization']=dictionary_fixed_angles_optimization
+    # dictionary['random_init']=dictionary_random
+    # dictionary['fixed_angles']=dictionary_fixed_angles
+    # dictionary['fixed_angles_optimization']=dictionary_fixed_angles_optimization
 
     #print(dictionary)
     pickle.dump(dictionary, open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_opt_{opt}_lr_{learning_rate}_v2.pkl", 'wb'))

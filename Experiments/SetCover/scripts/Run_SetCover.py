@@ -134,13 +134,59 @@ def main_2():
     with open(my_path + f"/data/example_graph.json", 'w') as f:
         json.dump(dictionary, f)
 
+def create_and_solve_single_new(U, V, n, run, idx):
+
+    variation = 'MINQ'
+    problem = Generator.SetCover(U, V, A=2, B=1)
+    print('number of qubits:', problem.num_variables)
+    expectation_value_qtensor = QtensorQAOAExpectationValuesQUBO(problem, p=2, variation=variation, opt=torch.optim.RMSprop, initialization = 'interpolation', opt_kwargs=dict(lr=0.001))
+    QIRO_qtensor = QIRO_SetCover(1, expectation_value_qtensor, variation=variation)
+    shrinking_solution, shrinking_size = QIRO_qtensor.execute()
+
+    valid, rest_size = problem.solution_check(list(shrinking_solution))
+    #solution_qtensor = QIRO_qtensor.solution
+    print(valid, rest_size)
+
+    losses = QIRO_qtensor.losses_list
+    energies = QIRO_qtensor.energies_list
+
+    greedy_solution, greedy_size = greedy_set_cover(U, V)
+
+    solution_dictionary = {'Set': U, 'Subsets': V, 'shrinking_solution': shrinking_solution, 'shrinking_size': shrinking_size, 'greedy_solution': greedy_solution, 'greedy_size': greedy_size}
+
+    my_path = os.path.dirname(__file__)
+    my_path = os.path.dirname(my_path)
+    with open(my_path + f"/data/results_node{n}_run_{run}_idx_{idx}p_2.json", 'w') as f:
+        json.dump(solution_dictionary, f)
+
+def main_3():
+    ns = range(100)
+    run=2
+    arguments_list = []
+    for n in ns: 
+        with open(f'../data/results_node{n}_run_{run}.json') as f:
+            data = json.load(f)
+        for idx, dic in enumerate(data):
+            U = dic["Set"]
+            V = dic["Subsets"]
+            problem = Generator.SetCover(U, V, A=2, B=1)
+            #if problem.num_variables<50:
+            if len(U)<=10:
+                arguments_list.append((U, V, n, run, idx))
+            
+            print(len(arguments_list))
+
+    print(len(arguments_list))
+    pool = mp.Pool(len(arguments_list))
+    pool.starmap(create_and_solve_single_new, arguments_list)
+
 if __name__ == '__main__':
     # num_problems = 5
     # solution = create_and_solve_multiple(num_problems=num_problems)
 
     # for i in range(num_problems):
     #     print('\nProblem number', i, '\nShrinking size:', solution[i]['shrinking_size'], '\nGreedy size:', solution[i]['greedy_size'])
-    main()
+    main_3()
 
 
 
