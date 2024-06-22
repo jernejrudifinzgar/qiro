@@ -152,7 +152,7 @@ def create_and_solve_single_new(U, V, n, run, idx):
 
     greedy_solution, greedy_size = greedy_set_cover(U, V)
 
-    solution_dictionary = {'Set': U, 'Subsets': V, 'shrinking_solution': shrinking_solution, 'shrinking_size': shrinking_size, 'greedy_solution': greedy_solution, 'greedy_size': greedy_size}
+    solution_dictionary = {'Set': U, 'Subsets': V, 'shrinking_solution': shrinking_solution, 'shrinking_size': int(shrinking_size), 'greedy_solution': greedy_solution, 'greedy_size': int(greedy_size)}
 
     my_path = os.path.dirname(__file__)
     my_path = os.path.dirname(my_path)
