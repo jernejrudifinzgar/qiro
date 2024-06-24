@@ -171,7 +171,7 @@ def main_3():
             V = dic["Subsets"]
             problem = Generator.SetCover(U, V, A=2, B=1)
             #if problem.num_variables<50:
-            if len(U)<=10:
+            if len(U) >10 and len(U)<=15:
                 arguments_list.append((U, V, n, run, idx))
             
             print(len(arguments_list))
