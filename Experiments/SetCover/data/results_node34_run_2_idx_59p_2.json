@@ -1,1 +1,1 @@
-{"Set": [0, 1, 2, 3], "Subsets": [[1], [0, 2], [0], [2, 3]], "shrinking_solution": [[1, [2, 3]], [1, [1]], [-1, [0, 2]], [1, [0]]], "shrinking_size": 
+{"Set": [0, 1, 2, 3], "Subsets": [[1], [0, 2], [0], [2, 3]], "shrinking_solution": [[1, [2, 3]], [1, [1]], [-1, [0, 2]], [1, [0]]], "shrinking_size": 3, "greedy_solution": [[2, 3], [0], [1]], "greedy_size": 3}
