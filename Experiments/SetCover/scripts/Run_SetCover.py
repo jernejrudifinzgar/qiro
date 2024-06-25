@@ -171,8 +171,13 @@ def main_3():
             V = dic["Subsets"]
             problem = Generator.SetCover(U, V, A=2, B=1)
             #if problem.num_variables<50:
-            if len(U)<=10:
-                arguments_list.append((U, V, n, run, idx))
+            if len(U) >10 and len(U)<=15:
+                if problem.num_variables <= 55:
+                    try: 
+                        with open(f"../data/results_node{n}_run_{run}_idx_{idx}p_2.json", 'r') as f:
+                            data = json.loads(f.read())
+                    except:
+                        arguments_list.append((U, V, n, run, idx))
             
             print(len(arguments_list))
 
