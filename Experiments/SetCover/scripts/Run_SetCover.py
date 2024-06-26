@@ -172,7 +172,7 @@ def main_3():
             problem = Generator.SetCover(U, V, A=2, B=1)
             #if problem.num_variables<50:
             if len(U) >10 and len(U)<=15:
-                if problem.num_variables > 65 and problem.num_variables <= 70:
+                if problem.num_variables > 70 and problem.num_variables <= 75:
                     try: 
                         with open(f"../data/results_node{n}_run_{run}_idx_{idx}p_2.json", 'r') as f:
                             data = json.loads(f.read())
