@@ -23,7 +23,7 @@ if __name__ == '__main__':
     ns = [160]
     seed = 666
     ps= [1, 2, 3]
-    runs=list(range(0, 20, 1))
+    runs=list(range(20, 40, 1))
     initialization = 'interpolation'
     variations=['QIRO', 'MMQ', 'MINQ', 'MAXQ']
     iterations=list(range(0, 1))
