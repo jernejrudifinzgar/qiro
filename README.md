@@ -32,7 +32,8 @@ pip install -r requirements.txt
 ```
 Then go into Qtensor folder and install corresponding requirements:
 ```
-cd Qtensor/qtree
+git submodule update --recursive --remote
+cd Qtensor/qtree_git
 pip install .
 cd ..
 pip install . 
@@ -67,7 +68,7 @@ Contains multiple QIRO algorithms for SetCover problems.
 
 #### RQAOA.py
 
-Contains the RQAOA algorithm for any quadratic problem (among others, MIS, MaxCut and MAX-2-SAT).
+Contains the RQAOA algorithm (with and without recalculation intervals) for any quadratic problem (among others, MIS, MaxCut and MAX-2-SAT).
 
 #### Experiments
 
