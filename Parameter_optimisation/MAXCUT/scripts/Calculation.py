@@ -1,0 +1,331 @@
+import sys 
+sys.path.append("../../Qtensor")
+sys.path.append("../../Qtensor/qtree_git")
+sys.path.append("../../")
+
+from qtensor import ZZQtreeQAOAComposer, ZZQtreeQAOAComposer_MIS, ZZQtreeQAOAComposer_MAXCUT
+from qtensor import QAOAQtreeSimulator, QAOAQtreeSimulator_MIS, QAOAQtreeSimulator_MAXCUT
+from qtensor.contraction_backends import TorchBackend
+import Generating_Problems as Generator
+from Calculating_Expectation_Values import SingleLayerQAOAExpectationValues, QtensorQAOAExpectationValuesMIS,QtensorQAOAExpectationValuesMAXCUT
+from QIRO import QIRO_MIS
+import torch
+import qtensor
+import networkx as nx
+import numpy as np
+from scipy.optimize import minimize
+import tqdm
+import pickle
+from scipy.optimize import Bounds
+import pprint
+from functools import partial
+import random
+import json
+import os
+import itertools
+import matplotlib.pyplot as plt
+import matplotlib
+import torch.multiprocessing as mp
+from IPython.display import set_matplotlib_formats
+__plot_height = 9.119
+matplotlib.rcParams['figure.figsize'] = (1.718*__plot_height, __plot_height)
+set_matplotlib_formats('svg')
+
+def analytic(problem):
+    """Subroutine to calculate p=1 analytic QAOA optimization energy."""
+    dictionary_single = {}
+    expectation_values_single = SingleLayerQAOAExpectationValues(problem)
+    expectation_values_single.optimize()
+    energy_single = expectation_values_single.energy
+    dictionary_single['energy']=energy_single
+    dictionary_single['correlations'] = expectation_values_single.expect_val_dict.copy()
+
+    return dictionary_single
+            
+
+def random_init(problem, ps, opt, **kwargs):
+    """Subroutine to calculate QAOA optimization energy for given ps with random parameter initialization."""
+
+    if opt=='SGD':
+        optimizer=torch.optim.SGD
+    elif opt=='RMSprop':
+        optimizer=torch.optim.RMSprop
+    elif opt=='Adam':
+        optimizer=torch.optim.Adam
+        
+    dictionary_random_init={}
+    for p in ps:
+        dictionary_random_init_sub={}
+
+        if p==1:
+            expectation_values_qtensor_random = QtensorQAOAExpectationValuesMAXCUT(problem, p, pbar=True)
+            expectation_values_qtensor_random.optimize(Opt=optimizer, **kwargs)
+            energy_qtensor_random = float(expectation_values_qtensor_random.energy)
+            dictionary_random_init_sub['energy'] = energy_qtensor_random
+            dictionary_random_init_sub['correlations'] = expectation_values_qtensor_random.expect_val_dict.copy()
+            dictionary_random_init_sub['losses'] = expectation_values_qtensor_random.losses.copy()
+
+        else:
+            for j in range(p):
+                expectation_values_qtensor_random = QtensorQAOAExpectationValuesMAXCUT(problem, p, pbar=True)
+                expectation_values_qtensor_random.optimize(Opt=optimizer, **kwargs)
+                energy_qtensor_random = float(expectation_values_qtensor_random.energy)
+
+                if j==0:
+                    energy_min_random=energy_qtensor_random
+                    correlations_min_random=expectation_values_qtensor_random.expect_val_dict.copy()
+                    losses_min_random=expectation_values_qtensor_random.losses.copy()
+                if energy_qtensor_random < energy_min_random:
+                    energy_min_random=energy_qtensor_random
+                    correlations_min_random=expectation_values_qtensor_random.expect_val_dict.copy()
+                    losses_min_random=expectation_values_qtensor_random.losses.copy()
+
+            dictionary_random_init_sub['energy'] = energy_min_random
+            dictionary_random_init_sub['correlations'] = correlations_min_random.copy()
+            dictionary_random_init_sub['losses'] = losses_min_random.copy()
+        
+        dictionary_random_init[f'p={p}'] = dictionary_random_init_sub.copy()
+
+    return dictionary_random_init
+
+
+def transition_states(problem, ps, opt, **kwargs):
+    """Subroutine to calculate QAOA optimization energy for given ps with transition states parameter initialization."""
+
+    if opt=='SGD':
+        optimizer=torch.optim.SGD
+    elif opt=='RMSprop':
+        optimizer=torch.optim.RMSprop
+    elif opt=='Adam':
+        optimizer=torch.optim.Adam
+    dictionary_transition_states={}
+    for p in ps: 
+        dictionary_transition_states_sub={}
+
+        if p==1:
+            expectation_values_single_transition = SingleLayerQAOAExpectationValues(problem)
+            expectation_values_single_transition.optimize()
+            gamma = [expectation_values_single_transition.gamma/np.pi]
+            beta = [expectation_values_single_transition.beta/np.pi]
+            energy_single_transition = expectation_values_single_transition.energy
+            dictionary_transition_states_sub['energy'] = energy_single_transition
+            dictionary_transition_states_sub['correlations'] = expectation_values_single_transition.expect_val_dict.copy()
+
+        else:
+            for j in range(p):
+                gamma_ts = gamma.copy()
+                beta_ts = beta.copy()
+                gamma_ts.insert(j, 0)
+                beta_ts.insert(j, 0)
+                expectation_values_qtensor_transition = QtensorQAOAExpectationValuesMAXCUT(problem, p, gamma=gamma_ts, beta=beta_ts, pbar=True)
+                expectation_values_qtensor_transition.optimize(Opt=optimizer, **kwargs)
+                energy_qtensor_transition = float(expectation_values_qtensor_transition.energy)
+
+                if j==0:
+                    energy_min = energy_qtensor_transition
+                    gamma_min = [float(i) for i in expectation_values_qtensor_transition.gamma]
+                    beta_min = [float(i) for i in expectation_values_qtensor_transition.beta]
+                    correlations_min = expectation_values_qtensor_transition.expect_val_dict.copy()
+                    losses_min = expectation_values_qtensor_transition.losses.copy()
+
+                if energy_qtensor_transition < energy_min:
+                    energy_min = energy_qtensor_transition
+                    gamma_min = [float(i) for i in expectation_values_qtensor_transition.gamma]
+                    beta_min = [float(i) for i in expectation_values_qtensor_transition.beta]
+                    correlations_min = expectation_values_qtensor_transition.expect_val_dict.copy()
+                    losses_min = expectation_values_qtensor_transition.losses.copy()
+
+            dictionary_transition_states_sub['energy'] = energy_min
+            dictionary_transition_states_sub['correlations'] = correlations_min.copy()
+            dictionary_transition_states_sub['losses'] = losses_min.copy()
+            gamma=gamma_min.copy()
+            beta=beta_min.copy()
+
+        dictionary_transition_states[f'p={p}'] = dictionary_transition_states_sub
+    
+    return dictionary_transition_states
+
+def interpolation(problem, ps, opt, **kwargs):
+    """Subroutine to calculate QAOA optimization energy for given ps with interpolation parameter initialization."""
+
+    if opt=='SGD':
+        optimizer=torch.optim.SGD
+    elif opt=='RMSprop':
+        optimizer=torch.optim.RMSprop
+    elif opt=='Adam':
+        optimizer=torch.optim.Adam
+    dictionary_transition_states={}
+    for p in ps: 
+        dictionary_transition_states_sub={}
+
+        if p==1:
+            expectation_values_single_transition = SingleLayerQAOAExpectationValues(problem)
+            expectation_values_single_transition.optimize()
+            gamma = [expectation_values_single_transition.gamma]
+            beta = [expectation_values_single_transition.beta]
+            energy_single_transition = expectation_values_single_transition.energy
+            dictionary_transition_states_sub['energy'] = energy_single_transition
+            dictionary_transition_states_sub['correlations'] = expectation_values_single_transition.expect_val_dict.copy()
+
+        else:
+            expectation_value_single = SingleLayerQAOAExpectationValues(problem)
+            expectation_value_single.optimize()
+            gamma_old = [expectation_value_single.gamma/np.pi]
+            beta_old = [expectation_value_single.beta/np.pi]
+
+            for step in range(2, p+1):
+                gamma_new = []
+                beta_new = []
+                for i in range(step):
+                    if i==0:
+                        gamma_new.append((step-1-(i+1)+1)/(step-1)*gamma_old[i])
+                        beta_new.append((step-1-(i+1)+1)/(step-1)*beta_old[i])
+                    elif i!=0 and i!=(step-1):
+                        gamma_new.append((i+1-1)/(step-1)*gamma_old[i-1]+(step-1-(i+1)+1)/(step-1)*gamma_old[i])
+                        beta_new.append((i+1-1)/(step-1)*beta_old[i-1]+(step-1-(i+1)+1)/(step-1)*beta_old[i])
+                    elif i==(step-1):
+                        gamma_new.append((i+1-1)/(step-1)*gamma_old[i-1])
+                        beta_new.append((i+1-1)/(step-1)*beta_old[i-1])
+                
+                expectation_values_qtensor_transition = QtensorQAOAExpectationValuesMAXCUT(problem, step, gamma=gamma_new, beta=beta_new, pbar=True)
+                expectation_values_qtensor_transition.optimize(Opt=optimizer, **kwargs)
+                energy_qtensor_transition = float(expectation_values_qtensor_transition.energy)
+
+                
+                gamma_old = [float(i) for i in expectation_values_qtensor_transition.gamma]
+                beta_old = [float(i) for i in expectation_values_qtensor_transition.beta]
+            
+            energy_min = float(expectation_values_qtensor_transition.energy)
+            correlations_min = expectation_values_qtensor_transition.expect_val_dict.copy()
+            losses_min = expectation_values_qtensor_transition.losses.copy()
+
+            dictionary_transition_states_sub['energy'] = energy_min
+            dictionary_transition_states_sub['correlations'] = correlations_min.copy()
+            dictionary_transition_states_sub['losses'] = losses_min.copy()
+
+        dictionary_transition_states[f'p={p}'] = dictionary_transition_states_sub
+    print('interpolation complete')
+    return dictionary_transition_states
+
+def fixed_angles(problem, regularity, ps):
+    """Subroutine to calculate QAOA energy for given ps with fixed angles parameter initialization. Without optimization!"""
+
+    with open('angles_regular_graphs.json', 'r') as file:
+        data = json.load(file)
+    dictionary_fixed_angles = {}
+    for p in ps:
+        dictionary_fixed_angles_sub = {}
+        gamma, beta = data[f"{regularity}"][f"{p}"]["gamma"], data[f"{regularity}"][f"{p}"]["beta"]
+        gamma, beta = [value/(-2*np.pi) for value in gamma], [value/(2*np.pi) for value in beta]
+        expectation_values_qtensor_fixed = QtensorQAOAExpectationValuesMAXCUT(problem, p, gamma=gamma, beta=beta, pbar=True)
+        expectation_values_qtensor_fixed.calc_expect_val()
+        energy_qtensor_fixed = float(expectation_values_qtensor_fixed.loss)
+        dictionary_fixed_angles_sub['energy'] = energy_qtensor_fixed
+        dictionary_fixed_angles_sub['correlations'] = expectation_values_qtensor_fixed.expect_val_dict.copy()
+        dictionary_fixed_angles[f'p={p}'] = dictionary_fixed_angles_sub.copy()
+    
+    return dictionary_fixed_angles
+
+
+def fixed_angles_optimization(problem, regularity, ps, opt, **kwargs):
+    """Subroutine to calculate QAOA optimization energy for given ps with fixed angles parameter initialization."""
+    if opt=='SGD':
+        optimizer=torch.optim.SGD
+    elif opt=='RMSprop':
+        optimizer=torch.optim.RMSprop
+    elif opt=='Adam':
+        optimizer=torch.optim.Adam
+
+    with open('angles_regular_graphs.json', 'r') as file:
+        data = json.load(file)
+    dictionary_fixed_angles_optimization = {}
+    for p in ps:
+        dictionary_fixed_angles_optimization_sub = {}
+        gamma, beta = data[f"{regularity}"][f"{p}"]["gamma"], data[f"{regularity}"][f"{p}"]["beta"]
+        gamma, beta = [value/(-2*np.pi) for value in gamma], [value/(2*np.pi) for value in beta]
+        expectation_values_qtensor_fixed_optim = QtensorQAOAExpectationValuesMAXCUT(problem, p, gamma=gamma, beta=beta, pbar=False)
+        expectation_values_qtensor_fixed_optim.optimize(Opt=optimizer, **kwargs)
+        energy_qtensor_fixed_optim = float(expectation_values_qtensor_fixed_optim.energy)
+        dictionary_fixed_angles_optimization_sub['energy'] = energy_qtensor_fixed_optim
+        dictionary_fixed_angles_optimization_sub['correlations'] = expectation_values_qtensor_fixed_optim.expect_val_dict.copy()
+        dictionary_fixed_angles_optimization_sub['losses'] = expectation_values_qtensor_fixed_optim.losses.copy()
+        dictionary_fixed_angles_optimization[f'p={p}'] = dictionary_fixed_angles_optimization_sub
+    
+    return dictionary_fixed_angles_optimization
+
+
+def individual_MAXCUT_QAOA_optimization_single_initialization(G_num, n, regularity, max_p, initialization, opt, learning_rate):
+    """Calculates and saves QAOA output information for individual problems and individual initializations that are given as input."""
+    my_path = os.path.dirname(__file__)
+    my_path = os.path.dirname(my_path)
+    
+    ps = list(range(1, max_p+1))
+    with open(my_path + f'/Problem_graphs/rudis_100_regular_graphs_nodes_{n}_reg_{regularity}.pkl', 'rb') as file:
+        data = pickle.load(file)
+
+    G = data[G_num]
+    problem = Generator.MAXCUT(G)
+
+    if initialization == 'analytic':
+        dictionary_single = analytic(problem)
+        pickle.dump(dictionary_single, open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_initialization_{initialization}.pkl", 'wb'))
+        return dictionary_single.copy()
+    
+    elif initialization == 'random':
+        dictionary_random = random_init(problem, ps, opt, lr=learning_rate)
+        pickle.dump(dictionary_random, open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_initialization_{initialization}_opt_{opt}_lr_{learning_rate}.pkl", 'wb'))
+        return dictionary_random.copy()
+    
+    elif initialization == 'transition_states':
+        dictionary_transition_states = transition_states(problem, ps, opt, lr=learning_rate)
+        pickle.dump(dictionary_transition_states, open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_initialization_{initialization}_opt_{opt}_lr_{learning_rate}.pkl", 'wb'))
+        return dictionary_transition_states.copy()
+    
+    elif initialization == 'interpolation':
+        dictionary_transition_states = interpolation(problem, ps, opt, lr=learning_rate)
+        pickle.dump(dictionary_transition_states, open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_initialization_{initialization}_opt_{opt}_lr_{learning_rate}.pkl", 'wb'))
+        return dictionary_transition_states.copy()
+    
+    elif initialization =='fixed_angles':
+        dictionary_fixed_angles = fixed_angles(problem, regularity, ps)
+        pickle.dump(dictionary_fixed_angles, open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_initialization_{initialization}.pkl", 'wb'))
+        return dictionary_fixed_angles.copy()
+    
+    elif initialization == 'fixed_angles_optimization':
+        dictionary_fixed_angles_optimization = fixed_angles_optimization(problem, regularity, ps, opt, lr=learning_rate)
+        pickle.dump(dictionary_fixed_angles_optimization, open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_initialization_{initialization}_opt_{opt}_lr_{learning_rate}.pkl", 'wb'))
+        return dictionary_fixed_angles_optimization   
+    
+
+def individual_MAXCUT_QAOA_optimization_all_initializations(G_num, n, regularity, max_p, opt, learning_rate):
+    """Calculates and saves QAOA output information for individual problems and all initializations (p=1 analytic, interpolation, transitino states, random, fixed angles, fixed angles with optimization)."""
+    my_path = os.path.dirname(__file__)
+    my_path = os.path.dirname(my_path)
+    
+    dictionary={}
+    ps = list(range(1, max_p+1))
+    with open(my_path + f'/Problem_graphs/rudis_100_regular_graphs_nodes_{n}_reg_{regularity}.pkl', 'rb') as file:
+        data = pickle.load(file)
+
+    with open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_opt_{opt}_lr_{learning_rate}_v2.pkl", 'rb') as file:
+        dictionary = pickle.load(file)
+        
+    G = data[G_num]
+    problem = Generator.MAXCUT(G)
+    dictionary_single = analytic(problem)
+    dictionary_interpolation = interpolation(problem, ps, opt, lr=learning_rate)
+    dictionary_random = random_init(problem, ps, opt, lr=learning_rate)
+    dictionary_transition_states = transition_states(problem, ps, opt, lr=learning_rate)
+    dictionary_fixed_angles = fixed_angles(problem, regularity, ps)
+    dictionary_fixed_angles_optimization = fixed_angles_optimization(problem, regularity, ps, opt, lr=learning_rate)      
+    dictionary['graph']=G_num
+    dictionary['analytic_single_p']=dictionary_single
+    dictionary['interpolation']=dictionary_interpolation
+    dictionary['transition_states']=dictionary_transition_states
+    dictionary['random_init']=dictionary_random
+    dictionary['fixed_angles']=dictionary_fixed_angles
+    dictionary['fixed_angles_optimization']=dictionary_fixed_angles_optimization
+
+    pickle.dump(dictionary, open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_opt_{opt}_lr_{learning_rate}_v2.pkl", 'wb'))
+    print(f'Sucessfully saved nodes_{n}_reg_{regularity}_graph_{G_num}_opt_{opt}_lr_{learning_rate}.pkl"')
+   

@@ -32,17 +32,19 @@ matplotlib.rcParams['figure.figsize'] = (1.718*__plot_height, __plot_height)
 set_matplotlib_formats('svg')
 
 def analytic(problem):
+    """Subroutine to calculate QAOA optimization energy for p=1 analytic."""
+
     dictionary_single = {}
     expectation_values_single = SingleLayerQAOAExpectationValues(problem)
     expectation_values_single.optimize()
     energy_single = expectation_values_single.energy
     dictionary_single['energy']=energy_single
     dictionary_single['correlations'] = expectation_values_single.expect_val_dict.copy()
-
     return dictionary_single
             
-
 def random_init(problem, ps, opt, **kwargs):
+    """Subroutine to calculate QAOA optimization energy for given ps with random parameter initialization."""
+
     if opt=='SGD':
         optimizer=torch.optim.SGD
     elif opt=='RMSprop':
@@ -82,12 +84,10 @@ def random_init(problem, ps, opt, **kwargs):
             dictionary_random_init_sub['losses'] = losses_min_random.copy()
         
         dictionary_random_init[f'p={p}'] = dictionary_random_init_sub.copy()
-
-    
     return dictionary_random_init
 
-
 def transition_states(problem, ps, opt, **kwargs):
+    """Subroutine to calculate QAOA optimization energy for given ps with transition states parameter initialization."""
     if opt=='SGD':
         optimizer=torch.optim.SGD
     elif opt=='RMSprop':
@@ -143,6 +143,8 @@ def transition_states(problem, ps, opt, **kwargs):
 
 
 def interpolation(problem, ps, opt, **kwargs):
+    """Subroutine to calculate QAOA optimization energy for given ps with interpolation parameter initialization."""
+
     if opt=='SGD':
         optimizer=torch.optim.SGD
     elif opt=='RMSprop':
@@ -187,7 +189,6 @@ def interpolation(problem, ps, opt, **kwargs):
             correlations_min = expectation_values_qtensor_transition.expect_val_dict.copy()
             losses_min = expectation_values_qtensor_transition.losses.copy()
 
-
             dictionary_interpolation_sub['energy'] = energy_min
             dictionary_interpolation_sub['correlations'] = correlations_min.copy()
             dictionary_interpolation_sub['losses'] = losses_min.copy()
@@ -197,10 +198,12 @@ def interpolation(problem, ps, opt, **kwargs):
         dictionary_interpolation[f'p={step}'] = dictionary_interpolation_sub
     return dictionary_interpolation
 
-
 def individual_MIS_QAOA_optimization_single_initialization(G_num, n, regularity, max_p, initialization, opt, learning_rate):
+    my_path = os.path.dirname(__file__)
+    my_path = os.path.dirname(my_path)
+    
     ps = list(range(1, max_p+1))
-    with open(f'100_regular_graphs_nodes_{n}_reg_{regularity}.pkl', 'rb') as file:
+    with open(my_path + f'/problem_instances/100_regular_graphs_nodes_{n}_reg_{regularity}.pkl', 'rb') as file:
         data = pickle.load(file)
 
 
@@ -229,7 +232,7 @@ def individual_MIS_QAOA_optimization_all_initializations(G_num, n, regularity, m
     
     dictionary={}
     ps = list(range(1, max_p+1))
-    with open(f'100_regular_graphs_nodes_{n}_reg_{regularity}.pkl', 'rb') as file:
+    with open(my_path + f'/problem_instances/100_regular_graphs_nodes_{n}_reg_{regularity}.pkl', 'rb') as file:
         data = pickle.load(file)
 
     G = data[G_num]
@@ -249,7 +252,6 @@ def individual_MIS_QAOA_optimization_all_initializations(G_num, n, regularity, m
     except:
         pass
 
-
     dictionary['graph']=G_num
     dictionary['analytic_single_p']=dictionary_single
     dictionary['transition_states']=dictionary_transition_states
@@ -257,13 +259,3 @@ def individual_MIS_QAOA_optimization_all_initializations(G_num, n, regularity, m
     dictionary['interpolation']=dictionary_interpolation
 
     pickle.dump(dictionary, open(my_path + f"/data/nodes_{n}_reg_{regularity}_graph_{G_num}_opt_{opt}_lr_{learning_rate}_v2.pkl", 'wb'))
-
-
-    
-
-
-
-
-    
-
-#individual_MAXCUT_QAOA_optimization(2, 4, 3, 2, 'random', 'RMSprop', 0.01)

@@ -4,7 +4,11 @@ import copy
 import random
 import os
 
+
+#Greedy solver for the set cover problem
+#It iteratively chooses the subset V with the highest cardinality and fixes it in the solution. Its elements are removed from all other subsets
 def greedy_set_cover(U, V):
+    """Greedy solver for the set cover problem"""
     solution = []
     U_copy = copy.deepcopy(U)
     V_copy = copy.deepcopy(V)

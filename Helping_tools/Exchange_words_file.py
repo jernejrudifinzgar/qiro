@@ -1,3 +1,5 @@
+#File to replace certain words in multiple code files at once
+
 search_text = 'position_translater'
 
 replace_text = 'sorted_names_nodes'
