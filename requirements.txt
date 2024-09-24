@@ -35,7 +35,6 @@ debugpy==1.6.6
 decorator==5.1.1
 defusedxml==0.7.1
 dill==0.3.6
-dpcpp-cpp-rt==2023.0.0
 entrypoints==0.4
 exceptiongroup==1.1.1
 executing==1.2.0
@@ -49,9 +48,6 @@ future==0.18.3
 idna==3.4
 importlib-metadata==6.1.0
 importlib-resources==5.12.0
-iniconfig==2.0.0
-intel-cmplr-lic-rt==2023.0.0
-intel-openmp==2023.0.0
 ipykernel==6.21.3
 ipython==8.11.0
 ipython-genutils==0.2.0
@@ -79,9 +75,6 @@ MarkupSafe==2.1.2
 matplotlib==3.7.1
 matplotlib-inline==0.1.6
 mistune==2.0.5
-mkl==2023.0.0
-mkl-fft==1.3.1
-mkl-service==2.4.0
 more-itertools==9.1.0
 mpmath==1.3.0
 multiprocess==0.70.14
@@ -152,7 +145,6 @@ sniffio==1.3.0
 soupsieve==2.4
 stack-data==0.6.2
 sympy==1.11.1
-tbb==2021.8.0
 tempdir==0.7.1
 terminado==0.17.1
 tinycss2==1.2.1
